@@ -658,6 +658,13 @@ Once you've completed this PWA, consider:
    - Push notifications
    - Media caching strategies
 
+5. **Build tools and optimization**:
+   - PostCSS with Autoprefixer (automatic vendor prefixes)
+   - CSS/JS minification
+   - Image optimization
+   - Webpack or Vite for bundling
+   - Production build pipelines
+
 ---
 
 ## Glossary
