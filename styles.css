@@ -63,6 +63,39 @@
       font-size: 1rem;
   }
 
+ /* Status Indicator */
+  .status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+  }
+
+  .status::before {
+      content: '●';
+      margin-right: 0.5rem;
+  }
+
+  .status.online {
+      background-color: #D1FAE5;
+      color: #065F46;
+  }
+
+  .status.online::before {
+      color: #10B981;
+  }
+
+  .status.offline {
+      background-color: #FEE2E2;
+      color: #991B1B;
+  }
+
+  .status.offline::before {
+      color: #EF4444;
+  } 
+
   /* Input Section */
   .input-section {
       margin-bottom: 2rem;

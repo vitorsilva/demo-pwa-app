@@ -16,6 +16,23 @@
    // Listen for input events
   textInput.addEventListener('input', updateOutput);
 
+  const statusElement = document.getElementById('status');
+
+  function updateOnlineStatus() {
+      if (navigator.onLine) {
+          statusElement.textContent = 'Online';
+          statusElement.className = 'status online';
+      } else {
+          statusElement.textContent = 'Offline';
+          statusElement.className = 'status offline';
+      }
+  }
+
+    window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  updateOnlineStatus();
+
     // Register Service Worker
   if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

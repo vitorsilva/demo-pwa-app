@@ -1,24 +1,63 @@
+  // Cache name and files to cache
+  const CACHE_NAME = 'pwa-text-echo-v1';
+  const FILES_TO_CACHE = [
+      '/',
+      '/index.html',
+      '/styles.css',
+      '/app.js',
+      '/manifest.json'
+  ];
+  
   // Service Worker Install Event
   self.addEventListener('install', (event) => {
-      console.log('Service Worker: Installing... v2');
+      console.log('Service Worker: Installing...');
 
-      // Force the waiting service worker to become the active service worker
-      self.skipWaiting();
+      // Cache files during installation
+      event.waitUntil(
+          caches.open(CACHE_NAME)
+              .then(cache => {
+                  console.log('Service Worker: Caching files');
+                  return cache.addAll(FILES_TO_CACHE);
+              })
+              .then(() => self.skipWaiting())
+      );
   });
 
-    // Service Worker Activate Event
+  // Service Worker Activate Event
   self.addEventListener('activate', (event) => {
       console.log('Service Worker: Activated');
 
-      // Take control of all pages immediately
-      event.waitUntil(clients.claim());
+      // Clean up old caches
+      event.waitUntil(
+          caches.keys().then(cacheNames => {
+              return Promise.all(
+                  cacheNames.map(cache => {
+                      if (cache !== CACHE_NAME) {
+                          console.log('Service Worker: Clearing old cache:', cache);
+                          return caches.delete(cache);
+                      }
+                  })
+              );
+          }).then(() => clients.claim())
+      );
   });
 
-    // Service Worker Fetch Event
+// Service Worker Fetch Event - Cache First Strategy
   self.addEventListener('fetch', (event) => {
       console.log('Service Worker: Fetching', event.request.url);
 
-      // For now, just let all requests go to the network
-      // We'll add caching in Phase 2
-      event.respondWith(fetch(event.request));
+      event.respondWith(
+          caches.match(event.request)
+              .then(response => {
+                  // If file is in cache, return it
+                  if (response) {
+                      console.log('Service Worker: Serving from cache:', event.request.url);
+                      return response;
+                  }
+
+                  // Otherwise, fetch from network
+                  console.log('Service Worker: Fetching from network:', event.request.url);
+                  return fetch(event.request);
+              })
+      );
   });
