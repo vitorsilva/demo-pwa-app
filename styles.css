@@ -96,6 +96,37 @@
       color: #EF4444;
   } 
 
+  /* Install Button */
+  .install-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--surface);
+      background-color: var(--primary-color);
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px var(--shadow);
+  }
+
+  .install-btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow);
+  }
+
+  .install-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px var(--shadow);
+  }
+
+  .install-btn.hidden {
+      display: none;
+  }
+
   /* Input Section */
   .input-section {
       margin-bottom: 2rem;
