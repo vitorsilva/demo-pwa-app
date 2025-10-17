@@ -494,27 +494,95 @@ Add professional PWA features like installation and test on real devices.
 Set up professional local development environment with HTTPS, build tools, and automated testing.
 
 ### Step 4.1: Local HTTPS Setup
-**What you'll learn**: Running HTTPS on localhost for full PWA testing
+
+**Goal**: Set up HTTPS on localhost to test full PWA features without deploying
+
+**Why HTTPS Locally?**
+- `beforeinstallprompt` only fires over HTTPS
+- Service workers require secure context
+- Test install flow before deploying
+- No "Not Secure" warnings in browser
+
+#### Step 4.1a: Simple Approach - mkcert in WSL
+
+**What you'll learn**: WSL integration, certificate generation, local HTTPS server
 
 **Key Concepts**:
-- Why HTTPS is required for PWA features locally
-- Self-signed certificates vs trusted certificates
-- Using mkcert for trusted local SSL
-- Alternative: using development servers with built-in HTTPS
+- Windows Subsystem for Linux (WSL) basics
+- Self-signed vs trusted certificates
+- Local certificate authorities
+- Running Linux commands from VS Code
 
-**Tools**:
-- **mkcert** (recommended): Creates locally-trusted certificates
-- **http-server with SSL**: Simple HTTPS file server
-- **Vite dev server**: Modern dev server with HTTPS support
+**VS Code Extensions Needed**:
+- **WSL** (ms-vscode-remote.remote-wsl): Work directly in WSL filesystem
+- **Remote - WSL** (included with WSL extension): Seamless WSL integration
+
+**Process**:
+1. Install mkcert in WSL
+2. Generate local CA and certificates
+3. Install CA in Windows trust store
+4. Serve PWA over HTTPS using http-server
+5. Access from `https://localhost:8080`
+
+**Files Created**:
+- `localhost.pem` (certificate)
+- `localhost-key.pem` (private key)
+- `.gitignore` entry for certificates
 
 **Testing**:
-- Install prompt appears locally
-- Service worker registers without warnings
-- No mixed content errors in console
-- Can test full PWA flow without deploying
+- Visit `https://localhost:8080`
+- No certificate warnings in browser
+- Install prompt appears
+- Service worker registers successfully
+- Lock icon shows in address bar
+
+#### Step 4.1b: Professional Approach - Docker + nginx
+
+**What you'll learn**: Docker basics, nginx configuration, containerization
+
+**Key Concepts**:
+- Docker containers and images
+- nginx reverse proxy
+- Volume mounting
+- Container networking
+- Docker Compose for multi-service apps
+
+**VS Code Extensions Needed**:
+- **Docker** (ms-azuretools.vscode-docker): Manage containers, images, Dockerfiles
+- **YAML** (redhat.vscode-yaml): Docker Compose file support
+- **nginx.conf hint** (hangxingliu.vscode-nginx-conf-hint): nginx syntax
+
+**Process**:
+1. Create Dockerfile for nginx
+2. Create nginx.conf with SSL configuration
+3. Mount certificates into container
+4. Create docker-compose.yml
+5. Run with `docker-compose up`
+
+**Files Created**:
+- `Dockerfile`
+- `nginx.conf`
+- `docker-compose.yml`
+- `.dockerignore`
+
+**Benefits**:
+- Production-like environment
+- Easy to tear down and rebuild
+- Portable across machines
+- Learn Docker skills for real projects
+
+**Testing**:
+- `docker-compose up` starts server
+- Visit `https://localhost:443`
+- Container serves PWA correctly
+- Can rebuild easily
+- Logs visible in terminal
+
+**Recommended Path**: Start with 4.1a (faster), then try 4.1b (professional)
 
 ### Step 4.2: Build Process Setup
-**What you'll learn**: Creating optimized production builds
+
+**What you'll learn**: Creating optimized production builds locally
 
 **Key Concepts**:
 - Development vs production environments
@@ -522,6 +590,12 @@ Set up professional local development environment with HTTPS, build tools, and a
 - Asset optimization (images, fonts)
 - Source maps for debugging minified code
 - Build scripts in package.json
+
+**VS Code Extensions Needed**:
+- **npm** (eg2.vscode-npm-script): Run npm scripts from sidebar
+- **npm Intellisense** (christian-kohler.npm-intellisense): Auto-complete package names
+- **ESLint** (dbaeumer.vscode-eslint): Code quality checking
+- **Prettier** (esbenp.prettier-vscode): Code formatting
 
 **Tools**:
 - **Vite** (recommended for beginners): Zero-config, fast
@@ -535,13 +609,25 @@ Set up professional local development environment with HTTPS, build tools, and a
 - Images compressed
 - Unused code removed (tree-shaking)
 
+**Files Created**:
+- `package.json`
+- `vite.config.js` (or webpack.config.js)
+- `.gitignore` (add node_modules, dist)
+
 **Testing**:
-- Run build command
-- Verify dist/build folder created
-- Check file sizes (should be smaller)
-- Test built version works correctly
+- Run `npm run build`
+- Verify `dist/` folder created
+- Check file sizes (should be much smaller)
+- Run `npm run preview` to test built version
+- Compare dev vs prod bundle sizes
+
+**Optional: Docker Build Container**
+- Multi-stage Dockerfile (build stage + serve stage)
+- Smaller final image (only production files)
+- Practice for real deployments
 
 ### Step 4.3: Unit Testing Setup
+
 **What you'll learn**: Writing automated tests for JavaScript functions
 
 **Where**: Create `tests/` or `__tests__/` folder
@@ -550,75 +636,230 @@ Set up professional local development environment with HTTPS, build tools, and a
 - What unit tests are (testing individual functions)
 - Test assertions (expect, toBe, toEqual)
 - Test runners (Jest, Vitest)
-- Mocking (simulating browser APIs)
+- Mocking (simulating browser APIs like navigator.onLine)
 - Test coverage (how much code is tested)
 
+**VS Code Extensions Needed**:
+- **Jest** (Orta.vscode-jest): Run tests in sidebar, inline results
+- **Jest Runner** (firsttris.vscode-jest-runner): Run individual tests
+- **Test Explorer UI** (hbenl.vscode-test-explorer): Unified test interface
+- **Coverage Gutters** (ryanluker.vscode-coverage-gutters): Show coverage in editor
+
+**Tools**:
+- **Vitest** (recommended): Fast, Vite-based, modern
+- **Jest**: Industry standard, huge ecosystem
+- **jsdom**: Simulates browser environment for Node tests
+
 **What to Test**:
-- `updateOutput()` function works correctly
+- `updateOutput()` function updates DOM correctly
 - `updateOnlineStatus()` sets correct classes
 - Event listeners are attached
 - DOM elements are found
+- Install button shows/hides correctly
+
+**Files Created**:
+- `tests/app.test.js`
+- `vitest.config.js` (or jest.config.js)
+- `.vscode/settings.json` (test runner config)
 
 **Testing**:
-- Run test command
-- All tests should pass
-- Check test coverage report
-- Tests run fast (milliseconds)
+- Run `npm test`
+- Watch mode: tests re-run on file changes
+- All tests should pass (green checkmarks)
+- Check coverage report: aim for 80%+
+- Tests run fast (< 1 second)
+
+**VS Code Integration**:
+- Tests appear in sidebar
+- Click to run individual tests
+- See results inline in code
+- Debug tests with breakpoints
 
 ### Step 4.4: End-to-End Testing
-**What you'll learn**: Testing full user flows automatically
+
+**What you'll learn**: Testing full user flows automatically with browser automation
 
 **Key Concepts**:
 - E2E vs unit tests (testing complete workflows)
-- Browser automation (Playwright, Cypress)
+- Browser automation (real browser control)
 - Testing PWA-specific features (install, offline)
 - Visual regression testing (screenshots)
+- Headless vs headed mode
 - Running tests in CI/CD
 
-**What to Test**:
-- User can type and see output
-- Install button appears
-- App works offline
-- Service worker caches files
-- Manifest loads correctly
+**VS Code Extensions Needed**:
+- **Playwright Test for VSCode** (ms-playwright.playwright): Run/debug Playwright tests
+- **Cypress Helper** (Shelex.vscode-cy-helper): Cypress autocomplete
+- **Debugging**: Built-in VS Code debugger works with both
 
 **Tools**:
-- **Playwright** (recommended): Fast, modern, multi-browser
-- **Cypress**: Great DX, visual test runner
-- **Puppeteer**: Chrome-only, lower-level
+- **Playwright** (recommended): Fast, modern, multi-browser (Chrome, Firefox, Safari)
+- **Cypress**: Great DX, visual test runner, time-travel debugging
+- **Puppeteer**: Chrome-only, lower-level API
+
+**What to Test**:
+- User can type in input, sees output update
+- Install button appears (test beforeinstallprompt)
+- Clicking install button triggers prompt
+- App works offline (simulate network offline)
+- Service worker intercepts requests
+- Cached resources load offline
+- Manifest loads correctly
+
+**Files Created**:
+- `tests/e2e/app.spec.js` (or `.cy.js` for Cypress)
+- `playwright.config.js` (or `cypress.config.js`)
+- `.vscode/launch.json` (for debugging tests)
 
 **Testing**:
-- Write test for typing flow
-- Write test for install button
-- Write test for offline mode
-- Run all E2E tests
-- View test results and screenshots
+- Run `npm run test:e2e`
+- Watch browser automate interactions
+- Tests take screenshots on failure
+- View test report with timeline
+- Debug failing tests with VS Code breakpoints
+
+**VS Code Integration**:
+- Run tests from sidebar
+- Set breakpoints in test code
+- Step through test execution
+- See browser and VS Code side-by-side
+
+**Advanced: Test in Docker**
+- Run browsers in containers
+- Consistent test environment
+- Parallel test execution
+- Practice for CI/CD pipelines
 
 ### Step 4.5: CI/CD Pipeline (Optional)
-**What you'll learn**: Automated testing on every commit
+
+**What you'll learn**: Automated testing and deployment on every commit
 
 **Where**: Create `.github/workflows/` folder
 
 **Key Concepts**:
-- Continuous Integration (CI)
-- Continuous Deployment (CD)
-- GitHub Actions basics
-- Automated test running
+- Continuous Integration (CI): Run tests automatically
+- Continuous Deployment (CD): Deploy automatically
+- GitHub Actions basics (YAML syntax, jobs, steps)
+- Automated test running in cloud
 - Automated deployment to GitHub Pages
+- Build caching for faster CI
+
+**VS Code Extensions Needed**:
+- **GitHub Actions** (github.vscode-github-actions): Syntax highlighting, validation
+- **YAML** (redhat.vscode-yaml): YAML file support
 
 **What Gets Automated**:
-- Run tests on every push
-- Run tests on pull requests
+- Lint code on every push
+- Run unit tests on every push
+- Run E2E tests on every push
 - Build the project
-- Deploy to GitHub Pages automatically
-- Report test failures
+- Run Lighthouse PWA audit
+- Deploy to GitHub Pages (only on main branch)
+- Comment test results on PRs
+- Report test failures via email/Slack
+
+**Files Created**:
+- `.github/workflows/test.yml`
+- `.github/workflows/deploy.yml`
+- `.github/dependabot.yml` (optional: auto-update dependencies)
 
 **Testing**:
 - Push code to GitHub
-- Watch GitHub Actions run
-- Tests run automatically
-- Deployment happens on main branch
-- Get notifications if tests fail
+- Go to "Actions" tab on GitHub
+- Watch workflow run in real-time
+- See green checkmark if tests pass
+- Click workflow to see detailed logs
+- Tests run in parallel for speed
+
+**Advanced: Docker in CI**
+- Use Docker containers in GitHub Actions
+- Same environment locally and in CI
+- Cache Docker layers for speed
+- Multi-stage builds for optimization
+
+**VS Code Integration**:
+- View workflow status in sidebar
+- Click to open GitHub Actions page
+- Get notifications when builds fail
+- Edit workflow files with autocomplete
+
+### Step 4.6: Containerizing Your PWA (Optional Advanced)
+
+**What you'll learn**: Complete Docker workflow for PWA development
+
+**Goal**: Create a professional, portable development environment
+
+**Key Concepts**:
+- Multi-stage Docker builds
+- Development vs production containers
+- Docker Compose for local development
+- Volume mounting for live reload
+- Container orchestration basics
+
+**VS Code Extensions Needed**:
+- **Docker** (ms-azuretools.vscode-docker): Already mentioned in 4.1b
+- **Dev Containers** (ms-vscode-remote.remote-containers): Develop inside containers
+- **Remote - Containers**: Work in containerized environment
+
+**What You'll Build**:
+
+#### Development Container
+```dockerfile
+# Hot-reload dev server
+# Mounted source code
+# Live debugging
+```
+
+#### Production Container
+```dockerfile
+# Multi-stage build
+# Stage 1: Build app (Node + build tools)
+# Stage 2: Serve app (nginx only)
+# Optimized, tiny final image
+```
+
+**Files Created**:
+- `Dockerfile.dev` (development)
+- `Dockerfile.prod` (production)
+- `docker-compose.yml` (orchestration)
+- `docker-compose.prod.yml` (production config)
+- `.dockerignore`
+- `.devcontainer/devcontainer.json` (VS Code dev container)
+
+**Development Workflow**:
+1. `docker-compose up` starts dev environment
+2. Edit code in VS Code
+3. Changes auto-reload in container
+4. Access at `https://localhost:8080`
+5. Tests run in container
+
+**Production Workflow**:
+1. `docker build -f Dockerfile.prod -t my-pwa .`
+2. Multi-stage build runs
+3. Final image < 50MB (nginx + static files only)
+4. `docker run -p 443:443 my-pwa`
+5. Production-ready PWA running
+
+**Benefits**:
+- Identical dev/prod environments
+- No "works on my machine" issues
+- Easy onboarding (just `docker-compose up`)
+- Practice for real DevOps workflows
+- Deploy containers to cloud (AWS, Azure, GCP)
+
+**Advanced: Dev Containers in VS Code**
+- Develop entirely inside container
+- Extensions installed in container
+- Terminal runs in container
+- Git, Node, all tools in container
+- VS Code connects remotely
+
+**Testing**:
+- Build dev container: `docker-compose build`
+- Start dev: `docker-compose up`
+- Build prod: `docker build -f Dockerfile.prod -t pwa-prod .`
+- Run prod: `docker run -p 443:443 pwa-prod`
+- Compare image sizes (dev vs prod)
 
 ---
 
