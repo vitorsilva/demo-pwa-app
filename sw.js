@@ -1,11 +1,13 @@
   // Cache name and files to cache
-  const CACHE_NAME = 'pwa-text-echo-v1';
+  const CACHE_NAME = 'pwa-text-echo-v2';
   const FILES_TO_CACHE = [
       '/',
       '/index.html',
       '/styles.css',
       '/app.js',
-      '/manifest.json'
+      '/manifest.json',
+      '/icons/icon-192x192.png',
+      '/icons/icon-512x512.png'
   ];
   
   // Service Worker Install Event
