@@ -1,5 +1,5 @@
   // Cache name and files to cache
-  const CACHE_NAME = 'pwa-text-echo-v4';
+  const CACHE_NAME = 'pwa-text-echo-v5';
   const FILES_TO_CACHE = [
       '/',
       'index.html',
