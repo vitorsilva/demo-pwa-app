@@ -1,7 +1,7 @@
   // Cache name and files to cache
-  const CACHE_NAME = 'pwa-text-echo-v5';
+  const CACHE_NAME = 'pwa-text-echo-v6';
   const FILES_TO_CACHE = [
-      '/',
+      './',
       'index.html',
       'styles.css',
       'app.js',
