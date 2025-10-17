@@ -1,11 +1,11 @@
   // Cache name and files to cache
-  const CACHE_NAME = 'pwa-text-echo-v3';
+  const CACHE_NAME = 'pwa-text-echo-v4';
   const FILES_TO_CACHE = [
       '/',
-      '/index.html',
-      '/styles.css',
-      '/app.js',
-      '/manifest.json',
+      'index.html',
+      'styles.css',
+      'app.js',
+      'manifest.json',
       'icons/icon-192x192.png',
       'icons/icon-512x512.png'
   ];
