@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  pwa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-pwa-app
+    ports:
+      - "443:443"
+    restart: unless-stopped

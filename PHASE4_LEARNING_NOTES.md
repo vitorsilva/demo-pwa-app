@@ -801,3 +801,413 @@ We successfully:
 - Verified trusted HTTPS connection with green lock icon
 
 Your PWA now runs in a production-like HTTPS environment locally!
+
+---
+
+## Phase 4.1b: Docker + nginx (Professional Approach)
+
+### What is Docker?
+
+**Definition:**
+Docker is a platform for developing, shipping, and running applications in containers. Containers package an application and all its dependencies together so it runs consistently across different environments.
+
+**Real-World Analogy:**
+Think of containers like shipping containers:
+- Standard size and shape
+- Can be moved between ships, trucks, trains
+- Contents are isolated and protected
+- You know exactly what's inside
+
+**Key Benefits:**
+- **Consistency**: "Works on my machine" becomes "works on every machine"
+- **Isolation**: Each container has its own environment
+- **Portability**: Move containers between development, testing, and production
+- **Efficiency**: Containers share the host OS kernel (lighter than virtual machines)
+- **Reproducibility**: Same Dockerfile = same container every time
+
+### Docker Concepts
+
+#### Containers vs Images
+
+**Docker Image:**
+- Blueprint or template for a container
+- Read-only
+- Created from a Dockerfile
+- Like a "class" in programming
+
+**Docker Container:**
+- Running instance of an image
+- Has its own filesystem, networking, processes
+- Like an "object" created from a class
+- Can be started, stopped, deleted
+
+**Analogy:**
+- Image = Recipe
+- Container = Actual meal made from recipe
+
+#### Dockerfile
+
+**What It Is:**
+A text file containing instructions to build a Docker image.
+
+**Common Instructions:**
+
+```dockerfile
+FROM nginx:alpine           # Base image to start from
+COPY file.txt /path/        # Copy files into image
+RUN command                 # Execute command during build
+EXPOSE 443                  # Document which ports are used
+CMD ["nginx"]               # Command to run when container starts
+```
+
+**Our Dockerfile Explained:**
+
+```dockerfile
+# Use nginx alpine (lightweight Linux distribution)
+FROM nginx:alpine
+```
+- Starts from official nginx image (web server)
+- `alpine` = minimal Linux distro (smaller image size)
+
+```dockerfile
+# Copy PWA files to nginx's default html directory
+COPY index.html /usr/share/nginx/html/
+COPY app.js /usr/share/nginx/html/
+# ... etc
+```
+- Copies our PWA files into the container
+- `/usr/share/nginx/html/` = where nginx serves files from
+
+```dockerfile
+# Copy SSL certificates
+COPY localhost+2.pem /etc/nginx/ssl/
+COPY localhost+2-key.pem /etc/nginx/ssl/
+```
+- Puts SSL certificates in container for HTTPS
+
+```dockerfile
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+```
+- Replaces default nginx config with our custom one
+
+```dockerfile
+# Expose HTTPS port
+EXPOSE 443
+```
+- Documents that container listens on port 443
+- Doesn't actually publish the port (docker-compose does that)
+
+#### docker-compose.yml
+
+**What It Is:**
+A YAML file that defines how to run one or more Docker containers.
+
+**Why Use It:**
+- Easier than remembering long `docker run` commands
+- Define configuration once, use repeatedly
+- Simple commands: `docker-compose up`, `docker-compose down`
+- Great for multi-container applications
+
+**Our docker-compose.yml Explained:**
+
+```yaml
+version: '3.8'
+```
+- Specifies docker-compose file format version
+
+```yaml
+services:
+  pwa:
+```
+- Defines a service named "pwa"
+- Services are containers you want to run
+
+```yaml
+    build:
+      context: .
+      dockerfile: Dockerfile
+```
+- `context: .` = use current directory for build
+- `dockerfile: Dockerfile` = use this Dockerfile
+
+```yaml
+    container_name: demo-pwa-app
+```
+- Gives container a friendly name (instead of random name)
+
+```yaml
+    ports:
+      - "443:443"
+```
+- Maps port 443 on host → port 443 in container
+- Format: `"host:container"`
+- Allows accessing `https://localhost` (port 443)
+
+```yaml
+    restart: unless-stopped
+```
+- Auto-restart container if it crashes
+- Won't restart if manually stopped
+
+#### .dockerignore
+
+**What It Is:**
+Like `.gitignore` but for Docker builds.
+
+**Why Use It:**
+- Excludes unnecessary files from build context
+- Faster builds (less to copy)
+- Smaller images (less bloat)
+- Don't copy secrets or dev files into production images
+
+**Our .dockerignore:**
+- Excludes: `.git`, documentation, scripts, node_modules, etc.
+- Only copies what's needed to run the PWA
+
+### nginx Web Server
+
+**What is nginx?**
+A high-performance web server, reverse proxy, and load balancer.
+
+**Pronunciation:** "Engine-X"
+
+**Why nginx?**
+- **Fast**: Handles thousands of concurrent connections
+- **Lightweight**: Low memory footprint
+- **Production-ready**: Used by Netflix, Airbnb, NASA, etc.
+- **Flexible**: Web server, reverse proxy, load balancer, cache
+
+**nginx vs http-server:**
+
+| Feature | http-server | nginx |
+|---------|-------------|-------|
+| Purpose | Development | Production |
+| Performance | Basic | High-performance |
+| Configuration | Command-line flags | Config files |
+| Features | Serve static files | Web server, proxy, load balancer, caching |
+| Use case | Quick local testing | Real deployments |
+
+**Our nginx.conf Explained:**
+
+```nginx
+events {
+    worker_connections 1024;
+}
+```
+- Configures how nginx handles connections
+- `worker_connections`: Max simultaneous connections per worker process
+
+```nginx
+http {
+    include /etc/nginx/mime.types;
+```
+- Includes MIME type definitions (tells browsers what file types are)
+- `.js` = `application/javascript`, `.css` = `text/css`, etc.
+
+```nginx
+    server {
+        listen 443 ssl;
+        server_name localhost;
+```
+- Creates an HTTPS server on port 443
+- Responds to requests for `localhost`
+
+```nginx
+        ssl_certificate /etc/nginx/ssl/localhost+2.pem;
+        ssl_certificate_key /etc/nginx/ssl/localhost+2-key.pem;
+```
+- Points to SSL certificate and private key
+- Enables HTTPS
+
+```nginx
+        root /usr/share/nginx/html;
+        index index.html;
+```
+- `root`: Where to find files to serve
+- `index`: Default file to serve for directories
+
+```nginx
+        location / {
+            try_files $uri $uri/ =404;
+```
+- Handles all requests
+- Try to find exact file, then directory, then return 404
+
+```nginx
+        location ~ ^/(sw\.js|manifest\.json)$ {
+            add_header Cache-Control "no-cache, must-revalidate";
+            add_header Service-Worker-Allowed "/";
+        }
+```
+- Special handling for service worker and manifest
+- Don't cache these files (always get fresh version)
+- `Service-Worker-Allowed` header allows SW to control all pages
+
+### Docker Commands Learned
+
+**Building and Running:**
+```bash
+docker-compose up              # Build (if needed) and start
+docker-compose up --build      # Force rebuild and start
+docker-compose up -d           # Start in background (detached)
+```
+
+**Stopping:**
+```bash
+docker-compose down            # Stop and remove containers
+Ctrl+C                         # Stop (when running in foreground)
+```
+
+**Viewing Logs:**
+```bash
+docker-compose logs            # Show logs
+docker-compose logs -f         # Follow logs (live updates)
+```
+
+**Container Management:**
+```bash
+docker ps                      # List running containers
+docker ps -a                   # List all containers (including stopped)
+docker images                  # List images
+```
+
+**Cleanup:**
+```bash
+docker-compose down --volumes  # Stop and remove volumes
+docker system prune            # Remove unused containers, images, networks
+```
+
+### Comparison: Phase 4.1a vs 4.1b
+
+| Aspect | Phase 4.1a (mkcert + http-server) | Phase 4.1b (Docker + nginx) |
+|--------|-----------------------------------|------------------------------|
+| **Setup Complexity** | Simple, quick | More involved |
+| **Start Command** | `./start-https.sh` | `docker-compose up` |
+| **URL** | `https://localhost:8080` | `https://localhost` |
+| **Web Server** | http-server (Node.js) | nginx (production-grade) |
+| **Environment** | Runs on host machine | Runs in container |
+| **Production-like** | Somewhat | Very |
+| **Portability** | WSL-specific | Works anywhere Docker runs |
+| **Best For** | Quick testing, development | Learning DevOps, production prep |
+| **Skills Gained** | Certificates, basic HTTPS | Docker, nginx, containerization |
+
+### When to Use Each Approach
+
+**Use Phase 4.1a (mkcert + http-server) when:**
+- ✅ Quick local testing
+- ✅ Rapid development cycles
+- ✅ Just need HTTPS for PWA features
+- ✅ Don't want Docker overhead
+- ✅ Simplicity is priority
+
+**Use Phase 4.1b (Docker + nginx) when:**
+- ✅ Want production-like environment
+- ✅ Learning Docker/DevOps
+- ✅ Testing container deployment
+- ✅ Need to share exact environment with team
+- ✅ Preparing for cloud deployment
+
+**Both are valid!** Many developers use simple servers for development and Docker for testing/production.
+
+### Files Created
+
+**Docker Configuration:**
+- `Dockerfile` - Instructions to build image
+- `docker-compose.yml` - Service orchestration
+- `.dockerignore` - Files to exclude from build
+
+**Web Server Configuration:**
+- `nginx.conf` - nginx web server configuration
+
+**Development Script (from earlier):**
+- `start-https.sh` - Quick script to run http-server
+
+### Key Takeaways
+
+**Conceptual Understanding:**
+
+1. **Containers Solve Real Problems**
+   - Eliminate "works on my machine" issues
+   - Consistent environments across dev, test, prod
+   - Isolation prevents conflicts
+
+2. **Docker Images Are Layered**
+   - Each instruction in Dockerfile creates a layer
+   - Layers are cached (faster rebuilds)
+   - Start from base images, add your customizations
+
+3. **nginx Is Industry Standard**
+   - Used in production by major companies
+   - High performance and reliability
+   - Complex but powerful configuration
+
+4. **Infrastructure as Code**
+   - Dockerfile = code that builds environment
+   - Version controlled, reproducible
+   - Share exact setup with team
+
+**Technical Skills Gained:**
+
+1. **Docker Skills**
+   - Writing Dockerfiles
+   - Using docker-compose
+   - Managing containers and images
+   - Understanding containerization benefits
+
+2. **nginx Configuration**
+   - Setting up HTTPS in nginx
+   - Serving static files
+   - Configuring SSL/TLS
+   - Setting headers for PWAs
+
+3. **DevOps Practices**
+   - Container orchestration
+   - Production-like local environments
+   - Infrastructure automation
+
+**Commands Mastered:**
+
+**Docker Compose:**
+```bash
+docker-compose up              # Start services
+docker-compose up --build      # Rebuild and start
+docker-compose up -d           # Start detached
+docker-compose down            # Stop services
+docker-compose logs -f         # View logs
+```
+
+**Docker:**
+```bash
+docker ps                      # List running containers
+docker images                  # List images
+docker system prune            # Cleanup
+```
+
+### What's Next
+
+**Completed in Phase 4:**
+- ✅ Phase 4.1a: Local HTTPS with mkcert + http-server
+- ✅ Phase 4.1b: Docker + nginx containerization
+
+**Still Available in Phase 4:**
+- Phase 4.2: Build Process Setup (Vite, minification, optimization)
+- Phase 4.3: Unit Testing Setup (Vitest/Jest)
+- Phase 4.4: End-to-End Testing (Playwright/Cypress)
+- Phase 4.5: CI/CD Pipeline (GitHub Actions) - Optional
+- Phase 4.6: Advanced Containerization (Multi-stage builds, dev containers) - Optional
+
+---
+
+**Progress Update:** Phase 4.1b is complete! ✅
+
+We successfully:
+- Installed Docker Desktop for Windows
+- Created Dockerfile for nginx-based PWA serving
+- Configured nginx with SSL/TLS
+- Created docker-compose.yml for easy orchestration
+- Built Docker image containing our PWA
+- Ran containerized PWA at https://localhost
+- Verified PWA works in production-like environment
+
+You now have TWO professional local development setups and understand the benefits of containerization!

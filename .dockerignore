@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+LEARNING_PLAN.md
+PHASE*.md
+README.md
+CLAUDE.md
+
+# Scripts
+start-https.sh
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Node (if added later)
+node_modules
+package.json
+package-lock.json
+
+# Environment files
+.env
