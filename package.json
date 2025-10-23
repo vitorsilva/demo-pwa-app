@@ -1,0 +1,25 @@
+{
+  "name": "demo-pwa-app",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/vitorsilva/demo-pwa-app#readme",
+  "bugs": {
+    "url": "https://github.com/vitorsilva/demo-pwa-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitorsilva/demo-pwa-app.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.12"
+  }
+}

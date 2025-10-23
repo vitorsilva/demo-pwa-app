@@ -2,3 +2,7 @@
 *.crt
 *.pem
 *.env
+ # Node.js dependencies
+node_modules/
+# Build output (we'll create this soon)
+dist/
