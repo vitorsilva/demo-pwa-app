@@ -8,6 +8,30 @@ This is a learning-focused Progressive Web App (PWA) project - a simple text ech
 
 **Repository**: https://github.com/vitorsilva/demo-pwa-app
 
+## Working with the Learning Plan
+
+### Continuing the Learning Journey
+
+When the user asks **"what's next"** or similar phrases (e.g., "what should I do next", "next step", "continue"), always:
+
+1. Read **LEARNING_PLAN.md** to understand the overall phase structure
+2. Check **PHASE*_LEARNING_NOTES.md** files to see what's been completed
+3. Identify the current phase and next steps in the learning progression
+4. Guide the user through the next appropriate task or learning objective
+
+### Pausing and Recording Progress
+
+When the user says **"that's a wrap"**, **"let's call it a day"**, **"let's pause"**, or similar phrases indicating they want to stop, always:
+
+1. Document the current state in the appropriate **PHASE*_LEARNING_NOTES.md** file:
+   - What was just completed in this session
+   - Current phase and specific step/task
+   - What's next when they resume
+   - Any relevant notes, blockers, or context needed for next session
+2. Ensure all recent work is properly documented so progress can be easily resumed
+
+This is a learning-focused project with a structured progression - respect this flow and help the user advance through it systematically.
+
 ## Architecture
 
 ### Core PWA Structure
