@@ -2,7 +2,9 @@
 *.crt
 *.pem
 *.env
- # Node.js dependencies
+# Node.js dependencies
 node_modules/
-# Build output (we'll create this soon)
 dist/
+test-results/
+playwright-report/
+playwright/.cache/
