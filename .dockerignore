@@ -3,8 +3,7 @@
 .gitignore
 
 # Documentation
-LEARNING_PLAN.md
-PHASE*.md
+docs/
 README.md
 CLAUDE.md
 

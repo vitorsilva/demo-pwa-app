@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a learning-focused Progressive Web App (PWA) project - a simple text echo application that demonstrates core PWA concepts. The project follows a guided, incremental learning methodology documented in `LEARNING_PLAN.md` with detailed phase notes in `PHASE*_LEARNING_NOTES.md` files.
+This is a learning-focused Progressive Web App (PWA) project - a simple text echo application that demonstrates core PWA concepts. The project follows a guided, incremental learning methodology documented in `docs/LEARNING_PLAN.md` with detailed phase notes in `docs/PHASE*_LEARNING_NOTES.md` files.
 
 **Repository**: https://github.com/vitorsilva/demo-pwa-app
 
@@ -96,7 +96,7 @@ Claude: "Let's install Playwright"
 ### Exception: Documentation
 
 The ONLY time Claude should write files is:
-- Updating learning notes (PHASE*_LEARNING_NOTES.md)
+- Updating learning notes (docs/PHASE*_LEARNING_NOTES.md)
 - When user explicitly says "you write the learning notes" or similar
 
 Even then, ask for confirmation first.
@@ -104,13 +104,13 @@ Even then, ask for confirmation first.
 ### Integration with Learning Plan
 
 When user says "what's next" or similar:
-1. Read LEARNING_PLAN.md and PHASE*_LEARNING_NOTES.md
+1. Read docs/LEARNING_PLAN.md and docs/PHASE*_LEARNING_NOTES.md
 2. Identify current phase and next step
 3. **Present the next topic and ask if they want to proceed**
 4. Once confirmed, **teach it step-by-step** (don't execute autonomously)
 
 When user says "that's a wrap" or similar:
-1. Document progress in appropriate PHASE*_LEARNING_NOTES.md
+1. Document progress in appropriate docs/PHASE*_LEARNING_NOTES.md
 2. Note what was completed
 3. Note what's next for resumption
 
@@ -122,8 +122,8 @@ When user says "that's a wrap" or similar:
 
 When the user asks **"what's next"** or similar phrases (e.g., "what should I do next", "next step", "continue"), always:
 
-1. Read **LEARNING_PLAN.md** to understand the overall phase structure
-2. Check **PHASE*_LEARNING_NOTES.md** files to see what's been completed
+1. Read **docs/LEARNING_PLAN.md** to understand the overall phase structure
+2. Check **docs/PHASE*_LEARNING_NOTES.md** files to see what's been completed
 3. Identify the current phase and next steps in the learning progression
 4. Guide the user through the next appropriate task or learning objective
 
@@ -131,7 +131,7 @@ When the user asks **"what's next"** or similar phrases (e.g., "what should I do
 
 When the user says **"that's a wrap"**, **"let's call it a day"**, **"let's pause"**, or similar phrases indicating they want to stop, always:
 
-1. Document the current state in the appropriate **PHASE*_LEARNING_NOTES.md** file:
+1. Document the current state in the appropriate **docs/PHASE*_LEARNING_NOTES.md** file:
    - What was just completed in this session
    - Current phase and specific step/task
    - What's next when they resume
@@ -189,7 +189,7 @@ npx http-server -p 8080
 # Right-click index.html → "Open with Live Server"
 ```
 
-**Note**: PWA features like `beforeinstallprompt` require HTTPS. For local HTTPS testing, see LEARNING_PLAN.md Phase 4.1.
+**Note**: PWA features like `beforeinstallprompt` require HTTPS. For local HTTPS testing, see docs/LEARNING_PLAN.md Phase 4.1.
 
 ### Testing Service Worker Changes
 
@@ -231,10 +231,10 @@ Text echo functionality (app.js:1-17):
 
 This repository contains extensive learning documentation:
 
-- **LEARNING_PLAN.md**: Complete 4-phase learning guide from PWA basics to advanced features
-- **PHASE1_LEARNING_NOTES.md**: Questions and explanations from Phase 1 (understanding the pieces)
-- **PHASE2_LEARNING_NOTES.md**: Questions and explanations from Phase 2 (offline functionality)
-- **PHASE3_LEARNING_NOTES.md**: Questions and explanations from Phase 3 (advanced features)
+- **docs/LEARNING_PLAN.md**: Complete 4-phase learning guide from PWA basics to advanced features
+- **docs/PHASE1_LEARNING_NOTES.md**: Questions and explanations from Phase 1 (understanding the pieces)
+- **docs/PHASE2_LEARNING_NOTES.md**: Questions and explanations from Phase 2 (offline functionality)
+- **docs/PHASE3_LEARNING_NOTES.md**: Questions and explanations from Phase 3 (advanced features)
 
 When making changes, respect the learning-focused nature of the project. Keep code simple and well-commented rather than introducing complex patterns or dependencies.
 
@@ -271,7 +271,7 @@ git push origin main
 3. Tap Share button → "Add to Home Screen"
 4. Test offline functionality after installation
 
-**Note**: iOS has more limited PWA support than Android (see PHASE3_LEARNING_NOTES.md for details)
+**Note**: iOS has more limited PWA support than Android (see docs/PHASE3_LEARNING_NOTES.md for details)
 
 ## Common Issues
 

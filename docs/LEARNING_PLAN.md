@@ -41,7 +41,7 @@ This project follows a **guided, incremental learning approach**:
 - Explore tangential topics that interest you
 
 **📚 Documentation of Learning**
-- All questions and explanations captured in `PHASE*_LEARNING_NOTES.md` files
+- All questions and explanations captured in `docs/PHASE*_LEARNING_NOTES.md` files
 - Creates a personalized reference guide
 - Review notes anytime to refresh concepts
 
@@ -893,7 +893,15 @@ demo-pwa-app/
 │   ├── icon-384x384.png
 │   └── icon-512x512.png
 │
-└── LEARNING_PLAN.md        # This file!
+└── docs/                   # Documentation folder
+    ├── LEARNING_PLAN.md    # This file! (4-phase learning guide)
+    ├── PHASE1_LEARNING_NOTES.md
+    ├── PHASE2_LEARNING_NOTES.md
+    ├── PHASE3_LEARNING_NOTES.md
+    ├── PHASE4_LEARNING_NOTES.md
+    ├── PHASE4_LEARNING_NOTES_2.md
+    ├── PHASE4_LEARNING_NOTES_3.md
+    └── PHASE4_ARCHITECTURE.md
 ```
 
 ---
