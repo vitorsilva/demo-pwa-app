@@ -1,0 +1,324 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1800">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #333; }
+      .subtitle { font: bold 18px sans-serif; fill: #555; }
+      .label { font: 14px sans-serif; fill: #333; }
+      .small-label { font: 12px sans-serif; fill: #666; }
+      .phase-label { font: bold 16px sans-serif; fill: white; }
+
+      .box { fill: white; stroke: #333; stroke-width: 2; }
+      .dev-box { fill: #E3F2FD; stroke: #1976D2; stroke-width: 2; }
+      .build-box { fill: #FFF3E0; stroke: #F57C00; stroke-width: 2; }
+      .test-box { fill: #F3E5F5; stroke: #7B1FA2; stroke-width: 2; }
+      .cicd-box { fill: #E8F5E9; stroke: #388E3C; stroke-width: 2; }
+
+      .arrow { stroke: #666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .arrow-bold { stroke: #333; stroke-width: 3; fill: none; marker-end: url(#arrowhead-bold); }
+      .arrow-success { stroke: #4CAF50; stroke-width: 3; fill: none; marker-end: url(#arrowhead-success); }
+
+      .phase-bg { fill: #1976D2; }
+      .phase-bg-2 { fill: #F57C00; }
+      .phase-bg-3 { fill: #7B1FA2; }
+      .phase-bg-4 { fill: #388E3C; }
+    </style>
+
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#666" />
+    </marker>
+
+    <marker id="arrowhead-bold" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#333" />
+    </marker>
+
+    <marker id="arrowhead-success" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#4CAF50" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="40" class="title" text-anchor="middle">Phase 4 Technology Architecture</text>
+
+  <!-- Technology Stack Section -->
+  <text x="700" y="80" class="subtitle" text-anchor="middle">Complete Technology Stack</text>
+
+  <!-- Layer 1: Development Environment -->
+  <rect x="50" y="100" width="600" height="140" class="dev-box" rx="5"/>
+  <text x="350" y="125" class="label" text-anchor="middle" font-weight="bold">DEVELOPMENT ENVIRONMENT (Phase 4.1)</text>
+
+  <rect x="80" y="140" width="240" height="80" class="box" rx="5"/>
+  <text x="200" y="165" class="label" text-anchor="middle" font-weight="bold">Local HTTPS (4.1a)</text>
+  <text x="200" y="185" class="small-label" text-anchor="middle">• mkcert</text>
+  <text x="200" y="205" class="small-label" text-anchor="middle">• http-server</text>
+
+  <rect x="380" y="140" width="240" height="80" class="box" rx="5"/>
+  <text x="500" y="165" class="label" text-anchor="middle" font-weight="bold">Docker (4.1b)</text>
+  <text x="500" y="185" class="small-label" text-anchor="middle">• Container</text>
+  <text x="500" y="205" class="small-label" text-anchor="middle">• nginx</text>
+
+  <!-- Layer 2: Build Tools -->
+  <rect x="50" y="260" width="600" height="100" class="build-box" rx="5"/>
+  <text x="350" y="285" class="label" text-anchor="middle" font-weight="bold">BUILD TOOLS (Phase 4.2)</text>
+
+  <rect x="180" y="300" width="340" height="45" class="box" rx="5"/>
+  <text x="350" y="320" class="label" text-anchor="middle" font-weight="bold">Vite</text>
+  <text x="350" y="337" class="small-label" text-anchor="middle">Dev Server • Bundler • Minification</text>
+
+  <!-- Layer 3: Testing Tools -->
+  <rect x="50" y="380" width="600" height="140" class="test-box" rx="5"/>
+  <text x="350" y="405" class="label" text-anchor="middle" font-weight="bold">TESTING TOOLS (Phase 4.3 &amp; 4.4)</text>
+
+  <rect x="80" y="420" width="240" height="80" class="box" rx="5"/>
+  <text x="200" y="445" class="label" text-anchor="middle" font-weight="bold">Vitest (4.3)</text>
+  <text x="200" y="465" class="small-label" text-anchor="middle">• Unit Tests</text>
+  <text x="200" y="485" class="small-label" text-anchor="middle">• jsdom • Fast</text>
+
+  <rect x="380" y="420" width="240" height="80" class="box" rx="5"/>
+  <text x="500" y="445" class="label" text-anchor="middle" font-weight="bold">Playwright (4.4)</text>
+  <text x="500" y="465" class="small-label" text-anchor="middle">• E2E Tests</text>
+  <text x="500" y="485" class="small-label" text-anchor="middle">• Real Browsers • Visual</text>
+
+  <!-- Layer 4: CI/CD -->
+  <rect x="50" y="540" width="600" height="100" class="cicd-box" rx="5"/>
+  <text x="350" y="565" class="label" text-anchor="middle" font-weight="bold">CI/CD AUTOMATION (Phase 4.5)</text>
+
+  <rect x="180" y="580" width="340" height="45" class="box" rx="5"/>
+  <text x="350" y="600" class="label" text-anchor="middle" font-weight="bold">GitHub Actions</text>
+  <text x="350" y="617" class="small-label" text-anchor="middle">test.yml • deploy.yml</text>
+
+  <!-- CI/CD Pipeline Flow -->
+  <text x="1050" y="80" class="subtitle" text-anchor="middle">CI/CD Pipeline Flow</text>
+
+  <!-- Developer -->
+  <rect x="950" y="100" width="200" height="50" class="box" rx="5"/>
+  <text x="1050" y="125" class="label" text-anchor="middle" font-weight="bold">Developer</text>
+  <text x="1050" y="142" class="small-label" text-anchor="middle">git push</text>
+
+  <!-- Arrow to GitHub Actions -->
+  <path d="M 1050 150 L 1050 180" class="arrow-bold"/>
+
+  <!-- GitHub Actions Trigger -->
+  <rect x="950" y="180" width="200" height="40" class="cicd-box" rx="5"/>
+  <text x="1050" y="205" class="label" text-anchor="middle">GitHub Actions Triggers</text>
+
+  <!-- Workflows -->
+  <path d="M 1050 220 L 900 250" class="arrow"/>
+  <path d="M 1050 220 L 1050 250" class="arrow"/>
+  <path d="M 1050 220 L 1200 250" class="arrow"/>
+
+  <!-- test.yml - Unit -->
+  <rect x="750" y="250" width="140" height="80" class="test-box" rx="5"/>
+  <text x="820" y="275" class="label" text-anchor="middle" font-weight="bold">test.yml</text>
+  <text x="820" y="292" class="small-label" text-anchor="middle">Unit Tests</text>
+  <text x="820" y="309" class="small-label" text-anchor="middle">Vitest</text>
+
+  <!-- test.yml - E2E -->
+  <rect x="980" y="250" width="140" height="80" class="test-box" rx="5"/>
+  <text x="1050" y="275" class="label" text-anchor="middle" font-weight="bold">test.yml</text>
+  <text x="1050" y="292" class="small-label" text-anchor="middle">E2E Tests</text>
+  <text x="1050" y="309" class="small-label" text-anchor="middle">Playwright</text>
+
+  <!-- deploy.yml -->
+  <rect x="1210" y="250" width="140" height="80" class="build-box" rx="5"/>
+  <text x="1280" y="275" class="label" text-anchor="middle" font-weight="bold">deploy.yml</text>
+  <text x="1280" y="292" class="small-label" text-anchor="middle">Build &amp; Deploy</text>
+  <text x="1280" y="309" class="small-label" text-anchor="middle">(main only)</text>
+
+  <!-- Test Results -->
+  <path d="M 820 330 L 820 360" class="arrow"/>
+  <path d="M 1050 330 L 1050 360" class="arrow"/>
+
+  <text x="820" y="380" class="label" text-anchor="middle" fill="#4CAF50">✓ Pass</text>
+  <text x="1050" y="380" class="label" text-anchor="middle" fill="#4CAF50">✓ Pass</text>
+
+  <!-- Deploy path -->
+  <path d="M 1280 330 L 1280 420" class="arrow-success"/>
+
+  <!-- GitHub Pages -->
+  <rect x="1180" y="420" width="200" height="50" class="cicd-box" rx="5"/>
+  <text x="1280" y="440" class="label" text-anchor="middle" font-weight="bold">GitHub Pages</text>
+  <text x="1280" y="457" class="small-label" text-anchor="middle">Deployment</text>
+
+  <!-- Live Site -->
+  <path d="M 1280 470 L 1280 500" class="arrow-success"/>
+
+  <rect x="1180" y="500" width="200" height="50" class="phase-bg-4" rx="5"/>
+  <text x="1280" y="525" class="phase-label" text-anchor="middle">🌐 LIVE SITE</text>
+  <text x="1280" y="542" class="phase-label" text-anchor="middle" font-size="11">vitorsilva.github.io</text>
+
+  <!-- Build Process Flow -->
+  <text x="350" y="700" class="subtitle" text-anchor="middle">Build Process: Source → Production</text>
+
+  <!-- Source Files -->
+  <rect x="50" y="730" width="180" height="120" class="box" rx="5"/>
+  <text x="140" y="755" class="label" text-anchor="middle" font-weight="bold">Source Files</text>
+  <text x="140" y="775" class="small-label" text-anchor="middle">index.html</text>
+  <text x="140" y="792" class="small-label" text-anchor="middle">app.js</text>
+  <text x="140" y="809" class="small-label" text-anchor="middle">styles.css</text>
+  <text x="140" y="826" class="small-label" text-anchor="middle">public/</text>
+
+  <!-- Vite Build -->
+  <path d="M 230 790 L 270 790" class="arrow-bold"/>
+
+  <rect x="270" y="730" width="180" height="120" class="build-box" rx="5"/>
+  <text x="360" y="755" class="label" text-anchor="middle" font-weight="bold">Vite Build</text>
+  <text x="360" y="775" class="small-label" text-anchor="middle">Bundle</text>
+  <text x="360" y="792" class="small-label" text-anchor="middle">Minify</text>
+  <text x="360" y="809" class="small-label" text-anchor="middle">Hash filenames</text>
+  <text x="360" y="826" class="small-label" text-anchor="middle">Optimize</text>
+
+  <!-- Production Build -->
+  <path d="M 450 790 L 490 790" class="arrow-bold"/>
+
+  <rect x="490" y="730" width="180" height="120" class="box" rx="5"/>
+  <text x="580" y="755" class="label" text-anchor="middle" font-weight="bold">dist/ folder</text>
+  <text x="580" y="775" class="small-label" text-anchor="middle">index.html</text>
+  <text x="580" y="792" class="small-label" text-anchor="middle">assets/main-abc.js</text>
+  <text x="580" y="809" class="small-label" text-anchor="middle">assets/main-xyz.css</text>
+  <text x="580" y="826" class="small-label" text-anchor="middle">public/ (copied)</text>
+
+  <!-- Size comparison -->
+  <rect x="150" y="870" width="380" height="30" class="cicd-box" rx="5"/>
+  <text x="340" y="890" class="label" text-anchor="middle">📊 Size: ~50KB → ~15KB (70% reduction)</text>
+
+  <!-- Testing Architecture -->
+  <text x="1050" y="700" class="subtitle" text-anchor="middle">Testing Architecture</text>
+
+  <!-- Source Code -->
+  <rect x="950" y="730" width="200" height="50" class="box" rx="5"/>
+  <text x="1050" y="760" class="label" text-anchor="middle" font-weight="bold">Your Code</text>
+
+  <!-- Split to tests -->
+  <path d="M 1050 780 L 900 820" class="arrow"/>
+  <path d="M 1050 780 L 1200 820" class="arrow"/>
+
+  <!-- Unit Tests -->
+  <rect x="750" y="820" width="200" height="100" class="test-box" rx="5"/>
+  <text x="850" y="845" class="label" text-anchor="middle" font-weight="bold">Unit Tests</text>
+  <text x="850" y="862" class="label" text-anchor="middle">Vitest</text>
+  <text x="850" y="882" class="small-label" text-anchor="middle">• Node.js + jsdom</text>
+  <text x="850" y="899" class="small-label" text-anchor="middle">• Fast (milliseconds)</text>
+  <text x="850" y="916" class="small-label" text-anchor="middle">• *.test.js</text>
+
+  <!-- E2E Tests -->
+  <rect x="1150" y="820" width="200" height="100" class="test-box" rx="5"/>
+  <text x="1250" y="845" class="label" text-anchor="middle" font-weight="bold">E2E Tests</text>
+  <text x="1250" y="862" class="label" text-anchor="middle">Playwright</text>
+  <text x="1250" y="882" class="small-label" text-anchor="middle">• Real browsers</text>
+  <text x="1250" y="899" class="small-label" text-anchor="middle">• Slow (seconds)</text>
+  <text x="1250" y="916" class="small-label" text-anchor="middle">• *.spec.js</text>
+
+  <!-- Phase 4 Journey -->
+  <text x="350" y="1000" class="subtitle" text-anchor="middle">Your Phase 4 Journey</text>
+
+  <!-- Phase 4.1 -->
+  <rect x="50" y="1030" width="140" height="80" class="phase-bg" rx="5"/>
+  <text x="120" y="1055" class="phase-label" text-anchor="middle">Phase 4.1a</text>
+  <text x="120" y="1075" class="phase-label" text-anchor="middle" font-size="12">Local HTTPS</text>
+  <text x="120" y="1092" class="phase-label" text-anchor="middle" font-size="11">mkcert</text>
+  <text x="120" y="1106" class="phase-label" text-anchor="middle" font-size="11">http-server</text>
+
+  <path d="M 190 1070 L 210 1070" class="arrow"/>
+
+  <rect x="210" y="1030" width="140" height="80" class="phase-bg" rx="5"/>
+  <text x="280" y="1055" class="phase-label" text-anchor="middle">Phase 4.1b</text>
+  <text x="280" y="1075" class="phase-label" text-anchor="middle" font-size="12">Docker</text>
+  <text x="280" y="1092" class="phase-label" text-anchor="middle" font-size="11">Container</text>
+  <text x="280" y="1106" class="phase-label" text-anchor="middle" font-size="11">nginx</text>
+
+  <!-- Arrow down -->
+  <path d="M 200 1110 L 200 1150 L 420 1150" class="arrow-bold"/>
+
+  <!-- Phase 4.2 -->
+  <rect x="420" y="1110" width="140" height="80" class="phase-bg-2" rx="5"/>
+  <text x="490" y="1135" class="phase-label" text-anchor="middle">Phase 4.2</text>
+  <text x="490" y="1155" class="phase-label" text-anchor="middle" font-size="12">Build Process</text>
+  <text x="490" y="1172" class="phase-label" text-anchor="middle" font-size="11">Vite</text>
+  <text x="490" y="1186" class="phase-label" text-anchor="middle" font-size="11">HMR • Bundle</text>
+
+  <!-- Split to testing -->
+  <path d="M 490 1190 L 370 1230" class="arrow"/>
+  <path d="M 490 1190 L 610 1230" class="arrow"/>
+
+  <!-- Phase 4.3 -->
+  <rect x="300" y="1230" width="140" height="80" class="phase-bg-3" rx="5"/>
+  <text x="370" y="1255" class="phase-label" text-anchor="middle">Phase 4.3</text>
+  <text x="370" y="1275" class="phase-label" text-anchor="middle" font-size="12">Unit Testing</text>
+  <text x="370" y="1292" class="phase-label" text-anchor="middle" font-size="11">Vitest</text>
+  <text x="370" y="1306" class="phase-label" text-anchor="middle" font-size="11">jsdom</text>
+
+  <!-- Phase 4.4 -->
+  <rect x="540" y="1230" width="140" height="80" class="phase-bg-3" rx="5"/>
+  <text x="610" y="1255" class="phase-label" text-anchor="middle">Phase 4.4</text>
+  <text x="610" y="1275" class="phase-label" text-anchor="middle" font-size="12">E2E Testing</text>
+  <text x="610" y="1292" class="phase-label" text-anchor="middle" font-size="11">Playwright</text>
+  <text x="610" y="1306" class="phase-label" text-anchor="middle" font-size="11">Real Browsers</text>
+
+  <!-- Merge to CI/CD -->
+  <path d="M 370 1310 L 490 1350" class="arrow"/>
+  <path d="M 610 1310 L 490 1350" class="arrow"/>
+
+  <!-- Phase 4.5 -->
+  <rect x="420" y="1350" width="140" height="80" class="phase-bg-4" rx="5"/>
+  <text x="490" y="1375" class="phase-label" text-anchor="middle">Phase 4.5</text>
+  <text x="490" y="1395" class="phase-label" text-anchor="middle" font-size="12">CI/CD Pipeline</text>
+  <text x="490" y="1412" class="phase-label" text-anchor="middle" font-size="11">GitHub Actions</text>
+  <text x="490" y="1426" class="phase-label" text-anchor="middle" font-size="11">Auto Deploy</text>
+
+  <!-- Success -->
+  <path d="M 490 1430 L 490 1470" class="arrow-success"/>
+
+  <rect x="380" y="1470" width="220" height="50" class="cicd-box" rx="5"/>
+  <text x="490" y="1495" class="label" text-anchor="middle" font-weight="bold" font-size="20">🎉 COMPLETE! 🎉</text>
+  <text x="490" y="1512" class="small-label" text-anchor="middle">Professional Development Workflow</text>
+
+  <!-- Technology Interaction -->
+  <text x="1050" y="1000" class="subtitle" text-anchor="middle">Technology Interaction</text>
+
+  <!-- Your Code (center) -->
+  <rect x="950" y="1030" width="200" height="60" class="box" rx="5"/>
+  <text x="1050" y="1055" class="label" text-anchor="middle" font-weight="bold">Your Code</text>
+  <text x="1050" y="1075" class="small-label" text-anchor="middle">index.html • app.js • styles.css</text>
+
+  <!-- Connects to all tools -->
+  <path d="M 1050 1090 L 900 1140" class="arrow"/>
+  <path d="M 1050 1090 L 1050 1140" class="arrow"/>
+  <path d="M 1050 1090 L 1200 1140" class="arrow"/>
+
+  <!-- Vite -->
+  <rect x="750" y="1140" width="140" height="50" class="build-box" rx="5"/>
+  <text x="820" y="1165" class="label" text-anchor="middle" font-weight="bold">Vite</text>
+  <text x="820" y="1182" class="small-label" text-anchor="middle">Build</text>
+
+  <!-- Vitest -->
+  <rect x="980" y="1140" width="140" height="50" class="test-box" rx="5"/>
+  <text x="1050" y="1165" class="label" text-anchor="middle" font-weight="bold">Vitest</text>
+  <text x="1050" y="1182" class="small-label" text-anchor="middle">Unit Test</text>
+
+  <!-- Playwright -->
+  <rect x="1210" y="1140" width="140" height="50" class="test-box" rx="5"/>
+  <text x="1280" y="1165" class="label" text-anchor="middle" font-weight="bold">Playwright</text>
+  <text x="1280" y="1182" class="small-label" text-anchor="middle">E2E Test</text>
+
+  <!-- All flow to GitHub Actions -->
+  <path d="M 820 1190 L 820 1230 L 1050 1230" class="arrow"/>
+  <path d="M 1050 1190 L 1050 1230" class="arrow"/>
+  <path d="M 1280 1190 L 1280 1230 L 1050 1230" class="arrow"/>
+
+  <!-- GitHub Actions -->
+  <rect x="950" y="1230" width="200" height="50" class="cicd-box" rx="5"/>
+  <text x="1050" y="1255" class="label" text-anchor="middle" font-weight="bold">GitHub Actions</text>
+  <text x="1050" y="1272" class="small-label" text-anchor="middle">CI/CD</text>
+
+  <!-- To Production -->
+  <path d="M 1050 1280 L 1050 1320" class="arrow-success"/>
+
+  <rect x="950" y="1320" width="200" height="50" class="phase-bg-4" rx="5"/>
+  <text x="1050" y="1345" class="phase-label" text-anchor="middle">GitHub Pages</text>
+  <text x="1050" y="1362" class="phase-label" text-anchor="middle" font-size="12">Live Production Site</text>
+
+  <!-- Footer -->
+  <text x="700" y="1780" class="small-label" text-anchor="middle" fill="#999">
+    Phase 4 Complete: Professional Development Workflow • From Local Dev to Production Deployment
+  </text>
+</svg>
