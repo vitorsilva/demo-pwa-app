@@ -893,15 +893,17 @@ demo-pwa-app/
 │   ├── icon-384x384.png
 │   └── icon-512x512.png
 │
-└── docs/                   # Documentation folder
-    ├── LEARNING_PLAN.md    # This file! (4-phase learning guide)
+└── docs/                      # Documentation folder
+    ├── LEARNING_PLAN.md       # This file! (4-phase learning guide)
     ├── PHASE1_LEARNING_NOTES.md
     ├── PHASE2_LEARNING_NOTES.md
     ├── PHASE3_LEARNING_NOTES.md
-    ├── PHASE4_LEARNING_NOTES.md
-    ├── PHASE4_LEARNING_NOTES_2.md
-    ├── PHASE4_LEARNING_NOTES_3.md
-    └── PHASE4_ARCHITECTURE.md
+    ├── PHASE4.1_LOCAL_HTTPS.md     # Phase 4.1 (mkcert + Docker)
+    ├── PHASE4.2_BUILD_TOOLS.md     # Phase 4.2 (Vite)
+    ├── PHASE4.3_UNIT_TESTING.md    # Phase 4.3 (Vitest)
+    ├── PHASE4.4_E2E_TESTING.md     # Phase 4.4 (Playwright)
+    ├── PHASE4.5_CI_CD.md           # Phase 4.5 (GitHub Actions)
+    └── PHASE4_ARCHITECTURE.md      # Architecture overview
 ```
 
 ---

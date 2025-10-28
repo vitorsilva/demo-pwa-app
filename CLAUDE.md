@@ -232,9 +232,15 @@ Text echo functionality (app.js:1-17):
 This repository contains extensive learning documentation:
 
 - **docs/LEARNING_PLAN.md**: Complete 4-phase learning guide from PWA basics to advanced features
-- **docs/PHASE1_LEARNING_NOTES.md**: Questions and explanations from Phase 1 (understanding the pieces)
-- **docs/PHASE2_LEARNING_NOTES.md**: Questions and explanations from Phase 2 (offline functionality)
-- **docs/PHASE3_LEARNING_NOTES.md**: Questions and explanations from Phase 3 (advanced features)
+- **docs/PHASE1_LEARNING_NOTES.md**: Phase 1 (understanding the pieces)
+- **docs/PHASE2_LEARNING_NOTES.md**: Phase 2 (offline functionality)
+- **docs/PHASE3_LEARNING_NOTES.md**: Phase 3 (advanced features)
+- **docs/PHASE4.1_LOCAL_HTTPS.md**: Phase 4.1 (local HTTPS with mkcert and Docker)
+- **docs/PHASE4.2_BUILD_TOOLS.md**: Phase 4.2 (Vite build process)
+- **docs/PHASE4.3_UNIT_TESTING.md**: Phase 4.3 (Vitest unit testing)
+- **docs/PHASE4.4_E2E_TESTING.md**: Phase 4.4 (Playwright E2E testing)
+- **docs/PHASE4.5_CI_CD.md**: Phase 4.5 (GitHub Actions CI/CD)
+- **docs/PHASE4_ARCHITECTURE.md**: Phase 4 architecture overview
 
 When making changes, respect the learning-focused nature of the project. Keep code simple and well-commented rather than introducing complex patterns or dependencies.
 
