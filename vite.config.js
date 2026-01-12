@@ -14,9 +14,22 @@ function getBasePath(command) {
 export default defineConfig(({ command }) => {
     const base = getBasePath(command);
 
+    // Determine deployment target for feature flags
+    // - Development (serve): 'development'
+    // - Staging: 'staging'
+    // - Production: 'production'
+    const deployTarget = command === 'serve'
+        ? 'development'
+        : (process.env.DEPLOY_TARGET || 'production');
+
     return {
     base,
     root: '.',
+
+    // Inject deployment target for runtime feature flag checks
+    define: {
+        'import.meta.env.VITE_DEPLOY_TARGET': JSON.stringify(deployTarget)
+    },
 
     plugins: [
         VitePWA({
