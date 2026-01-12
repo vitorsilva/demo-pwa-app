@@ -54,7 +54,7 @@ export default class JoinPartyView extends BaseView {
                 id="playerName"
                 value="${savedName}"
                 maxlength="30"
-                placeholder="Enter your name"
+                placeholder="${t('party.enterName')}"
                 class="w-full px-4 py-3 rounded-xl
                        bg-card-light dark:bg-card-dark
                        text-text-light dark:text-text-dark

@@ -584,7 +584,7 @@ export default class PartyQuizView extends BaseView {
 
     // Host advances to next question after a brief delay
     if (this.isHost) {
-      this._updateStatus(t('party.loading') || 'Loading next question...');
+      this._updateStatus(t('party.loading'));
 
       // Wait 2 seconds for everyone to see feedback
       setTimeout(async () => {

@@ -70,10 +70,10 @@ export default class PartyLobbyView extends BaseView {
           <!-- Quiz Info -->
           <div class="bg-card-light dark:bg-card-dark rounded-xl p-4 mb-6">
             <h3 class="text-text-light dark:text-text-dark font-bold mb-2">
-              ${this.quizInfo?.topic || 'Quiz'}
+              ${this.quizInfo?.topic || t('party.quizFallback')}
             </h3>
             <p class="text-subtext-light dark:text-subtext-dark text-sm">
-              ${this.quizInfo?.questionCount || '?'} questions • ${this.quizInfo?.secondsPerQuestion || 30} sec each
+              ${this.quizInfo?.questionCount || '?'} ${t('party.questionsLabel')} • ${this.quizInfo?.secondsPerQuestion || 30} ${t('party.secEach')}
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export default class PartyLobbyView extends BaseView {
         <!-- Connection Status Bar -->
         <div class="fixed bottom-0 left-0 right-0 py-3 bg-green-500 text-white text-center text-sm">
           <span class="material-symbols-outlined text-sm align-middle mr-1">wifi</span>
-          Connected
+          ${t('party.connected')}
         </div>
       </div>
     `);
@@ -116,7 +116,7 @@ export default class PartyLobbyView extends BaseView {
     const quiz = roomData.quiz_data;
     if (quiz) {
       this.quizInfo = {
-        topic: quiz.topic || 'Quiz',
+        topic: quiz.topic || t('party.quizFallback'),
         questionCount: quiz.questions?.length || quiz.totalQuestions || 10,
         secondsPerQuestion: roomData.seconds_per_question || 30,
       };

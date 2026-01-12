@@ -341,6 +341,14 @@
     "joining": "Joining party...",
     "correct": "Correct!",
     "incorrect": "Incorrect",
-    "timeUp": "Time's up!"
+    "timeUp": "Time's up!",
+    "connected": "Connected",
+    "quizFallback": "Quiz",
+    "questionsLabel": "questions",
+    "secEach": "sec each",
+    "enterName": "Enter your name",
+    "pointsLabel": "points",
+    "saveFeatureComingSoon": "Quiz saved! (Feature coming soon)",
+    "loading": "Loading next question..."
   }
 }

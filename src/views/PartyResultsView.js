@@ -97,7 +97,7 @@ export default class PartyResultsView extends BaseView {
                 </div>
                 <div class="text-right">
                   <p class="text-primary text-2xl font-bold">${myStanding.score}</p>
-                  <p class="text-subtext-light dark:text-subtext-dark text-sm">points</p>
+                  <p class="text-subtext-light dark:text-subtext-dark text-sm">${t('party.pointsLabel')}</p>
                 </div>
               </div>
             </div>
@@ -278,6 +278,6 @@ export default class PartyResultsView extends BaseView {
   async _saveLocally() {
     // TODO: Implement saving quiz to IndexedDB
     log.info('Save locally - not implemented yet');
-    alert('Quiz saved! (Feature coming soon)');
+    alert(t('party.saveFeatureComingSoon'));
   }
 }
