@@ -26,7 +26,7 @@ class RoomManager
     private function generateCode(): string
     {
         $length = $this->config['room']['code_length'];
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude similar chars: 0/O, 1/I/L
+        $chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // Exclude similar chars: 0/O, 1/I/L
 
         do {
             $code = '';
