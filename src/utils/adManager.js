@@ -35,6 +35,61 @@ const AD_SLOTS = {
 const loadedAds = new Set();
 
 /**
+ * Track AdSense script loading state
+ * @type {boolean}
+ */
+let adsenseScriptLoaded = false;
+
+/**
+ * Lazily load the AdSense script.
+ * Safe to call multiple times - only loads once.
+ * @returns {Promise<boolean>} True if loaded successfully
+ */
+async function loadAdSenseScript() {
+  // Already loaded
+  if (adsenseScriptLoaded) return true;
+
+  // Already available (e.g., set by tests or loaded elsewhere)
+  if (typeof window.adsbygoogle !== 'undefined') {
+    adsenseScriptLoaded = true;
+    return true;
+  }
+    
+  // Loading in progress - return existing promise
+  if (adsenseLoadPromise) return adsenseLoadPromise;
+
+  // Start loading
+  adsenseLoadPromise = new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLISHER_ID}`;      
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+
+    script.onload = () => {
+      adsenseScriptLoaded = true;
+      logger.info('[AdManager] AdSense script loaded');
+      resolve(true);
+    };
+
+    script.onerror = () => {
+      adsenseLoadPromise = null; // Allow retry
+      logger.error('[AdManager] Failed to load AdSense script');
+      resolve(false);
+    };
+
+    document.head.appendChild(script);
+  });
+
+  return adsenseLoadPromise;
+}
+
+/**
+ * Promise for script loading (singleton)
+ * @type {Promise<boolean>|null}
+ */
+let adsenseLoadPromise = null;
+
+/**
  * Check if we can load ads right now
  * @returns {boolean} True if ads can be loaded
  */
@@ -64,15 +119,23 @@ export function canLoadAds() {
  * Load an ad into a container
  * @param {string} containerId - DOM element ID for the ad container
  * @param {string} slotKey - Key from AD_SLOTS (e.g., 'quizLoading')
- * @returns {boolean} True if ad was loaded, false otherwise
+ * @returns {Promise<boolean>} True if ad was loaded, false otherwise
  */
-export function loadAd(containerId, slotKey) {
+export async function loadAd(containerId, slotKey) {
   // Prevent duplicate loads
   if (loadedAds.has(containerId)) {
     logger.debug(`[AdManager] Ad already loaded in ${containerId}`);
     return false;
   }
 
+  // Ensure AdSense script is loaded
+  const scriptLoaded = await loadAdSenseScript();
+  if (!scriptLoaded) {
+    logger.debug('[AdManager] AdSense script not available');
+    hideContainer(containerId);
+    return false;
+  }
+  
   // Check if we can load
   if (!canLoadAds()) {
     hideContainer(containerId);
