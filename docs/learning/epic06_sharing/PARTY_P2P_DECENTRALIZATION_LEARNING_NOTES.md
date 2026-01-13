@@ -377,13 +377,64 @@ Ran Stryker mutation testing to verify test quality:
 
 ---
 
+## Session: 2026-01-13 (Phase B: View Integration)
+
+### Progress
+
+- [x] Task B.1: Update CreatePartyView
+- [x] Task B.2: Update JoinPartyView + party-connection-store
+- [ ] Task B.3: Update PartyLobbyView (in progress)
+- [ ] Task B.4: Update PartyQuizView
+- [ ] Task B.5: Update PartyResultsView
+- [ ] Task B.6: Create ConnectionModeIndicator component
+
+### Key Changes
+
+**Task B.1: CreatePartyView**
+- Import and initialize `PartyConnectionManager` as host after room creation
+- Set up event handlers: `onModeChange`, `onPeerJoined`, `onPeerLeft`, `onError`
+- Replace continuous HTTP polling with event-driven updates
+- HTTP polling only starts in `HTTP_FALLBACK` mode
+- Added `_updateConnectionStatus()` and `_pollParticipants()` helper methods
+
+**Task B.2: JoinPartyView + party-connection-store**
+- Created `party-connection-store.js` - simple module-level store to hold connection across view navigation
+- Guest creates `PartyConnectionManager` after joining via API
+- Connection stored in store before navigating to lobby
+- P2P connection starts in background while navigating
+
+### Design Decision: Connection Store
+
+**Problem:** Views are destroyed on navigation, but P2P connection must survive JoinPartyView → PartyLobbyView transition.
+
+**Solution:** Created `party-connection-store.js` - a module-level variable that holds the connection manager reference.
+
+**Alternatives considered:**
+- Option B: Create connection in LobbyView (simpler but worse UX - user waits twice)
+
+**Why Option A (store) is better:**
+- Earlier user feedback (connection status during join)
+- Faster lobby load (already connecting)
+- Better error handling (centralized in join view)
+- Consistent pattern with host flow
+
+### Commits (Phase B - In Progress)
+
+```
+feat(party): wire PartyConnectionManager to CreatePartyView
+feat(party): wire PartyConnectionManager to JoinPartyView
+fix(components): add proper return type to createRoomCodeInput
+```
+
+---
+
 ## Next Steps (When Resuming)
 
-1. **Start Phase B: View Integration**
-   - Wire PartyConnectionManager to HostView
-   - Wire PartyConnectionManager to JoinView
-   - Wire PartyConnectionManager to PartyQuizView
-   - Update views to handle P2P/HTTP fallback modes
+1. **Continue Phase B: View Integration**
+   - Task B.3: Update PartyLobbyView (retrieve connection from store)
+   - Task B.4: Update PartyQuizView
+   - Task B.5: Update PartyResultsView
+   - Task B.6: Create ConnectionModeIndicator component
 
 2. **Branch:** Continue on `feature/party-p2p-decentralization`
 
@@ -400,7 +451,7 @@ Ran Stryker mutation testing to verify test quality:
 |-------|--------|-------------|
 | 0 | ✅ Complete | AdSense lazy-loading |
 | A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
-| B | 🔜 Next | View Integration |
+| B | 🔄 In Progress | View Integration (B.1, B.2 done; B.3-B.6 pending) |
 | C | ⏳ Pending | Server Minimization |
 | D | ⏳ Pending | STUN Testing |
 | E | ⏳ Pending | Testing & Validation |
