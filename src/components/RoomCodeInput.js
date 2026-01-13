@@ -16,7 +16,7 @@ export const VALID_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
  * @param {Object} [options] - Input options
  * @param {Function} [options.onChange] - Called when code changes (valid or not)
  * @param {Function} [options.onValidCode] - Called only when code is complete and valid
- * @returns {HTMLElement}
+ * @returns {HTMLElement & { showError: (msg: string) => void, clearError: () => void, getValue: () => string, setValue: (val: string) => void, focus: () => void }}
  */
 export function createRoomCodeInput(options = {}) {
   const { onChange, onValidCode } = options;
