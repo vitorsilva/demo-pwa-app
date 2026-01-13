@@ -418,6 +418,19 @@ Ran Stryker mutation testing to verify test quality:
 - Better error handling (centralized in join view)
 - Consistent pattern with host flow
 
+### E2E Test Failures (To Fix at End of Phase B)
+
+| Test | Error | Likely Cause |
+|------|-------|--------------|
+| `capture-party-demo.spec.js:322` | `Participants (2)` not visible | P2P/polling not updating participant list in E2E |
+| `capture-party-demo.spec.js:459` | `Participants (2)` not visible | Same as above |
+| `mode-toggle.spec.js:26` | Mode toggle visible when should be hidden | Feature flag config in test environment |
+| `usage-cost.spec.js:181` (flaky) | Credits visible when API fails | Race condition or test isolation |
+
+**P2P Errors in logs:**
+- `Failed to execute 'addIceCandidate' on 'RTCPeerConnection': The remote description was null`
+- CORS errors for telemetry (not critical)
+
 ### Commits (Phase B - In Progress)
 
 ```

@@ -11,6 +11,10 @@ import { createParticipantList } from '../components/ParticipantList.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom, leaveRoom } from '../services/party-api.js';
+import {
+  CONNECTION_MODES,
+} from '../services/party-connection-manager.js';
+import { getConnection, clearConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'PartyLobbyView' });
 
@@ -34,9 +38,42 @@ export default class PartyLobbyView extends BaseView {
     // Get participant ID from session storage (set during join)
     this.participantId = sessionStorage.getItem('partyParticipantId') || '';
     this.roomStatus = 'waiting';
+    this.connectionManager = null;
   }
 
   async render() {
+    // Retrieve connection manager from store (set by JoinPartyView)
+    this.connectionManager = getConnection();
+
+    if (this.connectionManager) {
+      // Set up P2P event handlers
+      this.connectionManager.onModeChange((mode, previousMode) => {
+        log.info('Connection mode changed', { from: previousMode, to: mode });
+        this._updateConnectionStatus(mode);
+      });
+
+      this.connectionManager.onPeerJoined((peerId) => {
+        log.info('Peer joined via P2P', { peerId });
+        this._pollParticipants();
+      });
+
+      this.connectionManager.onPeerLeft((peerId) => {
+        log.info('Peer left', { peerId });
+        this._pollParticipants();
+      });
+
+      this.connectionManager.onError((error) => {
+        log.warn('P2P connection error', { error: error.message });
+      });
+
+      // Check current mode and start polling if in fallback
+      if (this.connectionManager.getMode() === CONNECTION_MODES.HTTP_FALLBACK) {
+        log.info('Starting in HTTP fallback mode');
+      }
+    } else {
+      log.warn('No connection manager found - using HTTP polling only');
+    }
+
     // Fetch room info from API
     try {
       const roomData = await getRoom(this.roomCode);
@@ -91,7 +128,7 @@ export default class PartyLobbyView extends BaseView {
         </div>
 
         <!-- Connection Status Bar -->
-        <div class="fixed bottom-0 left-0 right-0 py-3 bg-green-500 text-white text-center text-sm">
+        <div id="connectionStatusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-blue-500 text-white text-center text-sm">
           <span class="material-symbols-outlined text-sm align-middle mr-1">wifi</span>
           ${t('party.connected')}
         </div>
@@ -103,8 +140,19 @@ export default class PartyLobbyView extends BaseView {
 
     this.attachListeners();
 
-    // Start polling for room updates
-    this._startPolling();
+    // Check connection mode and update status bar
+    if (this.connectionManager) {
+      const mode = this.connectionManager.getMode();
+      this._updateConnectionStatus(mode);
+
+      // Only start polling if in HTTP fallback mode or still connecting
+      if (mode === CONNECTION_MODES.HTTP_FALLBACK || mode === CONNECTION_MODES.CONNECTING) {
+        this._startPolling();
+      }
+    } else {
+      // No connection manager - use HTTP polling only
+      this._startPolling();
+    }
   }
 
   /**
@@ -136,48 +184,15 @@ export default class PartyLobbyView extends BaseView {
 
   /**
    * Start polling for room updates.
+   * Only used in HTTP fallback mode.
    */
   _startPolling() {
     if (this.pollInterval) return;
 
-    this.pollInterval = setInterval(async () => {
-      try {
-        const roomData = await getRoom(this.roomCode);
+    log.info('Starting HTTP polling for room', { roomCode: this.roomCode });
 
-        // Check if quiz started
-        if (roomData.status === 'playing' && this.roomStatus !== 'playing') {
-          log.info('Quiz started by host');
-          this._stopPolling();
-          this.navigateTo(`/party/quiz/${this.roomCode}`);
-          return;
-        }
-
-        // Check if room ended
-        if (roomData.status === 'ended') {
-          log.info('Room ended');
-          this._stopPolling();
-          alert(t('party.hostLeft'));
-          this.navigateTo('/');
-          return;
-        }
-
-        // Update participants
-        const newParticipants = (roomData.participants || []).map((p) => ({
-          id: p.id,
-          name: p.name,
-          isHost: p.isHost === true,
-          isYou: p.id === this.participantId,
-          status: 'connected',
-        }));
-
-        if (JSON.stringify(newParticipants) !== JSON.stringify(this.participants)) {
-          log.info('Participants updated', { count: newParticipants.length });
-          this.participants = newParticipants;
-          this.updateParticipantList();
-        }
-      } catch (error) {
-        log.error('Failed to poll room', { error: error.message });
-      }
+    this.pollInterval = setInterval(() => {
+      this._pollParticipants();
     }, POLL_INTERVAL_MS);
   }
 
@@ -190,6 +205,81 @@ export default class PartyLobbyView extends BaseView {
       this.pollInterval = null;
     }
   }
+
+  /**
+   * Update UI based on connection mode.
+   * @param {string} mode - Connection mode from CONNECTION_MODES
+   */
+  _updateConnectionStatus(mode) {
+    const statusBar = this.querySelector('#connectionStatusBar');
+    if (!statusBar) return;
+
+    if (mode === CONNECTION_MODES.P2P) {
+      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-green-500 text-white text-center text-sm';
+      statusBar.innerHTML = `
+        <span class="material-symbols-outlined text-sm align-middle mr-1">wifi</span>
+        ${t('party.connectedP2P')}
+      `;
+    } else if (mode === CONNECTION_MODES.HTTP_FALLBACK) {
+      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-yellow-500 text-white text-center text-sm';
+      statusBar.innerHTML = `
+        <span class="material-symbols-outlined text-sm align-middle mr-1">cloud</span>
+        ${t('party.connectedServer')}
+      `;
+      // Start HTTP polling in fallback mode
+      this._startPolling();
+    } else if (mode === CONNECTION_MODES.CONNECTING) {
+      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-blue-500 text-white text-center text-sm';
+      statusBar.innerHTML = `
+        <span class="material-symbols-outlined text-sm align-middle mr-1 animate-spin">sync</span>   
+        ${t('party.connecting')}
+      `;
+    }
+  }
+
+  /**
+   * Fetch participants once from the server.
+   */
+  async _pollParticipants() {
+    try {
+      const roomData = await getRoom(this.roomCode);
+
+      // Check if quiz started
+      if (roomData.status === 'playing' && this.roomStatus !== 'playing') {
+        log.info('Quiz started by host');
+        this._stopPolling();
+        this.navigateTo(`/party/quiz/${this.roomCode}`);
+        return;
+      }
+
+      // Check if room ended
+      if (roomData.status === 'ended') {
+        log.info('Room ended');
+        this._stopPolling();
+        alert(t('party.hostLeft'));
+        this.navigateTo('/');
+        return;
+      }
+
+      // Update participants
+      const newParticipants = (roomData.participants || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        isHost: p.isHost === true,
+        isYou: p.id === this.participantId,
+        status: 'connected',
+      }));
+
+      if (JSON.stringify(newParticipants) !== JSON.stringify(this.participants)) {
+        log.info('Participants updated', { count: newParticipants.length });
+        this.participants = newParticipants;
+        this.updateParticipantList();
+      }
+    } catch (error) {
+      log.error('Failed to fetch participants', { error: error.message });
+    }
+  }
+
 
   updateParticipantList() {
     const container = this.querySelector('#participantContainer');
@@ -257,6 +347,10 @@ export default class PartyLobbyView extends BaseView {
 
   destroy() {
     this._stopPolling();
+    if (this.connectionManager) {
+      clearConnection();
+      this.connectionManager = null;
+    }
     super.destroy();
   }
 }
