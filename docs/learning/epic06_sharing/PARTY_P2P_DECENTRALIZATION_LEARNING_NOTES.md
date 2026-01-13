@@ -128,6 +128,25 @@ interface Window {
 - `resolve(false)` vs `reject()`: Use resolve for expected/graceful failures, reject for unexpected errors
 - Making a function `async` changes return type - must update JSDoc from `@returns {boolean}` to `@returns {Promise<boolean>}`
 
+### Commits (Phase 0)
+
+```
+329d937 chore: add Window.adsbygoogle type declaration
+5004828 feat(ads): add lazy-loading for AdSense script
+0d4d940 test(ads): update tests for async loadAd
+7085ee7 fix(ads): remove global AdSense script from index.html
+5bedb1c docs: update learning notes for Phase 0 completion
+```
+
+### Next Steps
+
+1. Deploy Phase 0 to staging for real-world testing
+2. Start Phase A: P2P Foundation
+   - Task A.3: Simplify P2PService to STUN-only
+   - Task A.4: Clean up environment variables
+   - Task A.1: Create PartyConnectionManager
+   - Task A.2: Create tests
+
 ---
 
 ## References
