@@ -385,7 +385,7 @@ Ran Stryker mutation testing to verify test quality:
 - [x] Task B.2: Update JoinPartyView + party-connection-store
 - [x] Task B.3: Update PartyLobbyView
 - [x] Task B.4: Update PartyQuizView
-- [ ] Task B.5: Update PartyResultsView
+- [x] Task B.5: Update PartyResultsView
 - [ ] Task B.6: Create ConnectionModeIndicator component
 
 ### Key Changes
@@ -418,6 +418,12 @@ Ran Stryker mutation testing to verify test quality:
 - Only start HTTP polling if in `HTTP_FALLBACK` or `CONNECTING` mode
 - DON'T clear connection on destroy (PartyResultsView needs it)
 - Fixed pre-existing type bug: `highlightId` in LiveScoreboard was typed as `number` but should be `string`
+
+**Task B.5: PartyResultsView**
+- Import `getConnection` and `clearConnection` from store
+- Get standings from P2P session first (`session.getStandings()`), fallback to API
+- This is the FINAL view in party flow - clears connection on `destroy()`
+- Also clears party-related sessionStorage (`partyRoomCode`, `partyParticipantId`, `partyIsHost`)
 
 ### Design Decision: Connection Store
 
@@ -455,6 +461,7 @@ feat(party): wire PartyConnectionManager to JoinPartyView
 fix(components): add proper return type to createRoomCodeInput
 feat(party): wire PartyConnectionManager to PartyLobbyView
 feat(party): wire PartyConnectionManager to PartyQuizView
+feat(party): wire PartyConnectionManager to PartyResultsView
 ```
 
 ---
@@ -462,8 +469,10 @@ feat(party): wire PartyConnectionManager to PartyQuizView
 ## Next Steps (When Resuming)
 
 1. **Continue Phase B: View Integration**
-   - Task B.5: Update PartyResultsView (in progress)
    - Task B.6: Create ConnectionModeIndicator component
+     - **Decision:** Extract inline status bar from PartyLobbyView into reusable component
+     - File: `src/components/ConnectionModeIndicator.js`
+     - Shows: Green dot + "P2P" or Yellow dot + "Server" based on mode
    - Fix E2E test failures (see table above)
 
 2. **Branch:** Continue on `feature/party-p2p-decentralization`
@@ -481,7 +490,7 @@ feat(party): wire PartyConnectionManager to PartyQuizView
 |-------|--------|-------------|
 | 0 | ✅ Complete | AdSense lazy-loading |
 | A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
-| B | 🔄 In Progress | View Integration (B.1-B.4 done; B.5-B.6 pending) |
+| B | 🔄 In Progress | View Integration (B.1-B.5 done; B.6 pending) |
 | C | ⏳ Pending | Server Minimization |
 | D | ⏳ Pending | STUN Testing |
 | E | ⏳ Pending | Testing & Validation |
