@@ -107,16 +107,16 @@ describe('AdManager', () => {
       window.adsbygoogle = [];
     });
 
-    it('should return false when container is not found', () => {
-      const result = loadAd('nonexistent-container', 'quizLoading');
+    it('should return false when container is not found', async () => {
+      const result = await loadAd('nonexistent-container', 'quizLoading');
 
       expect(result).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith('[AdManager] Container not found: nonexistent-container');
     });
 
-    it('should return false and show placeholder when no slot ID is configured for quizLoading', () => {
+    it('should return false and show placeholder when no slot ID is configured for quizLoading', async () => {
       // quizLoading has empty slot ID by default
-      const result = loadAd('test-ad-container', 'quizLoading');
+      const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(false);
       expect(logger.debug).toHaveBeenCalledWith('[AdManager] No slot ID for quizLoading - AdSense pending approval');
@@ -127,9 +127,9 @@ describe('AdManager', () => {
       expect(container.innerHTML).toContain('Ad Space');
     });
 
-    it('should return false and show placeholder when no slot ID is configured for resultsLoading', () => {
+    it('should return false and show placeholder when no slot ID is configured for resultsLoading', async () => {
       // resultsLoading also has empty slot ID by default
-      const result = loadAd('test-ad-container', 'resultsLoading');
+      const result = await loadAd('test-ad-container', 'resultsLoading');
 
       expect(result).toBe(false);
       expect(logger.debug).toHaveBeenCalledWith('[AdManager] No slot ID for resultsLoading - AdSense pending approval');
@@ -140,26 +140,26 @@ describe('AdManager', () => {
       expect(container.innerHTML).toContain('Ad Space');
     });
 
-    it('should prevent duplicate ad loads in same container', () => {
+    it('should prevent duplicate ad loads in same container', async () => {
       // Set a slot ID
       setAdSlot('quizLoading', '1234567890');
 
       // First load
-      loadAd('test-ad-container', 'quizLoading');
+      await loadAd('test-ad-container', 'quizLoading');
 
       // Second load attempt
-      const result = loadAd('test-ad-container', 'quizLoading');
+      const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(false);
       expect(logger.debug).toHaveBeenCalledWith('[AdManager] Ad already loaded in test-ad-container');
     });
 
-    it('should hide container when ads cannot load', () => {
+    it('should hide container when ads cannot load', async () => {
       // Add content to verify it gets cleared by hideContainer
       document.getElementById('test-ad-container').innerHTML = '<p>old content</p>';
       isOnline.mockReturnValue(false);
 
-      const result = loadAd('test-ad-container', 'quizLoading');
+      const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(false);
       const container = document.getElementById('test-ad-container');
@@ -169,12 +169,12 @@ describe('AdManager', () => {
       expect(container.querySelectorAll('p').length).toBe(0);
     });
 
-    it('should load ad successfully when slot ID is set', () => {
+    it('should load ad successfully when slot ID is set', async () => {
       // Add some content to verify it gets cleared
       document.getElementById('test-ad-container').innerHTML = '<p>old content</p>';
       setAdSlot('quizLoading', '1234567890');
 
-      const result = loadAd('test-ad-container', 'quizLoading');
+      const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(true);
       expect(logger.info).toHaveBeenCalledWith('[AdManager] Ad loaded in test-ad-container');
@@ -196,11 +196,11 @@ describe('AdManager', () => {
       expect(container.childNodes.length).toBe(1);
     });
 
-    it('should push to adsbygoogle array when loading ad', () => {
+    it('should push to adsbygoogle array when loading ad', async () => {
       setAdSlot('quizLoading', '1234567890');
       window.adsbygoogle = [];
 
-      loadAd('test-ad-container', 'quizLoading');
+      await loadAd('test-ad-container', 'quizLoading');
 
       expect(window.adsbygoogle.length).toBe(1);
     });
@@ -278,7 +278,7 @@ describe('AdManager', () => {
   });
 
   describe('resetForNavigation', () => {
-    it('should clear loaded ads tracking', () => {
+    it('should clear loaded ads tracking', async () => {
       document.body.innerHTML = '<div id="test-ad-container"></div>';
       isFeatureEnabled.mockReturnValue(true);
       isOnline.mockReturnValue(true);
@@ -293,7 +293,7 @@ describe('AdManager', () => {
 
       // Should be able to load again (duplicate check should pass)
       document.body.innerHTML = '<div id="test-ad-container"></div>';
-      const result = loadAd('test-ad-container', 'quizLoading');
+      const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(true);
     });
@@ -376,7 +376,7 @@ describe('AdManager', () => {
       expect(logger.debug).toHaveBeenCalledWith('[AdManager] Online - ads can be shown');
     });
 
-    it('should register handlers that hide containers on offline event', () => {
+    it('should register handlers that hide containers on offline event', async () => {
       document.body.innerHTML = '<div id="ad-container-1"></div><div id="ad-container-2"></div>';
       isFeatureEnabled.mockReturnValue(true);
       isOnline.mockReturnValue(true);
@@ -384,11 +384,11 @@ describe('AdManager', () => {
 
       // Load ads in containers first
       setAdSlot('quizLoading', '1234567890');
-      loadAd('ad-container-1', 'quizLoading');
+      await loadAd('ad-container-1', 'quizLoading');
 
       resetForNavigation(); // Clear loaded state
       setAdSlot('resultsLoading', '0987654321');
-      loadAd('ad-container-2', 'resultsLoading');
+      await loadAd('ad-container-2', 'resultsLoading');
 
       initAdManager();
 
@@ -405,7 +405,7 @@ describe('AdManager', () => {
   });
 
   describe('error handling', () => {
-    it('should handle errors when loading ad and return false', () => {
+    it('should handle errors when loading ad and return false', async () => {
       // Setup container
       document.body.innerHTML = '<div id="error-test-container"></div>';
       isFeatureEnabled.mockReturnValue(true);
@@ -417,7 +417,7 @@ describe('AdManager', () => {
       const container = document.getElementById('error-test-container');
       container.appendChild = () => { throw new Error('DOM error'); };
 
-      const result = loadAd('error-test-container', 'quizLoading');
+      const result = await loadAd('error-test-container', 'quizLoading');
 
       expect(result).toBe(false);
       expect(logger.error).toHaveBeenCalledWith('[AdManager] Error loading ad:', expect.any(Error));
