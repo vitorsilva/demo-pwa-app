@@ -14,6 +14,8 @@ import { shuffleOptions } from '../utils/shuffle.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom, submitAnswer as submitAnswerApi, advanceQuestion as advanceQuestionApi } from '../services/party-api.js';
+import { CONNECTION_MODES } from '../services/party-connection-manager.js';
+import { getConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'PartyQuizView' });
 
@@ -33,6 +35,7 @@ export default class PartyQuizView extends BaseView {
     this.participantId = sessionStorage.getItem('partyParticipantId') || '';
     this.isHost = sessionStorage.getItem('partyIsHost') === 'true';
     this.session = options.session; // Legacy support
+    this.connectionManager = null;
 
     this.quiz = null;
     this.participants = [];
@@ -50,6 +53,17 @@ export default class PartyQuizView extends BaseView {
   }
 
   async render() {
+    // Get connection manager from store (set by JoinPartyView or CreatePartyView)
+    this.connectionManager = getConnection();
+
+    // If we have a connection manager with a session, use it
+    if (this.connectionManager) {
+      const session = this.connectionManager.getSession();
+      if (session && session.quiz) {
+        this.session = session;
+      }
+    }
+    
     // Legacy support: if session provided, use original behavior
     if (this.session && this.session.quiz) {
       return this._renderWithSession();
@@ -151,13 +165,38 @@ export default class PartyQuizView extends BaseView {
     this.attachListeners();
     this._startTimer();
 
-    // Only setup session callbacks if we have a session (legacy mode)
+    // Set up connection manager event handlers
+    if (this.connectionManager) {
+      this.connectionManager.onModeChange((mode, previousMode) => {
+        log.info('Connection mode changed', { from: previousMode, to: mode });
+
+        // If we switched to HTTP fallback, start polling
+        if (mode === CONNECTION_MODES.HTTP_FALLBACK && !this.pollInterval) {
+          this._startPolling();
+        }
+      });
+
+      this.connectionManager.onError((error) => {
+        log.warn('P2P connection error', { error: error.message });
+      });
+    }    
+    
+    // Set up callbacks and polling based on connection mode
     if (this.session) {
       this._setupSessionCallbacks();
+
+      // Only start polling if in HTTP fallback mode
+      if (this.connectionManager) {
+        const mode = this.connectionManager.getMode();
+        if (mode === CONNECTION_MODES.HTTP_FALLBACK || mode === CONNECTION_MODES.CONNECTING) {
+          this._startPolling();
+        }
+      }
     } else {
-      // MVP mode: poll for score updates
+      // No session - use HTTP polling only
       this._startPolling();
     }
+
   }
 
   /**
