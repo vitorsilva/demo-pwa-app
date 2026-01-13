@@ -217,13 +217,40 @@ npm run build
 npm run deploy
 ```
 
-### Next Steps
+### Commits (Environment Config)
 
-1. Start Phase A: P2P Foundation
-   - Task A.3: Simplify P2PService to STUN-only
-   - Task A.4: Clean up environment variables (Metered.ca references)
+```
+8da7a92 chore: add .env.local to gitignore and fix signaling test
+a793299 chore: add adsbygoogle words to spell checker
+686f280 docs: add staging deployment and env config to learning notes
+17748fa fix: use .env.development.local for dev-only env vars
+1d2436c docs: correct env file documentation (.env.development.local)
+```
+
+### Status
+
+- ✅ Phase 0: Complete (AdSense lazy-loading)
+- ✅ Environment configuration: Fixed and documented
+- ✅ All tests passing (730)
+- ✅ Staging deployed and verified
+- 🔜 Phase A: P2P Foundation (next)
+
+---
+
+## Next Steps (When Resuming)
+
+1. **Start Phase A: P2P Foundation**
+   - Task A.3: Simplify P2PService to STUN-only (remove Metered.ca TURN code)
+   - Task A.4: Clean up environment variables (remove `VITE_METERED_*` from `.env`)
    - Task A.1: Create PartyConnectionManager
-   - Task A.2: Create tests
+   - Task A.2: Create PartyConnectionManager tests
+
+2. **Branch:** Continue on `feature/party-p2p-decentralization`
+
+3. **Verification after each task:**
+   - Run tests: `npm test -- --run`
+   - Build staging: `npm run build:staging`
+   - Check for localhost: `Select-String -Path "dist\assets\*.js" -Pattern "localhost"`
 
 ---
 
