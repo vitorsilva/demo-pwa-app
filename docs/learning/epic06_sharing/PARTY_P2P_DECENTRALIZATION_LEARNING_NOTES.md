@@ -138,12 +138,81 @@ interface Window {
 5bedb1c docs: update learning notes for Phase 0 completion
 ```
 
+---
+
+## Session: 2026-01-13 (Staging Deployment & Environment Config)
+
+### Staging Deployment Issues
+
+After deploying Phase 0 to staging, the permission prompt still appeared. Investigation revealed:
+
+**Problem 1: Permission prompt still showing on staging**
+- Initial hypothesis: AdSense still causing it - WRONG
+- Used Chrome DevTools Network tab to investigate
+- Found requests going to `localhost:8080` in staging build!
+
+**Root Cause:**
+- `.env` had `VITE_PARTY_API_URL=http://localhost:8080/party`
+- This was being bundled into the staging build
+- The `http://localhost` URL triggered Chrome's "local network access" permission
+
+**Problem 2: After fixing URL, party API failed on VPS**
+- Error: `Unknown MySQL server host 'mysql' (-2)`
+- Cause: VPS `config.local.php` was configured for Docker (`host: 'mysql'`) instead of VPS (`host: 'localhost'`)
+
+### Multi-Environment Configuration Solution
+
+Implemented a proper multi-environment setup:
+
+**Frontend (Vite):**
+
+| File | Purpose | Committed |
+|------|---------|-----------|
+| `.env` | Base config, no `VITE_PARTY_API_URL` | ✅ Yes |
+| `.env.local` | Local dev overrides | ❌ No (gitignored) |
+
+**How it works:**
+- Vite automatically loads `.env.local` and overrides `.env`
+- Local dev: `.env.local` sets `VITE_PARTY_API_URL=http://localhost:8080/party`
+- Staging/Prod: No `.env.local` → undefined → falls back to `https://saberloop.com/party` (in `signaling-client.js`)
+
+**Backend (PHP):**
+
+| Environment | `config.local.php` db_host |
+|-------------|---------------------------|
+| Docker (local) | `mysql` (container name) |
+| VPS (staging/prod) | `localhost` |
+
+**Files modified:**
+- `.gitignore` - Added `.env.local`
+- `.env.local` - Created with `VITE_PARTY_API_URL=http://localhost:8080/party`
+- `.env` - Removed/commented `VITE_PARTY_API_URL`
+- VPS `config.local.php` - Updated with correct localhost credentials
+
+### Learnings
+
+- **Vite environment variables**: Files loaded in order: `.env` → `.env.local` → `.env.[mode]` → `.env.[mode].local`
+- **`.env.local` convention**: Standard Vite pattern for local overrides that shouldn't be committed
+- **Debug network issues**: Chrome DevTools Network tab is essential for finding unexpected requests
+- **Service Worker caching**: Can cause old bundles to be served even after deployment - use incognito or clear cache
+
+### Deployment Commands
+
+```bash
+# Staging
+npm run build:staging
+npm run deploy:staging
+
+# Production
+npm run build
+npm run deploy
+```
+
 ### Next Steps
 
-1. Deploy Phase 0 to staging for real-world testing
-2. Start Phase A: P2P Foundation
+1. Start Phase A: P2P Foundation
    - Task A.3: Simplify P2PService to STUN-only
-   - Task A.4: Clean up environment variables
+   - Task A.4: Clean up environment variables (Metered.ca references)
    - Task A.1: Create PartyConnectionManager
    - Task A.2: Create tests
 
