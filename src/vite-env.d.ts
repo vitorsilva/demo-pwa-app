@@ -10,3 +10,8 @@ declare module 'virtual:pwa-register' {
     onRegisterError?: (error: Error) => void;
   }): (reloadPage?: boolean) => Promise<void>;
 }
+
+// Google AdSense global
+interface Window {
+  adsbygoogle: object[];
+}
