@@ -383,7 +383,7 @@ Ran Stryker mutation testing to verify test quality:
 
 - [x] Task B.1: Update CreatePartyView
 - [x] Task B.2: Update JoinPartyView + party-connection-store
-- [ ] Task B.3: Update PartyLobbyView (in progress)
+- [x] Task B.3: Update PartyLobbyView
 - [ ] Task B.4: Update PartyQuizView
 - [ ] Task B.5: Update PartyResultsView
 - [ ] Task B.6: Create ConnectionModeIndicator component
@@ -402,6 +402,13 @@ Ran Stryker mutation testing to verify test quality:
 - Guest creates `PartyConnectionManager` after joining via API
 - Connection stored in store before navigating to lobby
 - P2P connection starts in background while navigating
+
+**Task B.3: PartyLobbyView**
+- Retrieve connection from store (set by JoinPartyView)
+- Set up P2P event handlers for mode changes and peer events
+- Add connection status bar with dynamic P2P/HTTP/Connecting states
+- Only start HTTP polling in fallback mode or when no connection manager
+- Clean up connection on view destroy via `clearConnection()`
 
 ### Design Decision: Connection Store
 
@@ -437,6 +444,7 @@ Ran Stryker mutation testing to verify test quality:
 feat(party): wire PartyConnectionManager to CreatePartyView
 feat(party): wire PartyConnectionManager to JoinPartyView
 fix(components): add proper return type to createRoomCodeInput
+feat(party): wire PartyConnectionManager to PartyLobbyView
 ```
 
 ---
@@ -444,15 +452,15 @@ fix(components): add proper return type to createRoomCodeInput
 ## Next Steps (When Resuming)
 
 1. **Continue Phase B: View Integration**
-   - Task B.3: Update PartyLobbyView (retrieve connection from store)
    - Task B.4: Update PartyQuizView
    - Task B.5: Update PartyResultsView
    - Task B.6: Create ConnectionModeIndicator component
+   - Fix E2E test failures (see table above)
 
 2. **Branch:** Continue on `feature/party-p2p-decentralization`
 
 3. **Verification:**
-   - Run tests: `npm test -- --run`
+   - Run E2E tests: `npm run test:e2e`
    - Test party flow manually in browser
    - Deploy to staging after completion
 

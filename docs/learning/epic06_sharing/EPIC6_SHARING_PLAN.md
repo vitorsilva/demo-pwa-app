@@ -344,12 +344,23 @@ tests/
 
 ---
 
-## Next Steps
+## Post-MVP Enhancements
 
-1. Review this plan
-2. Decide whether to proceed with Phase 1
-3. If yes, begin Phase 1 development using [PHASE1_QUIZ_SHARING.md](./PHASE1_QUIZ_SHARING.md)
+### Party Mode Decentralization (In Progress)
+
+The original MVP uses HTTP polling for party sessions. A follow-up enhancement is underway to transition to true P2P WebRTC communication:
+
+| Document | Description | Status |
+|----------|-------------|--------|
+| [PARTY_MODE_DECENTRALIZATION_PLAN.md](./PARTY_MODE_DECENTRALIZATION_PLAN.md) | Full plan for P2P transition | In Progress |
+| [PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md](./PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md) | Implementation notes | Active |
+
+**Current Progress:**
+- ✅ Phase 0: AdSense lazy-loading fix
+- ✅ Phase A: P2P Foundation (PartyConnectionManager, STUN-only)
+- 🔄 Phase B: View Integration (B.1-B.3 complete, B.4-B.6 pending)
+- ⏳ Phase C-F: Pending
 
 ---
 
-**Last Updated:** 2026-01-06
+**Last Updated:** 2026-01-13
