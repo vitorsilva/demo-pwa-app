@@ -246,8 +246,14 @@ describe('SignalingClient', () => {
 });
 
 describe('getSignalingBaseUrl', () => {
-  it('should return default URL', () => {
+  it('should return configured or default URL', () => {
     const url = getSignalingBaseUrl();
-    expect(url).toBe('https://saberloop.com/party');
+    // Returns env var if set, otherwise default
+    const envUrl = import.meta.env.VITE_PARTY_API_URL;
+    if (envUrl) {
+      expect(url).toBe(envUrl);
+    } else {
+      expect(url).toBe('https://saberloop.com/party');
+    }
   });
 });

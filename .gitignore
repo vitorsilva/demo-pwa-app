@@ -2,6 +2,7 @@
 *.crt
 *.pem
 *.env
+.env.local
 # Node.js dependencies
 node_modules/
 dist/
@@ -38,3 +39,4 @@ telemetry-logs/
 !.maestro/tests/screenshots/
 .claude/settings.local.json
 .claude/settings.local.json
+
