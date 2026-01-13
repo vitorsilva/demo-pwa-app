@@ -44,10 +44,17 @@
   }));
 
   // Mock P2PService
+  let capturedOnPeerConnected = null;
+  let capturedOnPeerDisconnected = null;
+
   const mockP2PService = {
     createConnection: vi.fn().mockResolvedValue(undefined),
-    onPeerConnected: vi.fn(),
-    onPeerDisconnected: vi.fn(),
+    onPeerConnected: vi.fn().mockImplementation((cb) => {
+      capturedOnPeerConnected = cb;
+    }),
+    onPeerDisconnected: vi.fn().mockImplementation((cb) => {
+      capturedOnPeerDisconnected = cb;
+    }),
     onMessage: vi.fn(),
     getConnectedPeers: vi.fn().mockReturnValue([]),
     destroy: vi.fn(),
@@ -83,7 +90,11 @@
       }
       vi.clearAllMocks();
       vi.useRealTimers();
+      // Reset mock functions
       mockSignalingClient.getPeers.mockResolvedValue(['host-123']);
+      // Reset captured callbacks
+      capturedOnPeerConnected = null;
+      capturedOnPeerDisconnected = null;
     });
 
     describe('constructor', () => {
@@ -160,6 +171,21 @@
 
         expect(manager.p2pService.createConnection).not.toHaveBeenCalled();
       });
+      
+      it('should handle connection failure and return false', async () => {
+        const connectionError = new Error('Network timeout');
+        // Make getPeers throw an error
+        mockSignalingClient.getPeers.mockRejectedValueOnce(connectionError);
+
+        // Guest will call getPeers, which will throw
+        manager = new PartyConnectionManager('ABC123', 'participant-1', false);
+        // Set retryCount to max so it goes straight to fallback (no retries)
+        manager.retryCount = 3;
+        const result = await manager.connect();
+
+        expect(result).toBe(false);
+        expect(manager.getMode()).toBe(CONNECTION_MODES.HTTP_FALLBACK);
+      });      
     });
 
     describe('disconnect', () => {
@@ -311,6 +337,68 @@
         await manager.connect();
 
         expect(callback).toHaveBeenCalledWith(CONNECTION_MODES.CONNECTING, CONNECTION_MODES.DISCONNECTED);      
+      });
+
+      it('should transition to P2P mode when peer connects', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        await manager.connect();
+
+        // Simulate peer connected event
+        capturedOnPeerConnected('peer-123');
+
+        expect(manager.mode).toBe(CONNECTION_MODES.P2P);
+      });
+
+      it('should call onPeerJoined when peer connects', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onPeerJoined(callback);
+        await manager.connect();
+
+        // Simulate peer connected event
+        capturedOnPeerConnected('peer-123');
+
+        expect(callback).toHaveBeenCalledWith('peer-123');
+      });
+
+      it('should reset retryCount when peer connects', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        manager.retryCount = 2;
+        await manager.connect();
+
+        // Simulate peer connected event
+        capturedOnPeerConnected('peer-123');
+
+        expect(manager.retryCount).toBe(0);
+      });
+
+      it('should call onPeerLeft when peer disconnects', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onPeerLeft(callback);
+        await manager.connect();
+
+        // Simulate peer disconnected event
+        capturedOnPeerDisconnected('peer-123', 'connection_lost');
+
+        expect(callback).toHaveBeenCalledWith('peer-123', 'connection_lost');
+      });
+
+      it('should call onError when all peers disconnect in P2P mode', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onError(callback);
+        await manager.connect();
+
+        // Set mode to P2P
+        manager.mode = CONNECTION_MODES.P2P;
+        // Mock getConnectedPeers to return empty array
+        mockP2PService.getConnectedPeers.mockReturnValue([]);
+
+        // Simulate peer disconnected event
+        capturedOnPeerDisconnected('peer-123', 'connection_lost');
+
+        expect(callback).toHaveBeenCalledWith(expect.any(Error));
       });
     });
 
