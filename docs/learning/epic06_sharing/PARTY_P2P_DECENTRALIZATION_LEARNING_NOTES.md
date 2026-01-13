@@ -166,15 +166,16 @@ Implemented a proper multi-environment setup:
 
 **Frontend (Vite):**
 
-| File | Purpose | Committed |
-|------|---------|-----------|
-| `.env` | Base config, no `VITE_PARTY_API_URL` | ✅ Yes |
-| `.env.local` | Local dev overrides | ❌ No (gitignored) |
+| File | Purpose | Committed | When Loaded |
+|------|---------|-----------|-------------|
+| `.env` | Base config, no `VITE_PARTY_API_URL` | ✅ Yes | All builds |
+| `.env.development.local` | Dev-only overrides | ❌ No (gitignored) | **Only** `npm run dev` |
+
+**⚠️ CRITICAL Learning:** `.env.local` loads for ALL builds (including staging/production). Use `.env.development.local` for dev-only variables!
 
 **How it works:**
-- Vite automatically loads `.env.local` and overrides `.env`
-- Local dev: `.env.local` sets `VITE_PARTY_API_URL=http://localhost:8080/party`
-- Staging/Prod: No `.env.local` → undefined → falls back to `https://saberloop.com/party` (in `signaling-client.js`)
+- Local dev (`npm run dev`): `.env.development.local` sets `VITE_PARTY_API_URL=http://localhost:8080/party`
+- Staging/Prod builds: `.env.development.local` is NOT loaded → `VITE_PARTY_API_URL` is undefined → falls back to `https://saberloop.com/party` (in `signaling-client.js`)
 
 **Backend (PHP):**
 
@@ -184,17 +185,25 @@ Implemented a proper multi-environment setup:
 | VPS (staging/prod) | `localhost` |
 
 **Files modified:**
-- `.gitignore` - Added `.env.local`
-- `.env.local` - Created with `VITE_PARTY_API_URL=http://localhost:8080/party`
+- `.gitignore` - Added `.env.*.local` pattern
+- `.env.development.local` - Created with `VITE_PARTY_API_URL=http://localhost:8080/party`
 - `.env` - Removed/commented `VITE_PARTY_API_URL`
 - VPS `config.local.php` - Updated with correct localhost credentials
 
 ### Learnings
 
-- **Vite environment variables**: Files loaded in order: `.env` → `.env.local` → `.env.[mode]` → `.env.[mode].local`
-- **`.env.local` convention**: Standard Vite pattern for local overrides that shouldn't be committed
+- **Vite environment variable loading order**:
+  | File | When Loaded |
+  |------|-------------|
+  | `.env` | All cases |
+  | `.env.local` | All cases (⚠️ NOT dev-only!) |
+  | `.env.[mode]` | Only in specified mode |
+  | `.env.[mode].local` | Only in specified mode |
+
+- **Use `.env.development.local`** for dev-only overrides, NOT `.env.local`
 - **Debug network issues**: Chrome DevTools Network tab is essential for finding unexpected requests
 - **Service Worker caching**: Can cause old bundles to be served even after deployment - use incognito or clear cache
+- **Verify builds**: Always search for sensitive strings in dist folder after build (`Select-String -Path "dist\assets\*.js" -Pattern "localhost"`)
 
 ### Deployment Commands
 
