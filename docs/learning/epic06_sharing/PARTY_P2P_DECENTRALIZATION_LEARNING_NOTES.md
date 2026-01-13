@@ -384,7 +384,7 @@ Ran Stryker mutation testing to verify test quality:
 - [x] Task B.1: Update CreatePartyView
 - [x] Task B.2: Update JoinPartyView + party-connection-store
 - [x] Task B.3: Update PartyLobbyView
-- [ ] Task B.4: Update PartyQuizView
+- [x] Task B.4: Update PartyQuizView
 - [ ] Task B.5: Update PartyResultsView
 - [ ] Task B.6: Create ConnectionModeIndicator component
 
@@ -409,6 +409,15 @@ Ran Stryker mutation testing to verify test quality:
 - Add connection status bar with dynamic P2P/HTTP/Connecting states
 - Only start HTTP polling in fallback mode or when no connection manager
 - Clean up connection on view destroy via `clearConnection()`
+
+**Task B.4: PartyQuizView**
+- Import `CONNECTION_MODES` and `getConnection` from store
+- Retrieve connection manager in `render()` and get PartySession from it
+- Set up mode change and error handlers from connection manager
+- Use session callbacks (`onQuestionChange`, `onScoreUpdate`, `onQuizEnd`) for P2P updates
+- Only start HTTP polling if in `HTTP_FALLBACK` or `CONNECTING` mode
+- DON'T clear connection on destroy (PartyResultsView needs it)
+- Fixed pre-existing type bug: `highlightId` in LiveScoreboard was typed as `number` but should be `string`
 
 ### Design Decision: Connection Store
 
@@ -445,6 +454,7 @@ feat(party): wire PartyConnectionManager to CreatePartyView
 feat(party): wire PartyConnectionManager to JoinPartyView
 fix(components): add proper return type to createRoomCodeInput
 feat(party): wire PartyConnectionManager to PartyLobbyView
+feat(party): wire PartyConnectionManager to PartyQuizView
 ```
 
 ---
@@ -452,8 +462,7 @@ feat(party): wire PartyConnectionManager to PartyLobbyView
 ## Next Steps (When Resuming)
 
 1. **Continue Phase B: View Integration**
-   - Task B.4: Update PartyQuizView
-   - Task B.5: Update PartyResultsView
+   - Task B.5: Update PartyResultsView (in progress)
    - Task B.6: Create ConnectionModeIndicator component
    - Fix E2E test failures (see table above)
 
@@ -472,7 +481,7 @@ feat(party): wire PartyConnectionManager to PartyLobbyView
 |-------|--------|-------------|
 | 0 | ✅ Complete | AdSense lazy-loading |
 | A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
-| B | 🔄 In Progress | View Integration (B.1, B.2 done; B.3-B.6 pending) |
+| B | 🔄 In Progress | View Integration (B.1-B.4 done; B.5-B.6 pending) |
 | C | ⏳ Pending | Server Minimization |
 | D | ⏳ Pending | STUN Testing |
 | E | ⏳ Pending | Testing & Validation |
