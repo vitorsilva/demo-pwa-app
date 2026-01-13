@@ -254,6 +254,70 @@ a793299 chore: add adsbygoogle words to spell checker
 
 ---
 
+## Session: 2026-01-13 (Phase A: P2P Foundation)
+
+### Task A.3: Simplify P2PService to STUN-only
+
+**Goal:** Remove TURN server complexity (Metered.ca) and use free Google STUN servers.
+
+**Branch:** `feature/party-p2p-decentralization`
+
+### Progress
+
+- [x] Replace `FALLBACK_ICE_SERVERS` with `ICE_SERVERS` constant (3 Google STUN servers)
+- [x] Remove TURN cache variables (`cachedIceServers`, `cacheExpiry`, `CACHE_TTL`)
+- [x] Remove entire `getIceServers()` async function (~48 lines)
+- [x] Update `createConnection()` - remove `await getIceServers()` call
+- [x] Update `_handleOffer()` - remove `await getIceServers()` call
+- [x] Update `_createPeerConnection()` - remove `iceServers` parameter, use `ICE_SERVERS` constant
+- [x] Remove `iceTransportPolicy: 'relay'` - critical for STUN to work!
+- [ ] Run tests and verify
+- [ ] Commit changes
+
+### Key Changes to `src/services/p2p-service.js`
+
+**Before:** 619 lines with async TURN credential fetching from Metered.ca
+**After:** 561 lines with static STUN-only configuration
+
+**ICE Servers (new):**
+```javascript
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+];
+```
+
+### Learnings
+
+- **STUN** = Session Traversal Utilities for NAT - helps discover public IP when behind router
+- **ICE candidate types:**
+  - `host` - local IP, works on same LAN only
+  - `srflx` (server reflexive) - public IP via STUN, works across internet
+  - `relay` - traffic routed through TURN server, always works but slower
+- **`iceTransportPolicy: 'relay'`** forces TURN-only connections. Without TURN servers, connections would ALWAYS fail. Must be removed for STUN to work.
+- Google provides free public STUN servers - no API keys needed
+
+### Removed Code
+
+| Removed | Lines | Purpose |
+|---------|-------|---------|
+| TURN cache variables | 6 | Cached credentials to avoid API calls |
+| `getIceServers()` function | 48 | Async fetch from Metered.ca |
+| `iceTransportPolicy: 'relay'` | 1 | Forced TURN-only (breaks without TURN) |
+| `await getIceServers()` calls | 2 | In `createConnection()` and `_handleOffer()` |
+
+---
+
+## Next Steps (When Resuming)
+
+1. **Complete Task A.3:** Verify tests pass, commit
+2. **Task A.4:** Clean up environment variables (remove `VITE_METERED_*`)
+3. **Task A.1:** Create PartyConnectionManager
+4. **Task A.2:** Create PartyConnectionManager tests
+
+---
+
 ## References
 
 - [PARTY_MODE_TURN_SERVER.md](./PARTY_MODE_TURN_SERVER.md) - Previous TURN implementation (not used)
