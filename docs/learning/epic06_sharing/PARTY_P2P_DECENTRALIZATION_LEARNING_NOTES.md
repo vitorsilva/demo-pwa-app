@@ -78,6 +78,58 @@ User reported Chrome was still asking for "local network access" permission when
 
 ---
 
+## Session: 2026-01-13 (Implementation)
+
+### Starting Phase 0: AdSense Permission Fix
+
+**Goal:** Lazy-load AdSense only on pages where ads are shown (ResultsView), eliminating the permission prompt on party pages.
+
+**Branch:** `feature/party-p2p-decentralization` ✅ Created
+
+### Progress
+
+- [x] Task 0.2: Add lazy-loading to `src/utils/adManager.js` (revised - simpler than separate file)
+- [x] Task 0.3: Remove global AdSense from `index.html`
+- [x] Task 0.4: Test ads work and no permission prompt ✅
+
+### Phase 0 Complete!
+
+**Results:**
+- No permission prompt when joining party (AdSense no longer loads globally)
+- Ad placeholder displays correctly on LoadingView
+- AdManager initializes and loads script on demand
+
+### Approach Change
+
+**Original plan:** Create separate `src/utils/adsense-loader.js`
+
+**Revised approach:** Integrate lazy-loading into existing `adManager.js`
+
+**Rationale:**
+- `adManager.js` already handles all ad logic
+- Adding lazy-loading there keeps ad code in one place
+- Simpler than maintaining two separate ad utilities
+
+### Difficulties & Solutions
+
+**Problem:** TypeScript error `Property 'adsbygoogle' does not exist on type 'Window'`
+**Cause:** Project has `checkJs: true` in `jsconfig.json`, enabling type checking for JS files
+**Fix:** Added Window interface extension in `src/vite-env.d.ts`:
+```typescript
+interface Window {
+  adsbygoogle: object[];
+}
+```
+**Learning:** JSDoc `@typedef` (in `types.js`) creates new types but can't extend globals. Use `.d.ts` files for extending browser interfaces.
+
+### Learnings
+
+- Singleton Promise pattern prevents duplicate script loading when multiple callers await simultaneously
+- `resolve(false)` vs `reject()`: Use resolve for expected/graceful failures, reject for unexpected errors
+- Making a function `async` changes return type - must update JSDoc from `@returns {boolean}` to `@returns {Promise<boolean>}`
+
+---
+
 ## References
 
 - [PARTY_MODE_TURN_SERVER.md](./PARTY_MODE_TURN_SERVER.md) - Previous TURN implementation (not used)
