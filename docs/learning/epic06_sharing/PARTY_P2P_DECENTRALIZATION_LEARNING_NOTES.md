@@ -264,15 +264,11 @@ a793299 chore: add adsbygoogle words to spell checker
 
 ### Progress
 
-- [x] Replace `FALLBACK_ICE_SERVERS` with `ICE_SERVERS` constant (3 Google STUN servers)
-- [x] Remove TURN cache variables (`cachedIceServers`, `cacheExpiry`, `CACHE_TTL`)
-- [x] Remove entire `getIceServers()` async function (~48 lines)
-- [x] Update `createConnection()` - remove `await getIceServers()` call
-- [x] Update `_handleOffer()` - remove `await getIceServers()` call
-- [x] Update `_createPeerConnection()` - remove `iceServers` parameter, use `ICE_SERVERS` constant
-- [x] Remove `iceTransportPolicy: 'relay'` - critical for STUN to work!
-- [ ] Run tests and verify
-- [ ] Commit changes
+- [x] Task A.3: Simplify P2PService to STUN-only
+- [x] Task A.4: Clean up environment variables (remove `VITE_METERED_*`)
+- [x] Task A.1: Create PartyConnectionManager
+- [x] Task A.2: Create PartyConnectionManager tests
+- [x] Mutation testing: Improved score from 45% → 63%
 
 ### Key Changes to `src/services/p2p-service.js`
 
@@ -307,14 +303,108 @@ const ICE_SERVERS = [
 | `iceTransportPolicy: 'relay'` | 1 | Forced TURN-only (breaks without TURN) |
 | `await getIceServers()` calls | 2 | In `createConnection()` and `_handleOffer()` |
 
+### PartyConnectionManager (`src/services/party-connection-manager.js`)
+
+New orchestration class that coordinates:
+- `SignalingClient` - HTTP polling for WebRTC signaling
+- `P2PService` - WebRTC peer connections
+- `PartySession` - Quiz game state
+
+**Key features:**
+- Connection timeout pattern (30s) with 3 retries
+- Automatic HTTP fallback when P2P fails
+- Mode states: `CONNECTING`, `P2P`, `HTTP_FALLBACK`, `DISCONNECTED`
+- Event callbacks: `onModeChange`, `onPeerJoined`, `onPeerLeft`, `onError`
+
+**Connection flow:**
+1. Set mode to CONNECTING
+2. Create SignalingClient, P2PService, PartySession
+3. Start connection timeout
+4. If guest: get peers via signaling, initiate P2P connection to host
+5. On P2P success: clear timeout, set mode to P2P
+6. On timeout/failure: retry up to 3 times, then fall back to HTTP
+
+### Difficulties & Solutions
+
+**Problem:** TypeScript error `Type 'Timeout' is not assignable to type 'number'`
+**Cause:** `setTimeout` returns different types in browser (number) vs Node.js (Timeout object)
+**Fix:** Changed `setTimeout` to `window.setTimeout` to explicitly use browser API
+
+**Problem:** Vitest mock error with class constructors
+**Cause:** Class mocks need proper function syntax
+**Fix:** Changed `vi.fn().mockImplementation(() => {...})` to `vi.fn().mockImplementation(function () {...})`
+
+### Mutation Testing
+
+Ran Stryker mutation testing to verify test quality:
+
+| Metric | Initial | After Improvements |
+|--------|---------|-------------------|
+| Tests | 30 | 31 |
+| Mutation Score | 45.19% | 62.69% |
+| Mutants Killed | 56 | 84 |
+| No Coverage | 6 | 2 |
+
+**Key improvements:**
+- Added error handling test for `connect()` catch block
+- Added P2P event callback tests (onPeerConnected, onPeerDisconnected)
+- Used captured callbacks pattern to simulate P2P events in tests
+
+**Surviving mutants (acceptable):**
+- Log message strings (don't affect behavior)
+- Telemetry tracking strings (don't affect behavior)
+- Some edge cases in fallback activation
+
+### Commits (Phase A)
+
+```
+[A.3] feat(p2p): simplify to STUN-only configuration
+[A.4] chore: remove Metered.ca TURN env variables
+[A.1] feat(party): add PartyConnectionManager orchestration class
+[A.2] test(party): add PartyConnectionManager unit tests
+[bonus] test(party): add error handling and P2P event tests
+```
+
+### Phase A Complete! ✅
+
+**Files created/modified:**
+| File | Action |
+|------|--------|
+| `src/services/p2p-service.js` | Modified (STUN-only) |
+| `src/services/party-connection-manager.js` | Created |
+| `src/services/party-connection-manager.test.js` | Created |
+| `.env.example` | Modified (removed TURN vars) |
+
 ---
 
 ## Next Steps (When Resuming)
 
-1. **Complete Task A.3:** Verify tests pass, commit
-2. **Task A.4:** Clean up environment variables (remove `VITE_METERED_*`)
-3. **Task A.1:** Create PartyConnectionManager
-4. **Task A.2:** Create PartyConnectionManager tests
+1. **Start Phase B: View Integration**
+   - Wire PartyConnectionManager to HostView
+   - Wire PartyConnectionManager to JoinView
+   - Wire PartyConnectionManager to PartyQuizView
+   - Update views to handle P2P/HTTP fallback modes
+
+2. **Branch:** Continue on `feature/party-p2p-decentralization`
+
+3. **Verification:**
+   - Run tests: `npm test -- --run`
+   - Test party flow manually in browser
+   - Deploy to staging after completion
+
+---
+
+## Status Summary
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 0 | ✅ Complete | AdSense lazy-loading |
+| A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
+| B | 🔜 Next | View Integration |
+| C | ⏳ Pending | Server Minimization |
+| D | ⏳ Pending | STUN Testing |
+| E | ⏳ Pending | Testing & Validation |
+| F | ⏳ Pending | Production Rollout |
 
 ---
 
