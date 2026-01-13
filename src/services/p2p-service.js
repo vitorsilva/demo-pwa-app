@@ -22,67 +22,15 @@ const log = logger.child({ module: 'p2p-service' });
  */
 
 /**
- * Fallback STUN servers if TURN fetch fails.
+ * STUN servers for ICE candidate gathering.
+ * Google provides these free public STUN servers.
+ * No external service or API key needed.
  */
-const FALLBACK_ICE_SERVERS = [
+const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
 ];
-
-/**
- * Cache for TURN credentials (avoids repeated API calls).
- */
-let cachedIceServers = null;
-let cacheExpiry = 0;
-const CACHE_TTL = 3600000; // 1 hour in ms
-
-/**
- * Fetch TURN credentials from Metered.ca.
- * API key is safe for frontend use (credential-scoped).
- *
- * @returns {Promise<RTCIceServer[]>} ICE servers configuration
- */
-async function getIceServers() {
-  // Use cached credentials if still valid
-  if (cachedIceServers && Date.now() < cacheExpiry) {
-    log.debug('Using cached TURN credentials');
-    return cachedIceServers;
-  }
-
-  const apiKey = import.meta.env.VITE_METERED_API_KEY;
-  const appName = import.meta.env.VITE_METERED_APP_NAME;
-
-  if (!apiKey || !appName) {
-    log.warn('Metered.ca not configured, using STUN fallback');
-    return FALLBACK_ICE_SERVERS;
-  }
-
-  try {
-    const response = await fetch(
-      `https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const iceServers = await response.json();
-
-    // Cache the credentials
-    cachedIceServers = iceServers;
-    cacheExpiry = Date.now() + CACHE_TTL;
-
-    log.info('TURN credentials fetched from Metered.ca', {
-      serverCount: iceServers.length
-    });
-
-    return iceServers;
-  } catch (error) {
-    log.warn('Failed to fetch TURN credentials, using STUN fallback', {
-      error: error.message
-    });
-    return FALLBACK_ICE_SERVERS;
-  }
-}
 
 /**
  * P2P Service for managing WebRTC connections.
@@ -185,10 +133,7 @@ export class P2PService {
       role: 'initiator',
     });
 
-    // Fetch TURN credentials from Metered.ca
-    const iceServers = await getIceServers();
-
-    const peerConnection = this._createPeerConnection(peerId, iceServers);
+    const peerConnection = this._createPeerConnection(peerId);
 
     // Create data channel (initiator creates the channel)
     const dataChannel = peerConnection.connection.createDataChannel('party', {
@@ -220,9 +165,7 @@ export class P2PService {
     // Create connection if it doesn't exist
     let peerConnection = this.peers.get(peerId);
     if (!peerConnection) {
-      // Fetch TURN credentials from Metered.ca
-      const iceServers = await getIceServers();
-      peerConnection = this._createPeerConnection(peerId, iceServers);
+      peerConnection = this._createPeerConnection(peerId);
     }
 
     const { connection } = peerConnection;
@@ -293,13 +236,11 @@ export class P2PService {
    *
    * @private
    * @param {string} peerId - Peer ID
-   * @param {RTCIceServer[]} iceServers - ICE servers configuration
    * @returns {PeerConnection}
    */
-  _createPeerConnection(peerId, iceServers) {
+  _createPeerConnection(peerId) {
     const connection = new RTCPeerConnection({
-      iceServers: iceServers,
-      iceTransportPolicy: 'relay', // Force TURN relay only - fixes PWA permission issue
+      iceServers: ICE_SERVERS,
     });
 
     /** @type {PeerConnection} */
