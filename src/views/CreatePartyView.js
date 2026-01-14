@@ -23,6 +23,7 @@ import {
   startQuiz as startQuizApi,
   generateParticipantId,
 } from '../services/party-api.js';
+import { setConnection, clearConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'CreatePartyView' });
 
@@ -231,6 +232,9 @@ export default class CreatePartyView extends BaseView {
         true // isHost
       );
 
+      // Store in connection store so it persists across view navigation
+      setConnection(this.connectionManager);
+
       // Set up connection event handlers
       this.connectionManager.onModeChange((mode, previousMode) => {
         log.info('Connection mode changed', { from: previousMode, to: mode });
@@ -435,16 +439,24 @@ export default class CreatePartyView extends BaseView {
       }
     }
 
+    // Clean up P2P connection when explicitly cancelling
+    clearConnection();
+
+    // Clear session storage
+    sessionStorage.removeItem('partyParticipantId');
+    sessionStorage.removeItem('partyRoomCode');
+    sessionStorage.removeItem('partyIsHost');
+
     log.info('Party cancelled', { roomCode: this.roomCode });
     this.navigateTo('/');
   }
 
   destroy() {
     this._stopPolling();
-    if (this.connectionManager) {
-      this.connectionManager.destroy();
-      this.connectionManager = null;
-    }
+    // Note: Do NOT clear the connection here - it should persist
+    // across view navigation. Connection is only cleared when
+    // explicitly cancelling the party via cancelParty().
+    this.connectionManager = null;
     super.destroy();
   }
 }
