@@ -483,23 +483,68 @@ feat(party): add ConnectionModeIndicator component
 
 ---
 
+## Session: 2026-01-14 (Phase C: Server Minimization)
+
+### Goal
+
+Minimize data stored on the server for P2P mode. Quiz content, names, and answers flow via WebRTC instead of being stored server-side.
+
+### Completed
+
+- [x] Task C.1: Update Room Creation Endpoint (make hostName optional)
+- [x] Task C.2: Update RoomManager createRoom (add 'Anonymous' fallback)
+- [x] Task C.3: Update Join Endpoint (make name optional, 'Guest' fallback)
+- [x] Task C.4: Deprecate Answer Endpoint (add `_fallback` flag for telemetry)
+- [x] Task C.5: Verify cleanup.php script (already existed!)
+- [x] Task C.6: Create migration for schema changes (003_minimize_data.sql)
+- [x] Run migration on local Docker MySQL
+- [x] Run migration on VPS MySQL (via phpMyAdmin)
+
+### Key Changes
+
+**`php-api/party/endpoints/rooms.php`:**
+- `hostName` changed from `requireField()` to `$body['hostName'] ?? null`
+- `name` in join endpoint changed to optional
+- Answer endpoint marked deprecated with `_fallback` flag in response
+
+**`php-api/party/RoomManager.php`:**
+- `createRoom()` uses `$hostName ?? 'Anonymous'` for DB insert
+- `joinRoom()` uses `$name ?? 'Guest'` for participant name
+
+**`php-api/party/migrations/003_minimize_data.sql`:**
+- Makes `party_rooms.host_name` nullable
+- Makes `party_participants.name` nullable
+- Adds `expires_at` column for auto-cleanup
+
+### Learnings
+
+- **PowerShell doesn't support `<` redirection** - Use `Get-Content file.sql | docker exec -i ...` instead
+- **VPS DB user has limited permissions** - Run migrations via phpMyAdmin as admin, not app user
+- **cleanup.php already existed** - Always check existing code before creating new files
+- **Fallback pattern**: Use `?? 'default'` in PHP for null coalescing, keep HTTP fallback working
+
+### Commits (Phase C)
+
+```
+feat(party): minimize server data storage for P2P mode
+```
+
+---
+
 ## Next Steps (When Resuming)
 
-1. **Start Phase C: Server Minimization**
-   - Task C.1: Update Room Creation Endpoint
-   - Task C.2: Update RoomManager
-   - Task C.3: Update Join Endpoint
-   - Task C.4: Deprecate Answer Endpoint
-   - Task C.5: Add Database Cleanup
-   - Task C.6: Create Migration for Schema Changes
+1. **Start Phase D: STUN Testing**
+   - Verify P2P works with STUN-only configuration
+   - Add telemetry for ICE candidate types
+   - Test on multiple network configurations
 
 2. **Branch:** Continue on `feature/party-p2p-decentralization`
 
 3. **Verification:**
    - Test party flow manually in browser
-   - Deploy to staging after Phase C completion
+   - Deploy to staging after Phase D completion
 
-**Note:** E2E test failures (see table above) deferred to Phase E since implementation is still changing.
+**Note:** E2E test failures (see Phase B notes) deferred to Phase E since implementation is still changing.
 
 ---
 
@@ -510,7 +555,7 @@ feat(party): add ConnectionModeIndicator component
 | 0 | ✅ Complete | AdSense lazy-loading |
 | A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
 | B | ✅ Complete | View Integration (B.1-B.6 all done) |
-| C | ⏳ Pending | Server Minimization |
+| C | ✅ Complete | Server Minimization |
 | D | ⏳ Pending | STUN Testing |
 | E | ⏳ Pending | Testing & Validation |
 | F | ⏳ Pending | Production Rollout |
