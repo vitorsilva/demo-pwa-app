@@ -358,9 +358,9 @@ The original MVP uses HTTP polling for party sessions. A follow-up enhancement i
 **Current Progress:**
 - ✅ Phase 0: AdSense lazy-loading fix
 - ✅ Phase A: P2P Foundation (PartyConnectionManager, STUN-only)
-- 🔄 Phase B: View Integration (B.1-B.3 complete, B.4-B.6 pending)
+- ✅ Phase B: View Integration (B.1-B.6 all complete)
 - ⏳ Phase C-F: Pending
 
 ---
 
-**Last Updated:** 2026-01-13
+**Last Updated:** 2026-01-14

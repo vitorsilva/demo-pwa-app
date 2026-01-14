@@ -386,7 +386,7 @@ Ran Stryker mutation testing to verify test quality:
 - [x] Task B.3: Update PartyLobbyView
 - [x] Task B.4: Update PartyQuizView
 - [x] Task B.5: Update PartyResultsView
-- [ ] Task B.6: Create ConnectionModeIndicator component
+- [x] Task B.6: Create ConnectionModeIndicator component
 
 ### Key Changes
 
@@ -453,7 +453,23 @@ Ran Stryker mutation testing to verify test quality:
 - `Failed to execute 'addIceCandidate' on 'RTCPeerConnection': The remote description was null`
 - CORS errors for telemetry (not critical)
 
-### Commits (Phase B - In Progress)
+**Task B.6: ConnectionModeIndicator Component**
+- Created reusable component `src/components/ConnectionModeIndicator.js`
+- Extracted inline status bar from PartyLobbyView
+- Added `MODE_CONFIG` constant for single source of truth (colors, icons, i18n keys)
+- Added unit tests `src/components/ConnectionModeIndicator.test.js`
+- Added i18n translations for all 9 locales:
+  - `party.connectedP2P` - P2P direct connection
+  - `party.connectedServer` - HTTP fallback mode
+  - `party.connecting` - Connection in progress
+
+### Learnings (B.6)
+
+- **Single source of truth pattern**: Extracting `MODE_CONFIG` as a constant allows both the component and tests to reference the same values. If colors change, tests don't break.
+- **Testing behavior vs implementation**: Tests should verify behavior (correct CSS class applied) not exact HTML markup. This makes tests less brittle.
+- **i18n keys must exist**: Component displayed raw keys (`party.connecting`) when translations were missing. Always verify translations exist for new i18n keys.
+
+### Commits (Phase B - Complete)
 
 ```
 feat(party): wire PartyConnectionManager to CreatePartyView
@@ -462,25 +478,32 @@ fix(components): add proper return type to createRoomCodeInput
 feat(party): wire PartyConnectionManager to PartyLobbyView
 feat(party): wire PartyConnectionManager to PartyQuizView
 feat(party): wire PartyConnectionManager to PartyResultsView
+feat(party): add ConnectionModeIndicator component
 ```
 
 ---
 
 ## Next Steps (When Resuming)
 
-1. **Continue Phase B: View Integration**
-   - Task B.6: Create ConnectionModeIndicator component
-     - **Decision:** Extract inline status bar from PartyLobbyView into reusable component
-     - File: `src/components/ConnectionModeIndicator.js`
-     - Shows: Green dot + "P2P" or Yellow dot + "Server" based on mode
-   - Fix E2E test failures (see table above)
+1. **Fix E2E test failures** (see table in E2E Test Failures section above)
+   - `capture-party-demo.spec.js` - Participants not visible
+   - `mode-toggle.spec.js` - Mode toggle visibility issue
+   - `usage-cost.spec.js` - Flaky test
 
-2. **Branch:** Continue on `feature/party-p2p-decentralization`
+2. **Start Phase C: Server Minimization**
+   - Task C.1: Update Room Creation Endpoint
+   - Task C.2: Update RoomManager
+   - Task C.3: Update Join Endpoint
+   - Task C.4: Deprecate Answer Endpoint
+   - Task C.5: Add Database Cleanup
+   - Task C.6: Create Migration for Schema Changes
 
-3. **Verification:**
+3. **Branch:** Continue on `feature/party-p2p-decentralization`
+
+4. **Verification:**
    - Run E2E tests: `npm run test:e2e`
    - Test party flow manually in browser
-   - Deploy to staging after completion
+   - Deploy to staging after Phase C completion
 
 ---
 
@@ -490,7 +513,7 @@ feat(party): wire PartyConnectionManager to PartyResultsView
 |-------|--------|-------------|
 | 0 | ✅ Complete | AdSense lazy-loading |
 | A | ✅ Complete | P2P Foundation (PartyConnectionManager, STUN-only) |
-| B | 🔄 In Progress | View Integration (B.1-B.5 done; B.6 pending) |
+| B | ✅ Complete | View Integration (B.1-B.6 all done) |
 | C | ⏳ Pending | Server Minimization |
 | D | ⏳ Pending | STUN Testing |
 | E | ⏳ Pending | Testing & Validation |
