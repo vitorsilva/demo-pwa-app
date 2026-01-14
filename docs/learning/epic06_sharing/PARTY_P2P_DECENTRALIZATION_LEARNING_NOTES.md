@@ -585,10 +585,10 @@ Verify P2P works with STUN-only configuration and fix bugs discovered during tes
 - ConnectionModeIndicator shows "Ligação P2P" (green)
 - Timeout is cleared, mode changes to 'p2p'
 
-**Quiz Flow: ⚠️ Falls back to HTTP**
-- P2P connection is destroyed when navigating from lobby to quiz view
-- HTTP fallback kicks in and quiz completes successfully
-- This is a view lifecycle issue, not a P2P issue
+**Quiz Flow: ✅ FIXED (see Session 2026-01-14 #2)**
+- P2P connection now persists across view navigation
+- Quiz uses HTTP polling for synchronization (current design)
+- Future work: Use P2P data channel for quiz sync
 
 ### Commits (Phase D)
 
@@ -602,18 +602,65 @@ fix(p2p): support multiple callbacks for P2P events
 
 ### Known Issues (For Phase E)
 
-1. **P2P disconnects on view navigation** - Connection manager destroyed when moving from lobby to quiz view. Needs investigation into view lifecycle and connection store usage.
+1. ~~**P2P disconnects on view navigation**~~ - **FIXED** in Session 2026-01-14 #2
 
 2. **E2E tests may need updates** - Party flow tests may need adjustment for P2P behavior.
 
 ---
 
+## Session: 2026-01-14 #2 (P2P Persistence Fix)
+
+### Goal
+
+Fix P2P connection being destroyed when navigating from lobby to quiz view.
+
+### Root Cause
+
+Both `PartyLobbyView.destroy()` and `CreatePartyView.destroy()` were calling connection cleanup methods when the view unmounted, including when navigating to the next view in the party flow.
+
+### Completed
+
+- [x] Identified connection destruction in `PartyLobbyView.destroy()` calling `clearConnection()`
+- [x] Fixed `PartyLobbyView`: moved `clearConnection()` to `leaveParty()` only
+- [x] Identified same issue in `CreatePartyView.destroy()` calling `connectionManager.destroy()`
+- [x] Fixed `CreatePartyView`: store connection in store, only clear in `cancelParty()`
+- [x] Tested P2P persistence from lobby through entire quiz flow
+
+### Key Changes
+
+**PartyLobbyView.js:**
+- Moved `clearConnection()` from `destroy()` to `leaveParty()`
+- Connection now only cleared when user explicitly leaves party
+
+**CreatePartyView.js:**
+- Added `setConnection(this.connectionManager)` after creating connection
+- Added `clearConnection()` to `cancelParty()` method
+- Removed `this.connectionManager.destroy()` from `destroy()`
+
+### Test Results
+
+**P2P Connection Persistence: ✅ WORKING**
+- Host creates party, connection stored in store
+- Guest joins, P2P connection established
+- Both show "Ligação P2P" indicator
+- Host starts quiz - connection persists!
+- Quiz completes successfully
+- Results show correctly
+
+### Commits
+
+```
+fix(party): persist P2P connection across view navigation
+fix(party): persist P2P connection for host view navigation
+```
+
+---
+
 ## Next Steps (When Resuming)
 
-1. **Fix P2P persistence across views** - Investigate why connection is destroyed on navigation
-2. **Task D.5: Document TURN Fallback Plan** - Decision criteria for adding TURN
-3. **Phase E: Testing & Validation** - E2E tests, Maestro tests
-4. **Phase F: Production Rollout** - Deploy with feature flag
+1. **Task D.5: Document TURN Fallback Plan** - Decision criteria for adding TURN
+2. **Phase E: Testing & Validation** - E2E tests, Maestro tests
+3. **Phase F: Production Rollout** - Deploy with feature flag
 
 **Branch:** `feature/party-p2p-decentralization`
 
