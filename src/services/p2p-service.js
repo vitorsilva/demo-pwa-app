@@ -51,14 +51,14 @@ export class P2PService {
     /** @type {Map<string, PeerConnection>} */
     this.peers = new Map();
 
-    /** @type {Function|null} */
-    this.onMessageCallback = null;
+    /** @type {Function[]} */
+    this.onMessageCallbacks = [];
 
-    /** @type {Function|null} */
-    this.onPeerConnectedCallback = null;
+    /** @type {Function[]} */
+    this.onPeerConnectedCallbacks = [];
 
-    /** @type {Function|null} */
-    this.onPeerDisconnectedCallback = null;
+    /** @type {Function[]} */
+    this.onPeerDisconnectedCallbacks = [];
 
     /** @type {number} */
     this.maxReconnectAttempts = 3;
@@ -410,8 +410,8 @@ export class P2PService {
         const message = JSON.parse(event.data);
         log.debug('Received message', { peerId, type: message.type });
 
-        if (this.onMessageCallback) {
-          this.onMessageCallback(peerId, message);
+        for (const callback of this.onMessageCallbacks) {
+          callback(peerId, message);
         }
       } catch (error) {
         log.error('Error parsing message', { error: error.message });
@@ -438,8 +438,8 @@ export class P2PService {
       peerConnection.peerConnectedNotified = true;
       log.info('Peer fully connected (connection + data channel ready)', { peerId });
 
-      if (this.onPeerConnectedCallback) {
-        this.onPeerConnectedCallback(peerId);
+      for (const callback of this.onPeerConnectedCallbacks) {
+        callback(peerId);
       }
     } else {
       log.debug('Peer not fully ready yet', {
@@ -458,8 +458,8 @@ export class P2PService {
    * @param {string} peerId - Peer ID
    */
   _handleDisconnection(peerId) {
-    if (this.onPeerDisconnectedCallback) {
-      this.onPeerDisconnectedCallback(peerId, 'disconnected');
+    for (const callback of this.onPeerDisconnectedCallbacks) {
+      callback(peerId, 'disconnected');
     }
   }
 
@@ -497,8 +497,8 @@ export class P2PService {
       log.error('Max reconnection attempts reached', { peerId });
       this._cleanupPeerConnection(peerId);
 
-      if (this.onPeerDisconnectedCallback) {
-        this.onPeerDisconnectedCallback(peerId, 'failed');
+      for (const callback of this.onPeerDisconnectedCallbacks) {
+        callback(peerId, 'failed');
       }
     }
   }
@@ -576,7 +576,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId, message)
    */
   onMessage(callback) {
-    this.onMessageCallback = callback;
+    this.onMessageCallbacks.push(callback);
   }
 
   /**
@@ -585,7 +585,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId)
    */
   onPeerConnected(callback) {
-    this.onPeerConnectedCallback = callback;
+    this.onPeerConnectedCallbacks.push(callback);
   }
 
   /**
@@ -594,7 +594,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId, reason)
    */
   onPeerDisconnected(callback) {
-    this.onPeerDisconnectedCallback = callback;
+    this.onPeerDisconnectedCallbacks.push(callback);
   }
 
   /**
@@ -657,9 +657,9 @@ export class P2PService {
     this.isDestroyed = true;
     this.disconnectAll();
     this.signalingClient.stopPolling();
-    this.onMessageCallback = null;
-    this.onPeerConnectedCallback = null;
-    this.onPeerDisconnectedCallback = null;
+    this.onMessageCallbacks = [];
+    this.onPeerConnectedCallbacks = [];
+    this.onPeerDisconnectedCallbacks = [];
 
     log.info('P2PService destroyed');
   }
