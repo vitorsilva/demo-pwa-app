@@ -20,6 +20,8 @@ const log = logger.child({ module: 'p2p-service' });
  * @property {number} reconnectAttempts - Number of reconnection attempts
  * @property {number} connectionStartTime - Timestamp when connection was initiated
  * @property {RTCIceCandidate[]} pendingIceCandidates - Queued ICE candidates waiting for remote description
+ * @property {boolean} dataChannelReady - Whether the data channel is open and ready
+ * @property {boolean} peerConnectedNotified - Whether onPeerConnected callback has been fired
  */
 
 /**
@@ -306,6 +308,8 @@ export class P2PService {
       reconnectAttempts: 0,
       connectionStartTime: Date.now(),
       pendingIceCandidates: [],
+      dataChannelReady: false,
+      peerConnectedNotified: false,
     };
 
     this.peers.set(peerId, peerConnection);
@@ -341,9 +345,8 @@ export class P2PService {
             iceState: connection.iceConnectionState,
           });
 
-          if (this.onPeerConnectedCallback) {
-            this.onPeerConnectedCallback(peerId);
-          }
+          // Only notify when both connection AND data channel are ready
+          this._notifyPeerConnectedIfReady(peerId);
           break;
 
         case 'disconnected':
@@ -386,6 +389,12 @@ export class P2PService {
   _setupDataChannel(peerId, channel) {
     channel.onopen = () => {
       log.info('Data channel opened', { peerId });
+      const peerConnection = this.peers.get(peerId);
+      if (peerConnection) {
+        peerConnection.dataChannelReady = true;
+        // Only notify when both connection AND data channel are ready
+        this._notifyPeerConnectedIfReady(peerId);
+      }
     };
 
     channel.onclose = () => {
@@ -408,6 +417,38 @@ export class P2PService {
         log.error('Error parsing message', { error: error.message });
       }
     };
+  }
+
+  /**
+   * Notify peer connected only when both connection and data channel are ready.
+   *
+   * @private
+   * @param {string} peerId - Peer ID
+   */
+  _notifyPeerConnectedIfReady(peerId) {
+    const peerConnection = this.peers.get(peerId);
+    if (!peerConnection) return;
+
+    // Check if both conditions are met and we haven't notified yet
+    const isConnectionReady = peerConnection.state === 'connected';
+    const isDataChannelReady = peerConnection.dataChannelReady;
+    const alreadyNotified = peerConnection.peerConnectedNotified;
+
+    if (isConnectionReady && isDataChannelReady && !alreadyNotified) {
+      peerConnection.peerConnectedNotified = true;
+      log.info('Peer fully connected (connection + data channel ready)', { peerId });
+
+      if (this.onPeerConnectedCallback) {
+        this.onPeerConnectedCallback(peerId);
+      }
+    } else {
+      log.debug('Peer not fully ready yet', {
+        peerId,
+        isConnectionReady,
+        isDataChannelReady,
+        alreadyNotified,
+      });
+    }
   }
 
   /**
