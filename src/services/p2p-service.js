@@ -257,7 +257,14 @@ export class P2PService {
     // Handle ICE candidates
     connection.onicecandidate = (event) => {
       if (event.candidate) {
-        this.signalingClient.sendIceCandidate(peerId, event.candidate);
+        // Track ICE candidate type for STUN vs TURN evaluation
+        telemetry.track('p2p_ice_candidate', {
+          peerId,
+          type: event.candidate.type,
+          protocol: event.candidate.protocol,
+        });
+
+        this.signalingClient.sendIceCandidate(peerId, event.candidate);   
       }
     };
 
@@ -274,7 +281,8 @@ export class P2PService {
           // Track telemetry
           telemetry.track('p2p_connection_success', {
             peerId,
-            connectionTime: Date.now() - peerConnection.connectionStartTime,
+            connectionTime: Date.now() - peerConnection.connectionStartTime,    
+            iceState: connection.iceConnectionState,
           });
 
           if (this.onPeerConnectedCallback) {
@@ -294,6 +302,7 @@ export class P2PService {
           telemetry.track('p2p_connection_failed', {
             peerId,
             error: 'connection_failed',
+            iceState: connection.iceConnectionState,
           });
 
           this._handleConnectionFailure(peerId);
