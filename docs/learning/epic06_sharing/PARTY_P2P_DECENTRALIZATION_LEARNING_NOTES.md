@@ -658,7 +658,32 @@ fix(party): persist P2P connection for host view navigation
 
 ## Next Steps (When Resuming)
 
-1. **Task D.5: Document TURN Fallback Plan** - Decision criteria for adding TURN
+### Pending P2P Test Scenarios (Phase D.4)
+
+| # | Scenario | Host | Guest | Network | Status |
+|---|----------|------|-------|---------|--------|
+| 1 | Same WiFi desktop | Desktop Chrome | Desktop Chrome | Same WiFi | ✅ Passed |
+| 2 | Same WiFi mobile | Desktop Chrome | Mobile Chrome | Same WiFi | ⏳ Pending |
+| 3 | **Different networks (STUN test)** | Desktop Chrome | Mobile Chrome | Different networks | ⏳ Pending |
+| 4 | PWA same WiFi | Android PWA | Android PWA | Same WiFi | ⏳ Pending |
+| 5 | Mobile data | Phone (4G) | Desktop (WiFi) | Different networks | ⏳ Pending |
+
+**Scenario 3 is critical** - validates STUN-only works across NATs.
+
+**Test procedure:**
+1. Open https://saberloop.com/app/ on both devices
+2. Host creates party
+3. Guest joins with room code
+4. Check for "Ligação P2P" indicator
+5. Complete quiz flow
+
+**Decision criteria for adding TURN:**
+- >10% connection failure rate in telemetry
+- Users on mobile data can't connect
+
+### After Testing
+
+1. **Task D.5: Document TURN Fallback Plan** - Based on test results
 2. **Phase E: Testing & Validation** - E2E tests, Maestro tests
 3. **Phase F: Production Rollout** - Deploy with feature flag
 
