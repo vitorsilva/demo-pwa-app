@@ -485,12 +485,7 @@ feat(party): add ConnectionModeIndicator component
 
 ## Next Steps (When Resuming)
 
-1. **Fix E2E test failures** (see table in E2E Test Failures section above)
-   - `capture-party-demo.spec.js` - Participants not visible
-   - `mode-toggle.spec.js` - Mode toggle visibility issue
-   - `usage-cost.spec.js` - Flaky test
-
-2. **Start Phase C: Server Minimization**
+1. **Start Phase C: Server Minimization**
    - Task C.1: Update Room Creation Endpoint
    - Task C.2: Update RoomManager
    - Task C.3: Update Join Endpoint
@@ -498,12 +493,13 @@ feat(party): add ConnectionModeIndicator component
    - Task C.5: Add Database Cleanup
    - Task C.6: Create Migration for Schema Changes
 
-3. **Branch:** Continue on `feature/party-p2p-decentralization`
+2. **Branch:** Continue on `feature/party-p2p-decentralization`
 
-4. **Verification:**
-   - Run E2E tests: `npm run test:e2e`
+3. **Verification:**
    - Test party flow manually in browser
    - Deploy to staging after Phase C completion
+
+**Note:** E2E test failures (see table above) deferred to Phase E since implementation is still changing.
 
 ---
 
