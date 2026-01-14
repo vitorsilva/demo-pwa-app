@@ -24,6 +24,7 @@ class MockRTCPeerConnection {
     this.remoteDescription = null;
     this.connectionState = 'new';
     this.iceConnectionState = 'new';
+    this.signalingState = 'stable';
     this.onicecandidate = null;
     this.onconnectionstatechange = null;
     this.ondatachannel = null;
@@ -46,10 +47,22 @@ class MockRTCPeerConnection {
 
   async setLocalDescription(desc) {
     this.localDescription = desc;
+    // Update signaling state based on description type
+    if (desc && desc.type === 'offer') {
+      this.signalingState = 'have-local-offer';
+    } else if (desc && desc.type === 'answer') {
+      this.signalingState = 'stable';
+    }
   }
 
   async setRemoteDescription(desc) {
     this.remoteDescription = desc;
+    // Update signaling state based on description type
+    if (desc && desc.type === 'offer') {
+      this.signalingState = 'have-remote-offer';
+    } else if (desc && desc.type === 'answer') {
+      this.signalingState = 'stable';
+    }
   }
 
   async addIceCandidate(candidate) {

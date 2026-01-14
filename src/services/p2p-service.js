@@ -171,6 +171,13 @@ export class P2PService {
 
     const { connection } = peerConnection;
 
+    // Only accept offer if we're in a state that can receive it
+    const signalingState = connection.signalingState;
+    if (signalingState !== 'stable' && signalingState !== 'have-local-offer') {
+      log.warn('Ignoring offer - wrong signaling state', { peerId, signalingState });
+      return;
+    }
+
     // Set remote description (the offer)
     await connection.setRemoteDescription(new RTCSessionDescription({     
       type: 'offer',
@@ -202,6 +209,13 @@ export class P2PService {
     const peerConnection = this.peers.get(peerId);
     if (!peerConnection) {
       log.warn('No connection for answer', { peerId });
+      return;
+    }
+
+    // Only accept answer if we're waiting for one (have-local-offer state)
+    const signalingState = peerConnection.connection.signalingState;
+    if (signalingState !== 'have-local-offer') {
+      log.warn('Ignoring answer - wrong signaling state', { peerId, signalingState });
       return;
     }
 
