@@ -29,8 +29,8 @@ try {
     if ($method === 'POST' && count($segments) === 0) {
         $body = ApiHelper::getJsonBody();
         $hostId = ApiHelper::requireField($body, 'hostId');
-        $hostName = ApiHelper::requireField($body, 'hostName');
-        $quizData = $body['quizData'] ?? null;
+        $hostName = $body['hostName'] ?? null;  // Optional for P2P mode
+        $quizData = $body['quizData'] ?? null;  // Optional for P2P mode
         $secondsPerQuestion = $body['secondsPerQuestion'] ?? null;
 
         $room = $roomManager->createRoom($hostId, $hostName, $quizData, $secondsPerQuestion);
@@ -54,7 +54,7 @@ try {
         $code = $segments[0];
         $body = ApiHelper::getJsonBody();
         $participantId = ApiHelper::requireField($body, 'participantId');
-        $name = ApiHelper::requireField($body, 'name');
+        $name = $body['name'] ?? null;  // Optional for P2P mode
 
         $room = $roomManager->joinRoom($code, $participantId, $name);
         ApiHelper::success($room);
