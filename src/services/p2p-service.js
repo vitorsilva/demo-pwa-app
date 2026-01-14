@@ -14,11 +14,12 @@ const log = logger.child({ module: 'p2p-service' });
 
 /**
  * @typedef {Object} PeerConnection
- * @property {RTCPeerConnection} connection - The WebRTC connection
- * @property {RTCDataChannel|null} dataChannel - The data channel
+ * @property {RTCPeerConnection} connection - The WebRTC connection   
+ * @property {RTCDataChannel|null} dataChannel - The data channel     
  * @property {'new'|'connecting'|'connected'|'disconnected'|'failed'} state - Connection state
  * @property {number} reconnectAttempts - Number of reconnection attempts
  * @property {number} connectionStartTime - Timestamp when connection was initiated
+ * @property {RTCIceCandidate[]} pendingIceCandidates - Queued ICE candidates waiting for remote description
  */
 
 /**
@@ -171,10 +172,13 @@ export class P2PService {
     const { connection } = peerConnection;
 
     // Set remote description (the offer)
-    await connection.setRemoteDescription(new RTCSessionDescription({
+    await connection.setRemoteDescription(new RTCSessionDescription({     
       type: 'offer',
       sdp: payload.sdp,
     }));
+
+    // Process any ICE candidates that arrived before the offer
+    await this._processPendingIceCandidates(peerId);
 
     // Create and send answer
     const answer = await connection.createAnswer();
@@ -205,6 +209,9 @@ export class P2PService {
       type: 'answer',
       sdp: payload.sdp,
     }));
+
+    // Process any ICE candidates that arrived before the answer
+    await this._processPendingIceCandidates(peerId);
   }
 
   /**
@@ -227,8 +234,42 @@ export class P2PService {
       sdpMLineIndex: payload.sdpMLineIndex,
     });
 
+    // Queue candidate if remote description not yet set
+    if (!peerConnection.connection.remoteDescription) {
+      log.debug('Queuing ICE candidate (no remote description yet)', { peerId });
+      peerConnection.pendingIceCandidates.push(candidate);
+      return;
+    }
+
     await peerConnection.connection.addIceCandidate(candidate);
     log.debug('Added ICE candidate', { peerId });
+  }
+
+  /**
+   * Process any queued ICE candidates after remote description is set. 
+   *
+   * @private
+   * @param {string} peerId - Peer ID
+   */
+  async _processPendingIceCandidates(peerId) {
+    const peerConnection = this.peers.get(peerId);
+    if (!peerConnection) return;
+
+    const pending = peerConnection.pendingIceCandidates;
+    if (pending.length === 0) return;
+
+    log.debug('Processing queued ICE candidates', { peerId, count: pending.length });
+
+    for (const candidate of pending) {
+      try {
+        await peerConnection.connection.addIceCandidate(candidate);     
+      } catch (error) {
+        log.warn('Failed to add queued ICE candidate', { peerId, error: error.message });
+      }
+    }
+
+    // Clear the queue
+    peerConnection.pendingIceCandidates = [];
   }
 
   /**
@@ -250,6 +291,7 @@ export class P2PService {
       state: 'new',
       reconnectAttempts: 0,
       connectionStartTime: Date.now(),
+      pendingIceCandidates: [],
     };
 
     this.peers.set(peerId, peerConnection);
