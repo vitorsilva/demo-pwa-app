@@ -15,6 +15,7 @@ import {
   CONNECTION_MODES,
 } from '../services/party-connection-manager.js';
 import { getConnection, clearConnection } from '../services/party-connection-store.js';
+import { createConnectionModeIndicator, updateConnectionModeIndicator } from '../components/ConnectionModeIndicator.js';
 
 const log = logger.child({ module: 'PartyLobbyView' });
 
@@ -127,14 +128,20 @@ export default class PartyLobbyView extends BaseView {
           </button>
         </div>
 
-        <!-- Connection Status Bar -->
-        <div id="connectionStatusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-blue-500 text-white text-center text-sm">
-          <span class="material-symbols-outlined text-sm align-middle mr-1">wifi</span>
-          ${t('party.connected')}
-        </div>
+        <!-- Connection Status Bar (rendered by component) -->
+        <div id="connectionStatusContainer"></div>
+
       </div>
     `);
 
+    // Create connection mode indicator
+    const initialMode = this.connectionManager?.getMode() || CONNECTION_MODES.CONNECTING;
+    const indicator = createConnectionModeIndicator(initialMode);
+    const container = this.querySelector('#connectionStatusContainer');
+    if (container) {
+      container.appendChild(indicator);
+    }
+        
     // Render participant list
     this.updateParticipantList();
 
@@ -211,29 +218,12 @@ export default class PartyLobbyView extends BaseView {
    * @param {string} mode - Connection mode from CONNECTION_MODES
    */
   _updateConnectionStatus(mode) {
-    const statusBar = this.querySelector('#connectionStatusBar');
-    if (!statusBar) return;
+    const indicator = this.querySelector('#connectionModeIndicator');
+    updateConnectionModeIndicator(indicator, mode);
 
-    if (mode === CONNECTION_MODES.P2P) {
-      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-green-500 text-white text-center text-sm';
-      statusBar.innerHTML = `
-        <span class="material-symbols-outlined text-sm align-middle mr-1">wifi</span>
-        ${t('party.connectedP2P')}
-      `;
-    } else if (mode === CONNECTION_MODES.HTTP_FALLBACK) {
-      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-yellow-500 text-white text-center text-sm';
-      statusBar.innerHTML = `
-        <span class="material-symbols-outlined text-sm align-middle mr-1">cloud</span>
-        ${t('party.connectedServer')}
-      `;
-      // Start HTTP polling in fallback mode
+    // Start HTTP polling when in fallback mode
+    if (mode === CONNECTION_MODES.HTTP_FALLBACK) {
       this._startPolling();
-    } else if (mode === CONNECTION_MODES.CONNECTING) {
-      statusBar.className = 'fixed bottom-0 left-0 right-0 py-3 bg-blue-500 text-white text-center text-sm';
-      statusBar.innerHTML = `
-        <span class="material-symbols-outlined text-sm align-middle mr-1 animate-spin">sync</span>   
-        ${t('party.connecting')}
-      `;
     }
   }
 
