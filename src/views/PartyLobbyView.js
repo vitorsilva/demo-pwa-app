@@ -300,6 +300,9 @@ export default class PartyLobbyView extends BaseView {
       }
     }
 
+    // Clean up P2P connection when explicitly leaving
+    clearConnection();
+
     // Clear session storage
     sessionStorage.removeItem('partyParticipantId');
     sessionStorage.removeItem('partyRoomCode');
@@ -337,10 +340,10 @@ export default class PartyLobbyView extends BaseView {
 
   destroy() {
     this._stopPolling();
-    if (this.connectionManager) {
-      clearConnection();
-      this.connectionManager = null;
-    }
+    // Note: Do NOT clear the connection here - it should persist
+    // across view navigation. Connection is only cleared when
+    // explicitly leaving the party via leaveParty().
+    this.connectionManager = null;
     super.destroy();
   }
 }
