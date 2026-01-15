@@ -3,7 +3,7 @@
 **Status:** ✅ Complete
 **Created:** 2026-01-15
 **Completed:** 2026-01-15
-**PR:** [#TBD](https://github.com/vitorsilva/saberloop/pull/TBD)
+**PR:** [#116](https://github.com/vitorsilva/saberloop/pull/116)
 **Priority:** Medium (Developer Experience)
 
 ---
