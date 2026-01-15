@@ -352,6 +352,9 @@
     "enterName": "Введи своё имя",
     "pointsLabel": "очков",
     "saveFeatureComingSoon": "Квиз сохранён! (Функция скоро будет)",
-    "loading": "Загрузка следующего вопроса..."
+    "loading": "Загрузка следующего вопроса...",
+    "nextQuestion": "Следующий Вопрос",
+    "allAnswered": "✓ {{answered}}/{{total}} ответили",
+    "waitingFor": "⏳ Ожидание {{count}}..."
   }
 }

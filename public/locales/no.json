@@ -352,6 +352,9 @@
     "enterName": "Skriv inn navnet ditt",
     "pointsLabel": "poeng",
     "saveFeatureComingSoon": "Quiz lagret! (Funksjon kommer snart)",
-    "loading": "Laster neste spørsmål..."
+    "loading": "Laster neste spørsmål...",
+    "nextQuestion": "Neste Spørsmål",
+    "allAnswered": "✓ {{answered}}/{{total}} har svart",
+    "waitingFor": "⏳ Venter på {{count}}..."
   }
 }

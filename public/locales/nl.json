@@ -352,6 +352,9 @@
     "enterName": "Voer je naam in",
     "pointsLabel": "punten",
     "saveFeatureComingSoon": "Quiz opgeslagen! (Functie komt binnenkort)",
-    "loading": "Volgende vraag laden..."
+    "loading": "Volgende vraag laden...",
+    "nextQuestion": "Volgende Vraag",
+    "allAnswered": "✓ {{answered}}/{{total}} hebben geantwoord",
+    "waitingFor": "⏳ Wachten op {{count}}..."
   }
 }

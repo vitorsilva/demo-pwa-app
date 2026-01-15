@@ -352,6 +352,9 @@
     "enterName": "Entre ton nom",
     "pointsLabel": "points",
     "saveFeatureComingSoon": "Quiz sauvegardé ! (Fonctionnalité à venir)",
-    "loading": "Chargement de la question suivante..."
+    "loading": "Chargement de la question suivante...",
+    "nextQuestion": "Question Suivante",
+    "allAnswered": "✓ {{answered}}/{{total}} ont répondu",
+    "waitingFor": "⏳ En attente de {{count}}..."
   }
 }
