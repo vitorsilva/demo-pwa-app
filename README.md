@@ -10,10 +10,11 @@
 ## Features
 
 - **AI-Generated Questions** - Powered by Claude API via OpenRouter
+- **Party Mode** - Play quizzes together in real-time with friends
 - **Progressive Web App** - Install on any device, works offline
 - **Local Progress Tracking** - Your data stays on your device
 - **Adaptive Difficulty** - Questions tailored to your grade level
-- **Multi-language Support** - Questions generated in the same language as your topic
+- **Multi-language Support** - 9 languages supported (EN, PT, ES, FR, DE, IT, NL, NO, RU)
 - **Privacy-First** - No tracking, no data collection
 
 ## Quick Start
@@ -44,7 +45,7 @@ cp .env.example .env
 # Start development server
 npm run dev
 
-# Open http://localhost:3000
+# Open http://localhost:8888
 ```
 
 ### Production Build
@@ -75,10 +76,7 @@ npm run preview
 
 ### Learning Journey
 
-This project was built as a learning experience. See detailed notes on:
-- [Epic 01: PWA Infrastructure](./docs/learning/epic01_infrastructure/)
-- [Epic 02: QuizMaster V1](./docs/learning/epic02_quizmaster_v1/)
-- [Epic 03: QuizMaster V2 (Production)](./docs/learning/epic03_quizmaster_v2/)
+This project was built as a learning experience across 10 epics covering PWA fundamentals, AI integration, internationalization, real-time multiplayer, and more. See the [Learning Documentation](./docs/learning/) for detailed notes on each epic.
 
 ## Testing
 

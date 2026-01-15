@@ -148,7 +148,7 @@ src/
 ├── styles/       # CSS files
 └── main.js       # Entry point
 
-php-api/          # PHP backend (optional)
+php-api/          # PHP backend (Party Mode signaling, telemetry)
 
 scripts/          # Build and deploy scripts
 
