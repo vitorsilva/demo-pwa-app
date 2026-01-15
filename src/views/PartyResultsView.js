@@ -152,13 +152,16 @@ export default class PartyResultsView extends BaseView {
               </button>
             ` : ''}
 
-            <button
-              id="saveBtn"
-              class="w-full py-3 rounded-xl border-2 border-primary text-primary font-medium
-                     hover:bg-primary/10 transition-colors"
-            >
-              ${t('party.saveLocally')}
-            </button>
+            ${!this.isHost ? `
+              <button
+                id="saveBtn"
+                data-testid="save-locally-btn"
+                class="w-full py-3 rounded-xl border-2 border-primary text-primary font-medium
+                       hover:bg-primary/10 transition-colors"
+              >
+                ${t('party.saveLocally')}
+              </button>
+            ` : ''}
 
             <button
               id="homeBtn"
