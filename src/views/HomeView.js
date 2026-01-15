@@ -4,7 +4,6 @@ import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
 import { isConnected, startAuth } from '../services/auth-service.js';
 import state from '../core/state.js';
 import { showConnectModal } from '../components/ConnectModal.js';
-import { isFeatureEnabled } from '../core/features.js';
 import { t } from '../core/i18n.js';
 import { formatRelativeDate } from '../utils/formatters.js';
 import { createModeToggle } from '../components/ModeToggle.js';
@@ -116,12 +115,10 @@ export default class HomeView extends BaseView {
       </div>
     `);
 
-    // Mount mode toggle (behind feature flag)
-    if (isFeatureEnabled('MODE_TOGGLE')) {
-      const toggleContainer = this.querySelector('#modeToggleContainer');
-      if (toggleContainer) {
-        toggleContainer.appendChild(createModeToggle());
-      }
+    // Mount mode toggle
+    const toggleContainer = this.querySelector('#modeToggleContainer');
+    if (toggleContainer) {
+      toggleContainer.appendChild(createModeToggle());
     }
 
     // Show party buttons when in party mode
@@ -220,11 +217,8 @@ export default class HomeView extends BaseView {
     const partyContainer = this.querySelector('#partyButtonsContainer');
     if (!partyContainer) return;
 
-    // Show party buttons when PARTY_SESSION is enabled and mode is 'party'
-    const showPartyButtons =
-      isFeatureEnabled('PARTY_SESSION') &&
-      isFeatureEnabled('MODE_TOGGLE') &&
-      getCurrentMode() === 'party';
+    // Show party buttons when mode is 'party'
+    const showPartyButtons = getCurrentMode() === 'party';
 
     if (showPartyButtons) {
       partyContainer.classList.remove('hidden');

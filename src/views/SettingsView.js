@@ -2,7 +2,6 @@
   import { getSettings, saveSetting } from '../core/settings.js';
   import { APP_VERSION, BUILD_DATE } from '../version.js';
   import { isConnected, disconnect, getApiKey, getCreditsBalance } from '../services/auth-service.js';
-  import { isFeatureEnabled } from '../core/features.js';
   import { t, changeLanguage, getCurrentLanguage, SUPPORTED_LANGUAGES } from '../core/i18n.js';
   import { getSelectedModel, getModelDisplayName, getAvailableModels, saveSelectedModel } from '../services/model-service.js';
   import { getStorageBreakdown } from '../utils/storage.js';
@@ -250,12 +249,10 @@
         </div>
       `);
 
-      // Mount mode toggle (behind feature flag)
-      if (isFeatureEnabled('MODE_TOGGLE')) {
-        const toggleContainer = this.querySelector('#modeToggleContainer');
-        if (toggleContainer) {
-          toggleContainer.appendChild(createModeToggle());
-        }
+      // Mount mode toggle
+      const toggleContainer = this.querySelector('#modeToggleContainer');
+      if (toggleContainer) {
+        toggleContainer.appendChild(createModeToggle());
       }
 
       // Load saved settings into form fields
