@@ -496,8 +496,10 @@ npm run test:coverage # With coverage report
 
 **E2E Tests** (Playwright):
 ```bash
-npm run test:e2e      # Run E2E tests headless
-npm run test:e2e:ui   # Run with Playwright UI
+npm run test:e2e          # Run functional tests only (fast)
+npm run test:e2e:capture  # Run capture scripts only (screenshots/videos)
+npm run test:e2e:all      # Run all E2E tests
+npm run test:e2e:ui       # Run with Playwright UI
 ```
 
 **Build Verification**:
