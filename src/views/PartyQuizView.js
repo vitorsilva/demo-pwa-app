@@ -778,6 +778,18 @@ export default class PartyQuizView extends BaseView {
       this._renderScoreboard();
     }
 
+    // Reset host controls for new question (Issue #108 fix)
+    this.allAnswered = false;
+    const answerStatusContainer = this.querySelector('#answerStatusContainer');
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (answerStatusContainer) {
+      answerStatusContainer.classList.add('hidden');
+    }
+    if (nextQuestionBtn) {
+      nextQuestionBtn.classList.add('hidden');
+      nextQuestionBtn.setAttribute('disabled', 'true');
+    }
+
     // Reset timer display
     const timerText = this.querySelector('#timerText');
     if (timerText) {
