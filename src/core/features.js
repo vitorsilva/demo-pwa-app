@@ -19,16 +19,6 @@
     SHOW_ADS: {
       phase: 'ENABLED',  // Show AdSense ads during loading screens
       description: 'Display Google AdSense ads during quiz and results loading'
-    },
-    MODE_TOGGLE: {
-      phase: 'ENABLED',  // Learning/Party mode toggle
-      description: 'Toggle between Learning and Party modes with different themes'
-    },
-    PARTY_SESSION: {
-      // Environment-specific: DISABLED in production, ENABLED in staging/development
-      //phase: getEnvironment() === 'production' ? 'DISABLED' : 'ENABLED',
-      phase: 'ENABLED',
-      description: 'Create and join party sessions to play quizzes with friends in real-time'
     }
   };
 
