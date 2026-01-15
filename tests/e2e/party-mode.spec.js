@@ -3,21 +3,11 @@ import { test, expect } from '@playwright/test';
 import { setupAuthenticatedState } from './helpers.js';
 
 /**
- * Helper to set up state with MODE_TOGGLE feature enabled and party mode selected.
+ * Helper to set up authenticated state with party mode selected.
  * @param {import('@playwright/test').Page} page
  */
 async function setupWithPartyModeEnabled(page) {
-  // First set up authenticated state
   await setupAuthenticatedState(page);
-
-  // Enable both MODE_TOGGLE and PARTY_SESSION feature flags via localStorage override
-  await page.evaluate(() => {
-    localStorage.setItem('__test_feature_MODE_TOGGLE', 'ENABLED');
-    localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
-  });
-
-  // Reload to apply the flags
-  await page.reload();
   await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
 
   // Switch to party mode
@@ -30,12 +20,6 @@ test.describe('Party Mode', () => {
   test.describe('Party buttons visibility', () => {
     test('should NOT show party buttons in learning mode', async ({ page }) => {
       await setupAuthenticatedState(page);
-
-      // Enable MODE_TOGGLE but stay in learning mode
-      await page.evaluate(() => {
-        localStorage.setItem('__test_feature_MODE_TOGGLE', 'ENABLED');
-      });
-      await page.reload();
       await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
 
       // Party buttons should not be visible in learning mode

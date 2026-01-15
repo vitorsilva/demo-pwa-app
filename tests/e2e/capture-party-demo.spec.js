@@ -45,17 +45,9 @@ test.describe('Capture Party Mode Demo', () => {
 
   test('Party Mode Complete Flow', async ({ page }) => {
     // ========================================
-    // SETUP: Enable feature flags
+    // SETUP: Authenticated state
     // ========================================
     await setupAuthenticatedState(page);
-
-    // Enable party mode features
-    await page.evaluate(() => {
-      localStorage.setItem('__test_feature_MODE_TOGGLE', 'ENABLED');
-      localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
-    });
-
-    await page.reload();
     await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
 
     // ========================================
@@ -345,13 +337,8 @@ test.describe('Capture Party Mode Demo', () => {
       await setupAuthenticatedState(hostPage);
       await setupAuthenticatedState(guestPage);
 
-      // Enable party features for both
+      // Wait for both to be ready
       for (const page of [hostPage, guestPage]) {
-        await page.evaluate(() => {
-          localStorage.setItem('__test_feature_MODE_TOGGLE', 'ENABLED');
-          localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
-        });
-        await page.reload();
         await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
       }
 
@@ -501,11 +488,6 @@ test.describe('Capture Party Mode Demo', () => {
       await setupAuthenticatedState(guestPage);
 
       for (const page of [hostPage, guestPage]) {
-        await page.evaluate(() => {
-          localStorage.setItem('__test_feature_MODE_TOGGLE', 'ENABLED');
-          localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
-        });
-        await page.reload();
         await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
       }
 
