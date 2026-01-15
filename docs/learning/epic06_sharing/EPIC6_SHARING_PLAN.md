@@ -346,22 +346,29 @@ tests/
 
 ## Post-MVP Enhancements
 
-### Party Mode Decentralization (In Progress)
+### Party Mode Decentralization ✅ Complete
 
-The original MVP uses HTTP polling for party sessions. A follow-up enhancement is underway to transition to true P2P WebRTC communication:
+The original MVP used HTTP polling for party sessions. This enhancement transitioned to true P2P WebRTC communication.
 
 | Document | Description | Status |
 |----------|-------------|--------|
-| [PARTY_MODE_DECENTRALIZATION_PLAN.md](./PARTY_MODE_DECENTRALIZATION_PLAN.md) | Full plan for P2P transition | In Progress |
-| [PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md](./PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md) | Implementation notes | Active |
+| [PARTY_MODE_DECENTRALIZATION_PLAN.md](./PARTY_MODE_DECENTRALIZATION_PLAN.md) | Full plan for P2P transition | ✅ Complete |
+| [PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md](./PARTY_P2P_DECENTRALIZATION_LEARNING_NOTES.md) | Implementation notes | ✅ Complete |
 
-**Current Progress:**
+**All Phases Complete:**
 - ✅ Phase 0: AdSense lazy-loading fix
 - ✅ Phase A: P2P Foundation (PartyConnectionManager, STUN-only)
 - ✅ Phase B: View Integration (B.1-B.6 all complete)
 - ✅ Phase C: Server Minimization (optional names, deprecated answer endpoint)
-- ⏳ Phase D-F: Pending
+- ✅ Phase D: STUN Testing (all scenarios passed)
+- ✅ Phase E: Testing & Validation (Maestro + manual testing)
+- ✅ Phase F: Production Rollout (PR #106 merged)
+
+**Key Results:**
+- P2P works across different networks (STUN-only, no TURN needed)
+- Privacy improved: quiz content, names, answers flow via P2P
+- Feature flag `PARTY_SESSION` enabled in production
 
 ---
 
-**Last Updated:** 2026-01-14
+**Last Updated:** 2026-01-15
