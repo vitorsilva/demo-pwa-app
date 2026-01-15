@@ -50,6 +50,7 @@ export default class PartyQuizView extends BaseView {
     this.pollInterval = null;
     this.shuffledOptions = null;
     this.shuffleMap = null; // Maps shuffled index to original index
+    this.allAnswered = false; // Track if all participants answered (Issue #108)
   }
 
   async render() {
@@ -154,9 +155,34 @@ export default class PartyQuizView extends BaseView {
           </div>
         </div>
 
-        <!-- Status bar -->
-        <div id="statusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-primary text-white text-center text-sm">
-          <span id="statusText">${t('party.waiting')}</span>
+        <!-- Host controls and status bar -->
+        <div id="statusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-primary text-white text-center">
+          <!-- Answer status indicator (visible to all) -->
+          <div id="answerStatusContainer" class="mb-2 ${this.hasAnswered ? '' : 'hidden'}">
+            <span id="answer-status-indicator" data-testid="answer-status-indicator" class="text-sm">
+              <!-- Will be updated by _updateAnswerStatus -->
+            </span>
+          </div>
+
+          <!-- Next Question button (host only, after answering) -->
+          ${this.isHost ? `
+            <button
+              id="nextQuestionBtn"
+              data-testid="next-question-btn"
+              class="hidden px-6 py-2 mb-2 bg-white text-primary font-medium rounded-lg
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     hover:bg-gray-100 transition-colors"
+              disabled
+            >
+              <span class="flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">skip_next</span>
+                ${t('party.nextQuestion')}
+              </span>
+            </button>
+          ` : ''}
+
+          <!-- Status text -->
+          <span id="statusText" class="text-sm">${t('party.waiting')}</span>
         </div>
       </div>
     `);
@@ -212,6 +238,7 @@ export default class PartyQuizView extends BaseView {
       isYou: p.id === this.participantId,
       score: p.score || 0,
       status: 'connected',
+      hasAnsweredCurrent: p.hasAnsweredCurrent ?? false,
     }));
   }
 
@@ -258,8 +285,34 @@ export default class PartyQuizView extends BaseView {
             <div id="scoreboardContainer" class="hidden"></div>
           </div>
         </div>
-        <div id="statusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-primary text-white text-center text-sm">
-          <span id="statusText">${t('party.waiting')}</span>
+        <!-- Host controls and status bar -->
+        <div id="statusBar" class="fixed bottom-0 left-0 right-0 py-3 bg-primary text-white text-center">
+          <!-- Answer status indicator (visible to all) -->
+          <div id="answerStatusContainer" class="mb-2 ${this.hasAnswered ? '' : 'hidden'}">
+            <span id="answer-status-indicator" data-testid="answer-status-indicator" class="text-sm">
+              <!-- Will be updated by _updateAnswerStatus -->
+            </span>
+          </div>
+
+          <!-- Next Question button (host only, after answering) -->
+          ${this.isHost ? `
+            <button
+              id="nextQuestionBtn"
+              data-testid="next-question-btn"
+              class="hidden px-6 py-2 mb-2 bg-white text-primary font-medium rounded-lg
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     hover:bg-gray-100 transition-colors"
+              disabled
+            >
+              <span class="flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">skip_next</span>
+                ${t('party.nextQuestion')}
+              </span>
+            </button>
+          ` : ''}
+
+          <!-- Status text -->
+          <span id="statusText" class="text-sm">${t('party.waiting')}</span>
         </div>
       </div>
     `);
@@ -376,6 +429,14 @@ export default class PartyQuizView extends BaseView {
         }
       });
     }
+
+    // Next Question button (host only)
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (nextQuestionBtn && this.isHost) {
+      this.addEventListener(nextQuestionBtn, 'click', () => {
+        this._onNextQuestionClick();
+      });
+    }
   }
 
   /**
@@ -414,6 +475,18 @@ export default class PartyQuizView extends BaseView {
     // Reset state
     this.selectedAnswer = null;
     this.hasAnswered = false;
+
+    // Reset answer status for new question (Issue #108 fix)
+    this.allAnswered = false;
+    const answerStatusContainer = this.querySelector('#answerStatusContainer');
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (answerStatusContainer) {
+      answerStatusContainer.classList.add('hidden');
+    }
+    if (nextQuestionBtn) {
+      nextQuestionBtn.classList.add('hidden');
+      nextQuestionBtn.setAttribute('disabled', 'true');
+    }
 
     // Shuffle new question
     this._shuffleCurrentQuestion(question);
@@ -479,6 +552,8 @@ export default class PartyQuizView extends BaseView {
     if (this.session) {
       this.session.submitAnswer(this.session.currentQuestion, originalIndex);
       this._updateStatus(t('party.answered'));
+      // Update answer status for host controls
+      this._updateAnswerStatus();
     } else {
       // MVP mode: submit via API
       const timeMs = Date.now() - this.questionStartTime;
@@ -494,10 +569,20 @@ export default class PartyQuizView extends BaseView {
         // Show correct/incorrect feedback
         this._showAnswerFeedback(shuffledIndex, result.isCorrect, result.points);
 
+        // Update answer status for host controls (mark self as answered)
+        // Self is already answered, so update participants to reflect this
+        const selfParticipant = this.participants.find((p) => p.id === this.participantId);
+        if (selfParticipant) {
+          selfParticipant.hasAnsweredCurrent = true;
+        }
+        this._updateAnswerStatus();
+
         log.info('Answer result', { isCorrect: result.isCorrect, points: result.points, score: result.score });
       } catch (error) {
         log.error('Failed to submit answer', { error: error.message });
         this._updateStatus(t('party.answered'));
+        // Still update answer status on error
+        this._updateAnswerStatus();
       }
     }
 
@@ -705,6 +790,18 @@ export default class PartyQuizView extends BaseView {
       this._renderScoreboard();
     }
 
+    // Reset host controls for new question (Issue #108 fix)
+    this.allAnswered = false;
+    const answerStatusContainer = this.querySelector('#answerStatusContainer');
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (answerStatusContainer) {
+      answerStatusContainer.classList.add('hidden');
+    }
+    if (nextQuestionBtn) {
+      nextQuestionBtn.classList.add('hidden');
+      nextQuestionBtn.setAttribute('disabled', 'true');
+    }
+
     // Reset timer display
     const timerText = this.querySelector('#timerText');
     if (timerText) {
@@ -733,6 +830,110 @@ export default class PartyQuizView extends BaseView {
     const statusText = this.querySelector('#statusText');
     if (statusText) {
       statusText.textContent = text;
+    }
+  }
+
+  /**
+   * Update answer status tracking.
+   * Calculates how many participants have answered the current question.
+   *
+   * @private
+   */
+  _updateAnswerStatus() {
+    // Get participants from session or local state
+    const participants = this.session
+      ? this.session.getParticipants()
+      : this.participants;
+
+    // Count who has answered (support both HTTP and P2P modes)
+    const answered = participants.filter((p) => {
+      // HTTP mode: hasAnsweredCurrent from API
+      // P2P mode: status === 'answered'
+      return p.hasAnsweredCurrent ?? (p.status === 'answered');
+    }).length;
+
+    const total = participants.length;
+    this.allAnswered = answered === total && total > 0;
+
+    // Update UI
+    this._renderHostControls(answered, total);
+  }
+
+  /**
+   * Render host controls (status indicator and Next Question button).
+   *
+   * @private
+   * @param {number} answered - Number of participants who answered
+   * @param {number} total - Total number of participants
+   */
+  _renderHostControls(answered, total) {
+    const answerStatusContainer = this.querySelector('#answerStatusContainer');
+    const statusIndicator = this.querySelector('#answer-status-indicator');
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+
+    // Show status container if host has answered
+    if (answerStatusContainer && this.hasAnswered) {
+      answerStatusContainer.classList.remove('hidden');
+    }
+
+    // Update status indicator text
+    if (statusIndicator) {
+      if (this.allAnswered) {
+        statusIndicator.textContent = t('party.allAnswered', { answered: total, total });
+      } else {
+        const waiting = total - answered;
+        statusIndicator.textContent = t('party.waitingFor', { count: waiting });
+      }
+    }
+
+    // Show/enable Next Question button for host
+    if (nextQuestionBtn && this.isHost && this.hasAnswered) {
+      nextQuestionBtn.classList.remove('hidden');
+
+      if (this.allAnswered) {
+        nextQuestionBtn.removeAttribute('disabled');
+      } else {
+        nextQuestionBtn.setAttribute('disabled', 'true');
+      }
+    }
+  }
+
+  /**
+   * Handle click on Next Question button (host only).
+   *
+   * @private
+   */
+  async _onNextQuestionClick() {
+    // Prevent double-click and race with timer
+    if (this.timerExpiredHandled) return;
+    this.timerExpiredHandled = true;
+
+    log.info('Host clicked Next Question');
+
+    // Disable button immediately to prevent double-click
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (nextQuestionBtn) {
+      nextQuestionBtn.setAttribute('disabled', 'true');
+    }
+
+    this._updateStatus(t('party.loading'));
+
+    try {
+      const roomData = await advanceQuestionApi(this.roomCode, this.participantId);
+
+      if (roomData.status === 'ended') {
+        this._onQuizEnd([]);
+      } else {
+        // Move to next question
+        this._moveToQuestion(roomData.current_question, roomData);
+      }
+    } catch (error) {
+      log.error('Failed to advance question', { error: error.message });
+      // Re-enable button on error
+      this.timerExpiredHandled = false;
+      if (nextQuestionBtn) {
+        nextQuestionBtn.removeAttribute('disabled');
+      }
     }
   }
 
@@ -796,6 +997,10 @@ export default class PartyQuizView extends BaseView {
         if (JSON.stringify(newParticipants) !== JSON.stringify(this.participants)) {
           this.participants = newParticipants;
           this._renderScoreboard();
+          // Update answer status for host controls
+          if (this.hasAnswered) {
+            this._updateAnswerStatus();
+          }
         }
       } catch (error) {
         log.error('Poll failed', { error: error.message });

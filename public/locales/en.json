@@ -352,6 +352,9 @@
     "enterName": "Enter your name",
     "pointsLabel": "points",
     "saveFeatureComingSoon": "Quiz saved! (Feature coming soon)",
-    "loading": "Loading next question..."
+    "loading": "Loading next question...",
+    "nextQuestion": "Next Question",
+    "allAnswered": "✓ {{answered}}/{{total}} answered",
+    "waitingFor": "⏳ Waiting for {{count}}..."
   }
 }

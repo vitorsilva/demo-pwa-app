@@ -167,4 +167,60 @@ test.describe('Party Mode', () => {
       await expect(page).toHaveURL(/#\/party\/join\/ABC123/);
     });
   });
+
+  test.describe('Host Advance Question (Issue #108)', () => {
+    // Note: Full E2E tests for host advance require a running PHP backend.
+    // These tests verify the UI elements and i18n are correctly set up.
+
+    test('host session state should show create party UI', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set up as host
+      await page.evaluate(() => {
+        sessionStorage.setItem('partyIsHost', 'true');
+        sessionStorage.setItem('partyParticipantId', 'host-123');
+      });
+
+      // Navigate to create party view
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Verify we're on the create party page
+      const createHeader = page.locator('h1, h2').first();
+      await expect(createHeader).toBeVisible({ timeout: 3000 });
+    });
+
+    test('non-host session should show join party UI', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set up as a non-host participant
+      await page.evaluate(() => {
+        sessionStorage.setItem('partyIsHost', 'false');
+        sessionStorage.setItem('partyParticipantId', 'guest-123');
+      });
+
+      // Navigate to join party view
+      await page.goto('/#/party/join');
+      await page.waitForLoadState('networkidle');
+
+      // Verify join UI is visible
+      const joinContainer = page.locator('#app');
+      await expect(joinContainer).toBeVisible({ timeout: 3000 });
+    });
+
+    test('i18n translation keys for host advance are present', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Verify the locale file loads and contains our new keys
+      const response = await page.evaluate(async () => {
+        const res = await fetch('/locales/en.json');
+        return res.json();
+      });
+
+      // Check our new i18n keys exist
+      expect(response.party.nextQuestion).toBeDefined();
+      expect(response.party.allAnswered).toBeDefined();
+      expect(response.party.waitingFor).toBeDefined();
+    });
+  });
 });

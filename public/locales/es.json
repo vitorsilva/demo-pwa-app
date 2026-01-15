@@ -352,6 +352,9 @@
     "enterName": "Introduce tu nombre",
     "pointsLabel": "puntos",
     "saveFeatureComingSoon": "¡Quiz guardado! (Función próximamente)",
-    "loading": "Cargando siguiente pregunta..."
+    "loading": "Cargando siguiente pregunta...",
+    "nextQuestion": "Siguiente Pregunta",
+    "allAnswered": "✓ {{answered}}/{{total}} respondieron",
+    "waitingFor": "⏳ Esperando a {{count}}..."
   }
 }
