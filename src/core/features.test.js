@@ -88,20 +88,14 @@
 
     describe('environment-aware flags', () => {
 
-      it('PARTY_SESSION should be DISABLED in production (default)', () => {
-        // In test environment, VITE_DEPLOY_TARGET is undefined,
-        // which defaults to 'production', so PARTY_SESSION should be DISABLED
-        expect(getFeaturePhase('PARTY_SESSION')).toBe('DISABLED');
-        expect(isFeatureEnabled('PARTY_SESSION')).toBe(false);
-      });
-
-      it('PARTY_SESSION can be enabled via localStorage override', () => {
-        // Even in production, localStorage override should work (for testing)
-        localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
+      it('PARTY_SESSION should be ENABLED (P2P decentralization complete)', () => {
+        // PARTY_SESSION is now enabled for all environments after P2P validation
+        expect(getFeaturePhase('PARTY_SESSION')).toBe('ENABLED');
         expect(isFeatureEnabled('PARTY_SESSION')).toBe(true);
       });
 
-      it('PARTY_SESSION localStorage override respects DISABLED', () => {
+      it('PARTY_SESSION can be disabled via localStorage override', () => {
+        // localStorage override should work for testing/rollback
         localStorage.setItem('__test_feature_PARTY_SESSION', 'DISABLED');
         expect(isFeatureEnabled('PARTY_SESSION')).toBe(false);
       });
