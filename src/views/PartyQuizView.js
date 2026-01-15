@@ -476,6 +476,18 @@ export default class PartyQuizView extends BaseView {
     this.selectedAnswer = null;
     this.hasAnswered = false;
 
+    // Reset answer status for new question (Issue #108 fix)
+    this.allAnswered = false;
+    const answerStatusContainer = this.querySelector('#answerStatusContainer');
+    const nextQuestionBtn = this.querySelector('#nextQuestionBtn');
+    if (answerStatusContainer) {
+      answerStatusContainer.classList.add('hidden');
+    }
+    if (nextQuestionBtn) {
+      nextQuestionBtn.classList.add('hidden');
+      nextQuestionBtn.setAttribute('disabled', 'true');
+    }
+
     // Shuffle new question
     this._shuffleCurrentQuestion(question);
 
