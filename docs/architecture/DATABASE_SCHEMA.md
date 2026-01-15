@@ -207,6 +207,7 @@ User preferences and caches are stored in localStorage via `src/core/settings.js
 | `questionsPerQuiz` | string | `"5"` | Questions per quiz |
 | `difficulty` | string | `"mixed"` | Difficulty preference |
 | `selectedModel` | string | `"tngtech/deepseek-r1t2-chimera:free"` | AI model selection |
+| `appMode` | string | `"learning"` | App mode (learning or party) |
 
 ### Operations
 
@@ -229,7 +230,8 @@ const allSettings = getSettings();
 | Key | Purpose | Module |
 |-----|---------|--------|
 | `i18nextLng` | Language preference | `src/core/i18n.js` |
-| `openrouter_models_cache` | Cached model list (24h TTL) | `src/services/model-service.js` |
+| `openrouter_models_cache` | Cached free model list (24h TTL) | `src/services/model-service.js` |
+| `openrouter_pricing_cache` | Cached model pricing data (24h TTL) | `src/services/model-service.js` |
 | `saberloop_telemetry_queue` | Offline telemetry events | `src/utils/telemetry.js` |
 
 ---

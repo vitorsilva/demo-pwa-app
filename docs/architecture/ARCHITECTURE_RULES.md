@@ -58,6 +58,13 @@ The services layer (`src/services/`) provides a clean abstraction between UI and
 | `quiz-import.js` | Import quizzes from URLs | quiz-serializer.js, db.js |
 | `quiz-serializer.js` | Serialize/deserialize quizzes | - |
 | `quiz-share.js` | Quiz sharing functionality | quiz-serializer.js |
+| `theme-manager.js` | Learning/Party mode theming | settings.js |
+| `party-api.js` | Party signaling server API | - |
+| `party-session.js` | Party session state | state.js |
+| `signaling-client.js` | WebRTC signaling | party-api.js |
+| `p2p-service.js` | Peer-to-peer connections | signaling-client.js |
+| `party-connection-manager.js` | WebRTC lifecycle | p2p-service.js |
+| `party-connection-store.js` | Connection state | - |
 
 ### Allowed Dependencies
 

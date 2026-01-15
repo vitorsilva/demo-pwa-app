@@ -2,7 +2,7 @@
 
 ## High-Level Architecture
 
-Saberloop is a **client-side PWA** with no backend required. AI calls are made directly from the browser using OpenRouter (user-provided API keys).
+Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) is made directly from the browser using OpenRouter (user-provided API keys). Party Mode uses a PHP signaling server for WebRTC coordination.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -17,8 +17,9 @@ Saberloop is a **client-side PWA** with no backend required. AI calls are made d
 │           │                      │                           │
 │  ┌────────▼─────────────────────────────────┐               │
 │  │              Views                        │               │
-│  │  Home │ Quiz │ Results │ Settings │       │               │
-│  │  Topics │ Help │ Welcome │ Loading │ ...  │               │
+│  │  Home │ Quiz │ Results │ Settings │ Help  │               │
+│  │  Topics │ Welcome │ Loading │ Import │    │               │
+│  │  Party: Create │ Join │ Lobby │ Quiz │    │               │
 │  └────────┬─────────────────────────────────┘               │
 │           │                                                  │
 │  ┌────────▼─────────────────────────────────┐               │
@@ -44,7 +45,7 @@ Saberloop is a **client-side PWA** with no backend required. AI calls are made d
 └───────────────────────────────────────────────────────────────┘
 ```
 
-**Note:** No server-side backend is required. The app is fully static and can be hosted on any web server.
+**Note:** Core quiz functionality requires no server-side backend - the app is fully static for solo play. Party Mode requires the PHP signaling server (`php-api/party/`) for WebRTC coordination.
 
 ## Components
 
@@ -68,7 +69,7 @@ Saberloop is a **client-side PWA** with no backend required. AI calls are made d
 | API | `src/api/` | External API calls (OpenRouter) |
 | Core | `src/core/` | Database, state, router, settings, i18n, feature flags |
 | Components | `src/components/` | Reusable presentational UI |
-| Utils | `src/utils/` | Shared utilities (logger, network, telemetry, share, retry, JSON extraction, ads) |
+| Utils | `src/utils/` | Shared utilities (logger, network, telemetry, share, retry, JSON extraction, ads, formatters, storage, shuffle, errorHandler, performance) |
 | Features | `src/features/` | Feature modules (onboarding, sample-loader) |
 | Data | `src/data/` | Static data files (sample quizzes) |
 
@@ -89,6 +90,13 @@ Saberloop is a **client-side PWA** with no backend required. AI calls are made d
 - `quiz-import.js` - Import quizzes from shared URLs
 - `quiz-serializer.js` - Serialize/deserialize quizzes for sharing
 - `quiz-share.js` - Quiz sharing functionality
+- `theme-manager.js` - Learning/Party mode theming
+- `party-api.js` - Party Mode signaling server API
+- `party-session.js` - Party session state management
+- `signaling-client.js` - WebRTC signaling client
+- `p2p-service.js` - Peer-to-peer WebRTC connections
+- `party-connection-manager.js` - WebRTC connection lifecycle
+- `party-connection-store.js` - Connection state storage
 
 **No Server Backend Required:**
 - Users provide their own OpenRouter API key
@@ -135,13 +143,6 @@ The app uses a feature flag system (`src/core/features.js`) for gradual rollout:
 | ENABLED | Available everywhere |
 
 **Current Feature Flags:**
-- `OPENROUTER_GUIDE` - Step-by-step OpenRouter connection guide
-- `TELEMETRY` - Send logs/errors to VPS for debugging
-- `EXPLANATION_FEATURE` - AI-generated explanations for wrong answers
-- `CONTINUE_TOPIC` - Continue quiz with new questions on same topic
-- `SHARE_FEATURE` - Share quiz results to social media
-- `SHARE_QUIZ` - Share quiz questions via URL so friends can take the same quiz
-- `SHOW_USAGE_COSTS` - Display token counts and costs after each quiz
 - `SHOW_ADS` - Display Google AdSense ads during loading screens
 
 ### Telemetry
