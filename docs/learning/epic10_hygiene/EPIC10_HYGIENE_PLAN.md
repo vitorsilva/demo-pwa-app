@@ -22,7 +22,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Status | Document |
 |------|--------|----------|
-| (none currently) | - | - |
+| E2E Test Separation (Tests vs Capture) | Planning | [PHASE3_E2E_TEST_SEPARATION.md](./PHASE3_E2E_TEST_SEPARATION.md) |
 
 ## Completed Tasks
 
