@@ -22,9 +22,16 @@ async function setupWithModeToggleEnabled(page) {
 }
 
 test.describe('Mode Toggle Feature', () => {
-  test.describe('when feature flag is disabled (default)', () => {
-    test('should NOT show mode toggle on home page', async ({ page }) => {
+  test.describe('when feature flag is disabled via override', () => {
+    test('should NOT show mode toggle when disabled via localStorage', async ({ page }) => {
       await setupAuthenticatedState(page);
+
+      // Disable MODE_TOGGLE via localStorage override (for rollback testing)
+      await page.evaluate(() => {
+        localStorage.setItem('__test_feature_MODE_TOGGLE', 'DISABLED');
+      });
+      await page.reload();
+      await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
 
       // Mode buttons should not be visible when flag is disabled
       const learnButton = page.locator('[data-mode="learning"]');
