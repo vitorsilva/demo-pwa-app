@@ -167,4 +167,81 @@ test.describe('Party Mode', () => {
       await expect(page).toHaveURL(/#\/party\/join\/ABC123/);
     });
   });
+
+  test.describe('Host Advance Question (Issue #108)', () => {
+    test('host should see Next Question button after answering', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Create a party as host
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Fill in host name
+      const nameInput = page.getByTestId('host-name-input');
+      await nameInput.fill('TestHost');
+
+      // Generate quiz and create party
+      const generateBtn = page.getByTestId('generate-quiz-btn');
+      if (await generateBtn.isVisible()) {
+        await generateBtn.click();
+        await page.waitForTimeout(2000);
+      }
+
+      const createBtn = page.getByTestId('create-party-btn');
+      if (await createBtn.isVisible()) {
+        await createBtn.click();
+        await page.waitForTimeout(1000);
+      }
+
+      // Start the quiz
+      const startBtn = page.getByTestId('start-quiz-btn');
+      if (await startBtn.isVisible()) {
+        await startBtn.click();
+        await page.waitForTimeout(1000);
+      }
+
+      // Answer a question
+      const optionBtn = page.getByTestId('option-0');
+      if (await optionBtn.isVisible()) {
+        await optionBtn.click();
+        await page.waitForTimeout(500);
+      }
+
+      // Host should see Next Question button
+      const nextQuestionBtn = page.getByTestId('next-question-btn');
+      await expect(nextQuestionBtn).toBeVisible();
+    });
+
+    test('Next Question button should show answer status indicator', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Navigate to a mock party quiz state (simplified test)
+      await page.goto('/#/party/quiz/TEST123');
+      await page.waitForLoadState('networkidle');
+
+      // The status indicator should show answered count
+      const statusIndicator = page.getByTestId('answer-status-indicator');
+      // Status should contain answered count pattern like "X/Y answered" or "Waiting for X..."
+      await expect(statusIndicator).toBeVisible();
+    });
+
+    test('non-host should NOT see Next Question button', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set up as a non-host participant (simulate joining)
+      await page.evaluate(() => {
+        sessionStorage.setItem('partyIsHost', 'false');
+        sessionStorage.setItem('partyParticipantId', 'guest-123');
+        sessionStorage.setItem('partyRoomCode', 'TEST456');
+      });
+
+      // Navigate to party quiz view
+      await page.goto('/#/party/quiz/TEST456');
+      await page.waitForLoadState('networkidle');
+
+      // Non-host should NOT see the Next Question button
+      const nextQuestionBtn = page.getByTestId('next-question-btn');
+      await expect(nextQuestionBtn).not.toBeVisible();
+    });
+  });
 });
