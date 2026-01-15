@@ -153,8 +153,34 @@ Self-hosted observability via `src/utils/telemetry.js`:
 |---------|-------------|
 | Event Batching | Collects events, sends in batches |
 | Offline Queue | localStorage fallback when offline |
-| Feature Flag | Controlled by `TELEMETRY` feature flag |
 | Privacy | Self-hosted VPS, no third-party services |
+
+### PHP Backend (`php-api/`)
+
+Server-side services deployed to VPS:
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| Party Signaling | `php-api/party/` | WebRTC coordination for Party Mode |
+| Telemetry | `php-api/telemetry/` | Event ingestion endpoint |
+
+**Party Mode API Endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/party/rooms` | Create a new room |
+| GET | `/party/rooms/{code}` | Get room info |
+| POST | `/party/rooms/{code}/join` | Join a room |
+| POST | `/party/rooms/{code}/leave` | Leave a room |
+| POST | `/party/rooms/{code}/start` | Start quiz (host only) |
+| POST | `/party/signal` | Send WebRTC signaling message |
+| GET | `/party/signal/{code}/{id}` | Poll for signaling messages |
+
+**PHP Classes:**
+- `RoomManager.php` - Room CRUD, participant management, scoring
+- `SignalingManager.php` - WebRTC offer/answer/ICE exchange
+- `Database.php` - PDO connection singleton
+- `ApiHelper.php` - CORS, JSON helpers, error handling
 
 ## Data Flow
 

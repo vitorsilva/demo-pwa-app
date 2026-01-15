@@ -236,6 +236,107 @@ const allSettings = getSettings();
 
 ---
 
+## MySQL (Party Mode Server)
+
+Party Mode uses a MySQL database on the VPS for room coordination.
+
+### Configuration
+
+| Property | Value |
+|----------|-------|
+| Database Name | `saberloop_party` |
+| Engine | InnoDB |
+| Charset | utf8mb4 |
+
+### Tables
+
+#### `party_rooms`
+
+Stores party session rooms created by hosts.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT AUTO_INCREMENT | Primary key |
+| `code` | VARCHAR(6) UNIQUE | Room code (e.g., ABC123) |
+| `host_id` | VARCHAR(36) | UUID of the host |
+| `host_name` | VARCHAR(50) | Display name of the host |
+| `quiz_data` | JSON | Serialized quiz data |
+| `status` | ENUM | 'waiting', 'playing', 'ended' |
+| `max_participants` | INT | Max allowed participants (default: 20) |
+| `seconds_per_question` | INT | Time per question (default: 30) |
+| `current_question` | INT | Current question index (0-based) |
+| `created_at` | TIMESTAMP | Room creation time |
+| `started_at` | TIMESTAMP | When quiz started |
+| `ended_at` | TIMESTAMP | When session ended |
+
+#### `party_participants`
+
+Stores participants who have joined a room.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT AUTO_INCREMENT | Primary key |
+| `room_id` | INT | FK to party_rooms |
+| `participant_id` | VARCHAR(36) | UUID of the participant |
+| `name` | VARCHAR(50) | Display name |
+| `is_host` | BOOLEAN | Whether this is the host |
+| `score` | INT | Current total score |
+| `joined_at` | TIMESTAMP | Join time |
+| `left_at` | TIMESTAMP | Leave time (NULL if still in room) |
+
+#### `party_signaling`
+
+Stores WebRTC signaling messages (short-lived).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT AUTO_INCREMENT | Primary key |
+| `room_code` | VARCHAR(6) | Room code for routing |
+| `from_id` | VARCHAR(36) | Sender participant ID |
+| `to_id` | VARCHAR(36) | Recipient participant ID |
+| `type` | ENUM | 'offer', 'answer', 'ice' |
+| `payload` | JSON | SDP or ICE candidate data |
+| `created_at` | TIMESTAMP | Message creation time |
+| `consumed_at` | TIMESTAMP | When message was retrieved |
+
+#### `party_answers`
+
+Stores participant answers for scoring.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT AUTO_INCREMENT | Primary key |
+| `room_id` | INT | FK to party_rooms |
+| `participant_id` | VARCHAR(36) | UUID of the participant |
+| `question_index` | INT | Question index (0-based) |
+| `answer_index` | INT | Answer index (0-based, -1 for no answer) |
+| `is_correct` | BOOLEAN | Whether answer was correct |
+| `time_ms` | INT | Time taken to answer (ms) |
+| `points` | INT | Points earned |
+| `created_at` | TIMESTAMP | Answer submission time |
+
+#### `party_rate_limits`
+
+Tracks room creation for rate limiting.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT AUTO_INCREMENT | Primary key |
+| `ip_address` | VARCHAR(45) | IPv4 or IPv6 address |
+| `action` | VARCHAR(20) | Action being limited |
+| `created_at` | TIMESTAMP | Action time |
+
+### Migrations
+
+Migration files are in `php-api/party/migrations/`:
+- `001_create_tables.sql` - Initial schema
+- `002_add_answers.sql` - Scoring support
+- `003_minimize_data.sql` - Data optimization
+
+Run migrations via: `php php-api/party/migrate.php`
+
+---
+
 ## Related Documentation
 
 - [System Overview](./SYSTEM_OVERVIEW.md)
