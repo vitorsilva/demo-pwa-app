@@ -223,4 +223,47 @@ test.describe('Party Mode', () => {
       expect(response.party.waitingFor).toBeDefined();
     });
   });
+
+  test.describe('Party Results Save Button (Issue #109)', () => {
+    // Tests verify that host does NOT see "Save locally" button (they already have the quiz)
+    // while guest DOES see it (they can save the quiz for later)
+
+    test('host should NOT see save locally button on results screen', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set up as host with a room code
+      await page.evaluate(() => {
+        sessionStorage.setItem('partyIsHost', 'true');
+        sessionStorage.setItem('partyParticipantId', 'host-123');
+        sessionStorage.setItem('partyRoomCode', 'TEST01');
+      });
+
+      // Navigate to party results
+      await page.goto('/#/party/results/TEST01');
+      await page.waitForLoadState('networkidle');
+
+      // Save locally button should NOT be visible for host
+      const saveBtn = page.getByTestId('save-locally-btn');
+      await expect(saveBtn).not.toBeVisible();
+    });
+
+    test('guest should see save locally button on results screen', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set up as guest with a room code
+      await page.evaluate(() => {
+        sessionStorage.setItem('partyIsHost', 'false');
+        sessionStorage.setItem('partyParticipantId', 'guest-456');
+        sessionStorage.setItem('partyRoomCode', 'TEST01');
+      });
+
+      // Navigate to party results
+      await page.goto('/#/party/results/TEST01');
+      await page.waitForLoadState('networkidle');
+
+      // Save locally button SHOULD be visible for guest
+      const saveBtn = page.getByTestId('save-locally-btn');
+      await expect(saveBtn).toBeVisible();
+    });
+  });
 });
