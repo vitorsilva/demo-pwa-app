@@ -22,12 +22,13 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Status | Document |
 |------|--------|----------|
-| E2E Test Separation (Tests vs Capture) | Planning | [PHASE3_E2E_TEST_SEPARATION.md](./PHASE3_E2E_TEST_SEPARATION.md) |
+| (none currently) | - | - |
 
 ## Completed Tasks
 
 | Task | Completed | Document |
 |------|-----------|----------|
+| E2E Test Separation (Tests vs Capture) | 2026-01-15 | [PHASE3_E2E_TEST_SEPARATION.md](./PHASE3_E2E_TEST_SEPARATION.md) |
 | Feature Flag Cleanup (Wave 2) | 2026-01-15 | [PHASE2_FEATURE_FLAG_CLEANUP.md](./PHASE2_FEATURE_FLAG_CLEANUP.md) |
 | Feature Flag Cleanup (Wave 1) | 2026-01-09 | [PHASE1_FEATURE_FLAG_CLEANUP.md](./PHASE1_FEATURE_FLAG_CLEANUP.md) |
 
