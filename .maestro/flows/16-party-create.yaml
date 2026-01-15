@@ -1,0 +1,66 @@
+appId: com.saberloop.app
+---
+# Test 16: Party Create Flow
+# Tests party creation (host side) for P2P verification
+# After this test runs, manually join from your phone to test P2P
+
+# Launch and navigate to home
+- launchApp
+- runFlow:
+    file: _shared/navigate-home.yaml
+
+- takeScreenshot: 16-party-home-start
+
+# Switch to Party mode
+- tapOn:
+    text: ".*Party.*"
+    label: "Switch to Party mode"
+
+- takeScreenshot: 16-party-mode-selected
+
+# Tap Create Party button
+- tapOn:
+    text: ".*Create Party.*"
+    label: "Tap Create Party"
+
+# Wait for Create Party view to load
+- extendedWaitUntil:
+    visible: ".*Select.*Quiz.*"
+    timeout: 5000
+
+- takeScreenshot: 16-party-select-quiz
+
+# Select first available quiz
+- tapOn:
+    text: ".*Solar System.*|.*Basic Math.*|.*Famous Scientists.*"
+    label: "Select a quiz"
+
+- takeScreenshot: 16-party-quiz-selected
+
+# Tap Create Party button (now enabled)
+- tapOn:
+    text: ".*Create Party.*"
+    label: "Create the party room"
+
+# Wait for room to be created (room code should appear)
+- extendedWaitUntil:
+    visible: ".*[A-Z0-9]{6}.*|.*Room Code.*|.*Code.*"
+    timeout: 10000
+
+- takeScreenshot: 16-party-room-created
+
+# Verify room code display is visible
+- assertVisible:
+    text: ".*Participants.*"
+    label: "Participants section should be visible"
+
+# Verify connection status (should show Connecting or P2P)
+- assertVisible:
+    text: ".*Connect.*|.*P2P.*|.*Server.*"
+    optional: true
+    label: "Connection status indicator"
+
+- takeScreenshot: 16-party-lobby-ready
+
+# Keep the app open - user will manually join from phone
+# The test ends here, but emulator stays running for manual P2P test
