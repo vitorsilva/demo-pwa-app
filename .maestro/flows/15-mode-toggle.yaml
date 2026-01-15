@@ -2,8 +2,6 @@ appId: com.saberloop.app
 ---
 # Test 15: Mode Toggle Feature
 # Verifies mode toggle functionality (Learning/Party modes)
-# NOTE: This test requires MODE_TOGGLE feature flag to be ENABLED
-# Currently DISABLED by default - enable in src/core/features.js to run this test
 
 # Launch and navigate to home
 - launchApp
