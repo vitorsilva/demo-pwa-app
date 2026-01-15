@@ -22,7 +22,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Status | Document |
 |------|--------|----------|
-| (none) | | |
+| Feature Flag Cleanup (Wave 2) | Planning | [PHASE2_FEATURE_FLAG_CLEANUP.md](./PHASE2_FEATURE_FLAG_CLEANUP.md) |
 
 ## Completed Tasks
 
@@ -44,8 +44,15 @@ These flags are intentionally kept but have removal plans documented:
 | Flag | Status | Remove When | Document |
 |------|--------|-------------|----------|
 | `SHOW_ADS` | ENABLED | Epic 07 premium tier implemented | [FLAG_SHOW_ADS.md](./FLAG_SHOW_ADS.md) |
-| `MODE_TOGGLE` | DISABLED | Feature released + 2 weeks stable | [FLAG_MODE_TOGGLE.md](./FLAG_MODE_TOGGLE.md) |
-| `PARTY_SESSION` | DISABLED | Feature released + 2 weeks stable | [FLAG_PARTY_SESSION.md](./FLAG_PARTY_SESSION.md) |
+
+### Scheduled for Removal (Wave 2)
+
+These flags are now ENABLED in production and scheduled for removal:
+
+| Flag | Status | Target | Document |
+|------|--------|--------|----------|
+| `MODE_TOGGLE` | ENABLED | ~Jan 23 (2 weeks stable) | [PHASE2_FEATURE_FLAG_CLEANUP.md](./PHASE2_FEATURE_FLAG_CLEANUP.md) |
+| `PARTY_SESSION` | ENABLED | ~Jan 23 (2 weeks stable) | [PHASE2_FEATURE_FLAG_CLEANUP.md](./PHASE2_FEATURE_FLAG_CLEANUP.md) |
 
 ---
 
@@ -207,4 +214,4 @@ A flag should be removed when ALL of these are true:
 
 ---
 
-**Last Updated:** 2026-01-09
+**Last Updated:** 2026-01-15
