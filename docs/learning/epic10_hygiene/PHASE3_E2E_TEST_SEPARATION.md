@@ -1,7 +1,9 @@
 # Phase 3: E2E Test Separation (Tests vs Content Capture)
 
-**Status:** 📋 Planning
+**Status:** ✅ Complete
 **Created:** 2026-01-15
+**Completed:** 2026-01-15
+**PR:** [#TBD](https://github.com/vitorsilva/saberloop/pull/TBD)
 **Priority:** Medium (Developer Experience)
 
 ---
@@ -211,12 +213,12 @@ Update `.github/workflows/test.yml` to run only `test:e2e` (not capture scripts)
 
 ## Success Criteria
 
-- [ ] `npm run test:e2e` runs only functional tests (fast)
-- [ ] `npm run test:e2e:capture` runs only capture scripts
-- [ ] Video recording disabled for functional tests (saves disk space)
-- [ ] CI runs only functional tests
-- [ ] All existing tests still pass
-- [ ] Documentation updated
+- [x] `npm run test:e2e` runs only functional tests (fast)
+- [x] `npm run test:e2e:capture` runs only capture scripts
+- [x] Video recording disabled for functional tests (saves disk space)
+- [x] CI runs only functional tests
+- [x] All existing tests still pass (102 passed)
+- [x] Documentation updated (CLAUDE.md)
 
 ---
 
@@ -264,6 +266,51 @@ Update `.github/workflows/test.yml` to run only `test:e2e` (not capture scripts)
 
 - [Epic 10 Hygiene Plan](./EPIC10_HYGIENE_PLAN.md)
 - [E2E Testing Phase](../epic01_infrastructure/PHASE4.4_E2E_TESTING.md)
+
+---
+
+## Learning Notes
+
+### Session: 2026-01-15
+
+#### Completed
+
+- Created two Playwright projects: `tests` (functional) and `capture` (content production)
+- Updated npm scripts with new commands
+- Updated CI workflow to clarify capture scripts are excluded
+- Updated CLAUDE.md with new test commands
+- All 102 functional tests passing
+
+#### Implementation Details
+
+**Key changes to playwright.config.js:**
+- `testIgnore: '**/capture-*.spec.js'` for tests project
+- `testMatch: '**/capture-*.spec.js'` for capture project
+- `video: 'off'` for tests project (saves disk space)
+- `video: 'on'` for capture project (needed for content)
+
+**Commits:**
+1. `refactor(hygiene): separate E2E tests into projects` - playwright.config.js
+2. `chore(hygiene): add npm scripts for test separation` - package.json
+3. `docs(ci): clarify E2E tests exclude capture scripts` - test.yml
+4. `docs: update E2E test commands in CLAUDE.md` - CLAUDE.md
+
+#### Key Learnings
+
+1. **Playwright Projects Pattern**: Using `testIgnore` and `testMatch` is cleaner than moving files to separate directories. Files stay in place, imports don't break, and configuration is centralized.
+
+2. **Video Recording Cost**: Disabling video for functional tests reduces test artifacts significantly. Videos are only needed for debugging failures (screenshot suffices) or intentional capture.
+
+3. **Naming Convention Value**: The `capture-*.spec.js` naming convention made separation trivial. Good naming patterns pay off when organizing tests later.
+
+4. **CI Implicit Change**: The npm script change automatically affected CI without requiring workflow file changes. However, adding a clarifying comment documents intent.
+
+#### Test Results
+
+```
+Tests project: 107 tests (102 passed, 3 skipped, 2 flaky)
+Capture project: 15 tests in 3 files (not run in CI)
+```
 
 ---
 
