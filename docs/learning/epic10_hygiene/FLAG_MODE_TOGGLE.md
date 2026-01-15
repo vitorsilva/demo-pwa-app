@@ -1,8 +1,8 @@
 # Flag: MODE_TOGGLE
 
-**Status:** Active - Keep (Feature Not Released)
-**Review After:** Feature enabled in production + 2 weeks stable
-**Risk Level:** N/A (not removing yet)
+**Status:** ✅ Removed (Wave 2)
+**Removed:** 2026-01-15
+**PR:** TBD
 
 ---
 

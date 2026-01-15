@@ -6,15 +6,11 @@
     beforeEach(() => {
       // Clear any test overrides before each test
       localStorage.removeItem('__test_feature_SHOW_ADS');
-      localStorage.removeItem('__test_feature_MODE_TOGGLE');
-      localStorage.removeItem('__test_feature_PARTY_SESSION');
     });
 
     afterEach(() => {
       // Clean up after each test
       localStorage.removeItem('__test_feature_SHOW_ADS');
-      localStorage.removeItem('__test_feature_MODE_TOGGLE');
-      localStorage.removeItem('__test_feature_PARTY_SESSION');
     });
 
     describe('isFeatureEnabled', () => {
@@ -31,25 +27,12 @@
         expect(isFeatureEnabled('SHOW_ADS', 'home')).toBe(true);
       });
 
-      it('should return true for MODE_TOGGLE (enabled in all environments)', () => {
-        // MODE_TOGGLE is ENABLED in all environments
-        expect(isFeatureEnabled('MODE_TOGGLE', 'settings')).toBe(true);
-        expect(isFeatureEnabled('MODE_TOGGLE', 'welcome')).toBe(true);
-        expect(isFeatureEnabled('MODE_TOGGLE', 'home')).toBe(true);
-      });
-
       it('should use default context when not provided', () => {
         // ENABLED should return true regardless of context
         expect(isFeatureEnabled('SHOW_ADS')).toBe(true);
-        expect(isFeatureEnabled('MODE_TOGGLE')).toBe(true);
       });
 
       describe('localStorage overrides', () => {
-
-        it('should return true when localStorage override is ENABLED', () => {
-          localStorage.setItem('__test_feature_PARTY_SESSION', 'ENABLED');
-          expect(isFeatureEnabled('PARTY_SESSION')).toBe(true);
-        });
 
         it('should return false when localStorage override is DISABLED', () => {
           localStorage.setItem('__test_feature_SHOW_ADS', 'DISABLED');
@@ -79,25 +62,8 @@
       });
 
       it('should return the exact current phase for known features', () => {
-        // SHOW_ADS and MODE_TOGGLE are always ENABLED
+        // SHOW_ADS is ENABLED
         expect(getFeaturePhase('SHOW_ADS')).toBe('ENABLED');
-        expect(getFeaturePhase('MODE_TOGGLE')).toBe('ENABLED');
-      });
-
-    });
-
-    describe('environment-aware flags', () => {
-
-      it('PARTY_SESSION should be ENABLED (P2P decentralization complete)', () => {
-        // PARTY_SESSION is now enabled for all environments after P2P validation
-        expect(getFeaturePhase('PARTY_SESSION')).toBe('ENABLED');
-        expect(isFeatureEnabled('PARTY_SESSION')).toBe(true);
-      });
-
-      it('PARTY_SESSION can be disabled via localStorage override', () => {
-        // localStorage override should work for testing/rollback
-        localStorage.setItem('__test_feature_PARTY_SESSION', 'DISABLED');
-        expect(isFeatureEnabled('PARTY_SESSION')).toBe(false);
       });
 
     });
@@ -106,8 +72,6 @@
 
       it('should have expected flags defined', () => {
         expect(FEATURE_FLAGS).toHaveProperty('SHOW_ADS');
-        expect(FEATURE_FLAGS).toHaveProperty('MODE_TOGGLE');
-        expect(FEATURE_FLAGS).toHaveProperty('PARTY_SESSION');
       });
 
       it('each flag should have phase and description', () => {

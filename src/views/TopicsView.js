@@ -3,7 +3,6 @@
   import state from '../core/state.js';
   import { t } from '../core/i18n.js';
   import { formatRelativeDate } from '../utils/formatters.js';
-  import { isFeatureEnabled } from '../core/features.js';
   import { formatCost, isFreeModel } from '../services/cost-service.js';
   import { showShareQuizModal } from '../components/ShareQuizModal.js';
   import { logger } from '../utils/logger.js';
@@ -66,12 +65,10 @@
         </div>
       `);
 
-      // Mount mode toggle (behind feature flag)
-      if (isFeatureEnabled('MODE_TOGGLE')) {
-        const toggleContainer = this.querySelector('#modeToggleContainer');
-        if (toggleContainer) {
-          toggleContainer.appendChild(createModeToggle());
-        }
+      // Mount mode toggle
+      const toggleContainer = this.querySelector('#modeToggleContainer');
+      if (toggleContainer) {
+        toggleContainer.appendChild(createModeToggle());
       }
 
       this.attachListeners();
