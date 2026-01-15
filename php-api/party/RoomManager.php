@@ -152,7 +152,8 @@ class RoomManager
         $room['seconds_per_question'] = (int) $room['seconds_per_question'];
         $room['current_question'] = (int) ($room['current_question'] ?? 0);
         $room['quiz_data'] = $room['quiz_data'] ? json_decode($room['quiz_data'], true) : null;
-        $room['participants'] = $this->getParticipants((int) $room['id']);
+        // Pass current_question to include hasAnsweredCurrent for each participant
+        $room['participants'] = $this->getParticipants((int) $room['id'], $room['current_question']);
         return $room;
     }
 
@@ -160,9 +161,10 @@ class RoomManager
      * Get participants for a room.
      *
      * @param int $roomId Room ID
+     * @param int|null $currentQuestion Current question index (for hasAnsweredCurrent)
      * @return array List of participants
      */
-    public function getParticipants(int $roomId): array
+    public function getParticipants(int $roomId, ?int $currentQuestion = null): array
     {
         $stmt = $this->db->prepare('
             SELECT participant_id, name, is_host, score, joined_at
@@ -173,14 +175,30 @@ class RoomManager
         $stmt->execute([$roomId]);
         $participants = $stmt->fetchAll();
 
-        return array_map(function ($p) {
-            return [
+        // Get who answered current question (if specified)
+        $answeredIds = [];
+        if ($currentQuestion !== null) {
+            $stmt = $this->db->prepare('
+                SELECT participant_id FROM party_answers
+                WHERE room_id = ? AND question_index = ?
+            ');
+            $stmt->execute([$roomId, $currentQuestion]);
+            $answeredIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
+        return array_map(function ($p) use ($answeredIds, $currentQuestion) {
+            $result = [
                 'id' => $p['participant_id'],
                 'name' => $p['name'],
                 'isHost' => (bool) $p['is_host'],
                 'score' => (int) $p['score'],
                 'joinedAt' => $p['joined_at'],
             ];
+            // Add hasAnsweredCurrent if currentQuestion was specified
+            if ($currentQuestion !== null) {
+                $result['hasAnsweredCurrent'] = in_array($p['participant_id'], $answeredIds);
+            }
+            return $result;
         }, $participants);
     }
 
