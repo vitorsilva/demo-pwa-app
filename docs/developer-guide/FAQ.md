@@ -8,9 +8,10 @@ Saberloop is an AI-powered quiz application that generates questions on any topi
 
 ### Is it free to use?
 
-The app itself is free. However, AI-generated questions require API credits:
-- **With OpenRouter:** You can use your own API key, some free tier models available
-- **Server-side API:** Uses the developer's Anthropic credits (may be limited)
+The app itself is free. AI-generated questions use OpenRouter:
+- **Free tier models:** DeepSeek R1T2 Chimera (default) - no cost
+- **Premium models:** Claude, GPT-4, etc. - uses your OpenRouter credits
+- **Mock mode:** Development works without any API key
 
 ### Does it work offline?
 
@@ -69,6 +70,8 @@ Client-side OpenRouter benefits:
 - No server-side API key management needed
 - Simpler deployment (static files + FTP)
 - User controls their own usage/costs
+
+**Note:** Party Mode does use a PHP backend for WebRTC signaling coordination, but quiz generation remains fully client-side.
 
 ### Why IndexedDB (not localStorage)?
 
@@ -145,9 +148,10 @@ AI-generated questions are generally accurate but:
 
 ### Can I use my own API key?
 
-Yes! Two options:
-1. **OpenRouter:** Connect via Settings → Connect to AI Provider
-2. **Anthropic (self-hosted):** Set `ANTHROPIC_API_KEY` in your deployment
+Yes! Connect your OpenRouter account via Settings → Connect to AI Provider. This gives you access to:
+- Free tier models (DeepSeek, etc.)
+- Premium models (Claude, GPT-4, Gemini)
+- Your own usage tracking and billing
 
 ### What happens if API fails?
 
@@ -155,6 +159,33 @@ The app handles failures gracefully:
 - Error message shown to user
 - Sample quizzes available offline
 - Can retry generation
+
+---
+
+## Party Mode
+
+### What is Party Mode?
+
+Party Mode allows multiple people to take the same quiz together in real-time:
+- Host creates a room and gets a 6-character code
+- Others join using the room code
+- Everyone answers questions simultaneously
+- Live scoreboard shows rankings
+
+### How does Party Mode work technically?
+
+- **Room coordination:** PHP signaling server manages rooms and participants
+- **Real-time sync:** WebRTC peer-to-peer connections between participants
+- **Fallback:** HTTP polling if WebRTC fails
+
+### Does Party Mode require a server?
+
+Yes, Party Mode requires the PHP backend (`php-api/party/`) for:
+- Room creation and management
+- WebRTC signaling (offer/answer/ICE exchange)
+- Participant tracking
+
+The backend is deployed to the VPS alongside the static frontend.
 
 ---
 

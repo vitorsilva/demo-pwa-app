@@ -10,19 +10,16 @@ Before installing Saberloop, ensure you have:
 | npm | 9+ | `npm --version` |
 | Git | Any | `git --version` |
 
-### Getting an API Key
+### Getting an API Key (Optional)
 
-To use real AI-generated questions, you need an API key from one of:
+To use real AI-generated questions, connect your OpenRouter account:
 
-1. **Anthropic Claude** (recommended for server-side)
-   - Sign up at [console.anthropic.com](https://console.anthropic.com/)
-   - Create an API key
-   - Free tier has limited credits
+- **OpenRouter** - Sign up at [openrouter.ai](https://openrouter.ai/)
+- Provides access to multiple AI models (Claude, GPT-4, Gemini, etc.)
+- Free tier models available (default: DeepSeek R1T2 Chimera)
+- Connect via Settings page in the app (OAuth flow)
 
-2. **OpenRouter** (for client-side with your own key)
-   - Sign up at [openrouter.ai](https://openrouter.ai/)
-   - Provides access to multiple AI models
-   - Some free tier models available
+**Note:** The app works without an API key using mock responses for development.
 
 ## Installation Steps
 
@@ -60,11 +57,13 @@ cp .env.example .env
 Edit `.env` with your configuration:
 
 ```bash
-# Required for real API (server-side)
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-
-# Optional: Use mock API in development
+# Use mock API (default) or real API via OpenRouter
 VITE_USE_REAL_API=false
+
+# FTP deployment (optional - only if deploying to VPS)
+FTP_HOST=your-ftp-host
+FTP_USER=your-ftp-username
+FTP_PASSWORD=your-ftp-password
 ```
 
 ### 4. Install Playwright Browsers (for E2E tests)

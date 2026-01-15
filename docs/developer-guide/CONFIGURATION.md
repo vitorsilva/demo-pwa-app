@@ -11,11 +11,13 @@ Saberloop uses environment variables for configuration. These are managed differ
 Create a `.env` file in the project root (copy from `.env.example`):
 
 ```bash
-# API Configuration
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-
 # Development Options
 VITE_USE_REAL_API=false
+
+# FTP Deployment (optional)
+FTP_HOST=your-ftp-host
+FTP_USER=your-ftp-username
+FTP_PASSWORD=your-ftp-password
 ```
 
 **Important:** Never commit `.env` to version control. It's already in `.gitignore`.
@@ -24,8 +26,13 @@ VITE_USE_REAL_API=false
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | For real API | - | Your Anthropic Claude API key |
 | `VITE_USE_REAL_API` | No | `false` | Use real API vs mock API |
+| `VITE_TELEMETRY_ENABLED` | No | `false` | Enable telemetry sending |
+| `VITE_TELEMETRY_ENDPOINT` | No | - | VPS endpoint for telemetry |
+| `VITE_TELEMETRY_TOKEN` | No | - | Auth token for telemetry |
+| `FTP_HOST` | For deploy | - | FTP server hostname |
+| `FTP_USER` | For deploy | - | FTP username |
+| `FTP_PASSWORD` | For deploy | - | FTP password |
 
 ### Vite Environment Variables
 
@@ -110,7 +117,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        'primary': '#4A90E2',
+        'primary': 'var(--color-primary)',  // CSS variable for theming
+        'primary-hover': 'var(--color-primary-hover)',
         'background-light': '#F8F9FA',
         'background-dark': '#121212',
         // ... more custom colors
@@ -119,6 +127,8 @@ export default {
   }
 }
 ```
+
+**Note:** Primary colors use CSS variables to support Learning/Party mode theming.
 
 ## PWA Configuration
 
