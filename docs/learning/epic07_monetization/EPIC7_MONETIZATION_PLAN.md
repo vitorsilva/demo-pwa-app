@@ -1,7 +1,8 @@
 # Epic 7: Monetization - Revenue Streams
 
-**Status:** Planning
+**Status:** In Progress
 **Created:** 2026-01-06
+**Updated:** 2026-01-15
 
 ---
 
@@ -21,11 +22,11 @@ Implement a hybrid monetization strategy for Saberloop to achieve break-even rev
 
 ### What's IN
 
-| Phase | Feature | Priority | Revenue Target | Document |
-|-------|---------|----------|----------------|----------|
-| **60** | AdSense Integration | High | €1-5/month | [PHASE60_ADSENSE_MONETIZATION.md](./PHASE60_ADSENSE_MONETIZATION.md) |
-| **61** | Donation Support | Medium | €2-15/month | [PHASE61_DONATION.md](./PHASE61_DONATION.md) |
-| **62** | License Key Premium | High | €20-80/month | [PHASE62_LICENSE_KEY_PREMIUM.md](./PHASE62_LICENSE_KEY_PREMIUM.md) |
+| Phase | Feature | Priority | Revenue Target | Status | Document |
+|-------|---------|----------|----------------|--------|----------|
+| **60** | AdSense Integration | High | €1-5/month | Planning | [PHASE60_ADSENSE_MONETIZATION.md](./PHASE60_ADSENSE_MONETIZATION.md) |
+| **61** | Donation Support | Medium | €2-15/month | ✅ Complete | [PHASE61_DONATION.md](./PHASE61_DONATION.md) |
+| **62** | License Key Premium | High | €20-80/month | Planning | [PHASE62_LICENSE_KEY_PREMIUM.md](./PHASE62_LICENSE_KEY_PREMIUM.md) |
 
 ### Reference Documentation
 
@@ -101,13 +102,12 @@ Implement a hybrid monetization strategy for Saberloop to achieve break-even rev
 
 ## Implementation Order
 
-**Recommended sequence:**
+**Sequence:**
 
-1. **Phase 61 (Donations)** - Quick win, 1-2 hours
-   - Lowest effort, builds community goodwill
-   - Start generating revenue immediately
+1. ~~**Phase 61 (Donations)**~~ ✅ Complete
+   - Liberapay integration live
 
-2. **Phase 60 (AdSense)** - 4-5 days + approval wait
+2. **Phase 60 (AdSense)** - 4-5 days + approval wait ← **Next**
    - Passive revenue during LLM loading screens
    - Requires Google approval (1-7 days)
 
@@ -115,7 +115,7 @@ Implement a hybrid monetization strategy for Saberloop to achieve break-even rev
    - Primary revenue driver
    - Requires payment processor setup
 
-**Total estimated effort:** 7-10 days (excluding approval waits)
+**Remaining effort:** 6-8 days (excluding approval waits)
 
 ---
 
