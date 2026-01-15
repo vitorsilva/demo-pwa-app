@@ -14,75 +14,26 @@ const log = logger.child({ module: 'p2p-service' });
 
 /**
  * @typedef {Object} PeerConnection
- * @property {RTCPeerConnection} connection - The WebRTC connection
- * @property {RTCDataChannel|null} dataChannel - The data channel
+ * @property {RTCPeerConnection} connection - The WebRTC connection   
+ * @property {RTCDataChannel|null} dataChannel - The data channel     
  * @property {'new'|'connecting'|'connected'|'disconnected'|'failed'} state - Connection state
  * @property {number} reconnectAttempts - Number of reconnection attempts
  * @property {number} connectionStartTime - Timestamp when connection was initiated
+ * @property {RTCIceCandidate[]} pendingIceCandidates - Queued ICE candidates waiting for remote description
+ * @property {boolean} dataChannelReady - Whether the data channel is open and ready
+ * @property {boolean} peerConnectedNotified - Whether onPeerConnected callback has been fired
  */
 
 /**
- * Fallback STUN servers if TURN fetch fails.
+ * STUN servers for ICE candidate gathering.
+ * Google provides these free public STUN servers.
+ * No external service or API key needed.
  */
-const FALLBACK_ICE_SERVERS = [
+const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
 ];
-
-/**
- * Cache for TURN credentials (avoids repeated API calls).
- */
-let cachedIceServers = null;
-let cacheExpiry = 0;
-const CACHE_TTL = 3600000; // 1 hour in ms
-
-/**
- * Fetch TURN credentials from Metered.ca.
- * API key is safe for frontend use (credential-scoped).
- *
- * @returns {Promise<RTCIceServer[]>} ICE servers configuration
- */
-async function getIceServers() {
-  // Use cached credentials if still valid
-  if (cachedIceServers && Date.now() < cacheExpiry) {
-    log.debug('Using cached TURN credentials');
-    return cachedIceServers;
-  }
-
-  const apiKey = import.meta.env.VITE_METERED_API_KEY;
-  const appName = import.meta.env.VITE_METERED_APP_NAME;
-
-  if (!apiKey || !appName) {
-    log.warn('Metered.ca not configured, using STUN fallback');
-    return FALLBACK_ICE_SERVERS;
-  }
-
-  try {
-    const response = await fetch(
-      `https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const iceServers = await response.json();
-
-    // Cache the credentials
-    cachedIceServers = iceServers;
-    cacheExpiry = Date.now() + CACHE_TTL;
-
-    log.info('TURN credentials fetched from Metered.ca', {
-      serverCount: iceServers.length
-    });
-
-    return iceServers;
-  } catch (error) {
-    log.warn('Failed to fetch TURN credentials, using STUN fallback', {
-      error: error.message
-    });
-    return FALLBACK_ICE_SERVERS;
-  }
-}
 
 /**
  * P2P Service for managing WebRTC connections.
@@ -100,14 +51,14 @@ export class P2PService {
     /** @type {Map<string, PeerConnection>} */
     this.peers = new Map();
 
-    /** @type {Function|null} */
-    this.onMessageCallback = null;
+    /** @type {Function[]} */
+    this.onMessageCallbacks = [];
 
-    /** @type {Function|null} */
-    this.onPeerConnectedCallback = null;
+    /** @type {Function[]} */
+    this.onPeerConnectedCallbacks = [];
 
-    /** @type {Function|null} */
-    this.onPeerDisconnectedCallback = null;
+    /** @type {Function[]} */
+    this.onPeerDisconnectedCallbacks = [];
 
     /** @type {number} */
     this.maxReconnectAttempts = 3;
@@ -185,10 +136,7 @@ export class P2PService {
       role: 'initiator',
     });
 
-    // Fetch TURN credentials from Metered.ca
-    const iceServers = await getIceServers();
-
-    const peerConnection = this._createPeerConnection(peerId, iceServers);
+    const peerConnection = this._createPeerConnection(peerId);
 
     // Create data channel (initiator creates the channel)
     const dataChannel = peerConnection.connection.createDataChannel('party', {
@@ -220,18 +168,26 @@ export class P2PService {
     // Create connection if it doesn't exist
     let peerConnection = this.peers.get(peerId);
     if (!peerConnection) {
-      // Fetch TURN credentials from Metered.ca
-      const iceServers = await getIceServers();
-      peerConnection = this._createPeerConnection(peerId, iceServers);
+      peerConnection = this._createPeerConnection(peerId);
     }
 
     const { connection } = peerConnection;
 
+    // Only accept offer if we're in a state that can receive it
+    const signalingState = connection.signalingState;
+    if (signalingState !== 'stable' && signalingState !== 'have-local-offer') {
+      log.warn('Ignoring offer - wrong signaling state', { peerId, signalingState });
+      return;
+    }
+
     // Set remote description (the offer)
-    await connection.setRemoteDescription(new RTCSessionDescription({
+    await connection.setRemoteDescription(new RTCSessionDescription({     
       type: 'offer',
       sdp: payload.sdp,
     }));
+
+    // Process any ICE candidates that arrived before the offer
+    await this._processPendingIceCandidates(peerId);
 
     // Create and send answer
     const answer = await connection.createAnswer();
@@ -258,10 +214,20 @@ export class P2PService {
       return;
     }
 
+    // Only accept answer if we're waiting for one (have-local-offer state)
+    const signalingState = peerConnection.connection.signalingState;
+    if (signalingState !== 'have-local-offer') {
+      log.warn('Ignoring answer - wrong signaling state', { peerId, signalingState });
+      return;
+    }
+
     await peerConnection.connection.setRemoteDescription(new RTCSessionDescription({
       type: 'answer',
       sdp: payload.sdp,
     }));
+
+    // Process any ICE candidates that arrived before the answer
+    await this._processPendingIceCandidates(peerId);
   }
 
   /**
@@ -284,8 +250,42 @@ export class P2PService {
       sdpMLineIndex: payload.sdpMLineIndex,
     });
 
+    // Queue candidate if remote description not yet set
+    if (!peerConnection.connection.remoteDescription) {
+      log.debug('Queuing ICE candidate (no remote description yet)', { peerId });
+      peerConnection.pendingIceCandidates.push(candidate);
+      return;
+    }
+
     await peerConnection.connection.addIceCandidate(candidate);
     log.debug('Added ICE candidate', { peerId });
+  }
+
+  /**
+   * Process any queued ICE candidates after remote description is set. 
+   *
+   * @private
+   * @param {string} peerId - Peer ID
+   */
+  async _processPendingIceCandidates(peerId) {
+    const peerConnection = this.peers.get(peerId);
+    if (!peerConnection) return;
+
+    const pending = peerConnection.pendingIceCandidates;
+    if (pending.length === 0) return;
+
+    log.debug('Processing queued ICE candidates', { peerId, count: pending.length });
+
+    for (const candidate of pending) {
+      try {
+        await peerConnection.connection.addIceCandidate(candidate);     
+      } catch (error) {
+        log.warn('Failed to add queued ICE candidate', { peerId, error: error.message });
+      }
+    }
+
+    // Clear the queue
+    peerConnection.pendingIceCandidates = [];
   }
 
   /**
@@ -293,13 +293,11 @@ export class P2PService {
    *
    * @private
    * @param {string} peerId - Peer ID
-   * @param {RTCIceServer[]} iceServers - ICE servers configuration
    * @returns {PeerConnection}
    */
-  _createPeerConnection(peerId, iceServers) {
+  _createPeerConnection(peerId) {
     const connection = new RTCPeerConnection({
-      iceServers: iceServers,
-      iceTransportPolicy: 'relay', // Force TURN relay only - fixes PWA permission issue
+      iceServers: ICE_SERVERS,
     });
 
     /** @type {PeerConnection} */
@@ -309,6 +307,9 @@ export class P2PService {
       state: 'new',
       reconnectAttempts: 0,
       connectionStartTime: Date.now(),
+      pendingIceCandidates: [],
+      dataChannelReady: false,
+      peerConnectedNotified: false,
     };
 
     this.peers.set(peerId, peerConnection);
@@ -316,7 +317,14 @@ export class P2PService {
     // Handle ICE candidates
     connection.onicecandidate = (event) => {
       if (event.candidate) {
-        this.signalingClient.sendIceCandidate(peerId, event.candidate);
+        // Track ICE candidate type for STUN vs TURN evaluation
+        telemetry.track('p2p_ice_candidate', {
+          peerId,
+          type: event.candidate.type,
+          protocol: event.candidate.protocol,
+        });
+
+        this.signalingClient.sendIceCandidate(peerId, event.candidate);   
       }
     };
 
@@ -333,12 +341,12 @@ export class P2PService {
           // Track telemetry
           telemetry.track('p2p_connection_success', {
             peerId,
-            connectionTime: Date.now() - peerConnection.connectionStartTime,
+            connectionTime: Date.now() - peerConnection.connectionStartTime,    
+            iceState: connection.iceConnectionState,
           });
 
-          if (this.onPeerConnectedCallback) {
-            this.onPeerConnectedCallback(peerId);
-          }
+          // Only notify when both connection AND data channel are ready
+          this._notifyPeerConnectedIfReady(peerId);
           break;
 
         case 'disconnected':
@@ -353,6 +361,7 @@ export class P2PService {
           telemetry.track('p2p_connection_failed', {
             peerId,
             error: 'connection_failed',
+            iceState: connection.iceConnectionState,
           });
 
           this._handleConnectionFailure(peerId);
@@ -380,6 +389,12 @@ export class P2PService {
   _setupDataChannel(peerId, channel) {
     channel.onopen = () => {
       log.info('Data channel opened', { peerId });
+      const peerConnection = this.peers.get(peerId);
+      if (peerConnection) {
+        peerConnection.dataChannelReady = true;
+        // Only notify when both connection AND data channel are ready
+        this._notifyPeerConnectedIfReady(peerId);
+      }
     };
 
     channel.onclose = () => {
@@ -395,13 +410,45 @@ export class P2PService {
         const message = JSON.parse(event.data);
         log.debug('Received message', { peerId, type: message.type });
 
-        if (this.onMessageCallback) {
-          this.onMessageCallback(peerId, message);
+        for (const callback of this.onMessageCallbacks) {
+          callback(peerId, message);
         }
       } catch (error) {
         log.error('Error parsing message', { error: error.message });
       }
     };
+  }
+
+  /**
+   * Notify peer connected only when both connection and data channel are ready.
+   *
+   * @private
+   * @param {string} peerId - Peer ID
+   */
+  _notifyPeerConnectedIfReady(peerId) {
+    const peerConnection = this.peers.get(peerId);
+    if (!peerConnection) return;
+
+    // Check if both conditions are met and we haven't notified yet
+    const isConnectionReady = peerConnection.state === 'connected';
+    const isDataChannelReady = peerConnection.dataChannelReady;
+    const alreadyNotified = peerConnection.peerConnectedNotified;
+
+    if (isConnectionReady && isDataChannelReady && !alreadyNotified) {
+      peerConnection.peerConnectedNotified = true;
+      log.info('Peer fully connected (connection + data channel ready)', { peerId });
+
+      for (const callback of this.onPeerConnectedCallbacks) {
+        callback(peerId);
+      }
+    } else {
+      log.debug('Peer not fully ready yet', {
+        peerId,
+        isConnectionReady,
+        isDataChannelReady,
+        alreadyNotified,
+      });
+    }
   }
 
   /**
@@ -411,8 +458,8 @@ export class P2PService {
    * @param {string} peerId - Peer ID
    */
   _handleDisconnection(peerId) {
-    if (this.onPeerDisconnectedCallback) {
-      this.onPeerDisconnectedCallback(peerId, 'disconnected');
+    for (const callback of this.onPeerDisconnectedCallbacks) {
+      callback(peerId, 'disconnected');
     }
   }
 
@@ -450,8 +497,8 @@ export class P2PService {
       log.error('Max reconnection attempts reached', { peerId });
       this._cleanupPeerConnection(peerId);
 
-      if (this.onPeerDisconnectedCallback) {
-        this.onPeerDisconnectedCallback(peerId, 'failed');
+      for (const callback of this.onPeerDisconnectedCallbacks) {
+        callback(peerId, 'failed');
       }
     }
   }
@@ -529,7 +576,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId, message)
    */
   onMessage(callback) {
-    this.onMessageCallback = callback;
+    this.onMessageCallbacks.push(callback);
   }
 
   /**
@@ -538,7 +585,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId)
    */
   onPeerConnected(callback) {
-    this.onPeerConnectedCallback = callback;
+    this.onPeerConnectedCallbacks.push(callback);
   }
 
   /**
@@ -547,7 +594,7 @@ export class P2PService {
    * @param {Function} callback - Called with (peerId, reason)
    */
   onPeerDisconnected(callback) {
-    this.onPeerDisconnectedCallback = callback;
+    this.onPeerDisconnectedCallbacks.push(callback);
   }
 
   /**
@@ -610,9 +657,9 @@ export class P2PService {
     this.isDestroyed = true;
     this.disconnectAll();
     this.signalingClient.stopPolling();
-    this.onMessageCallback = null;
-    this.onPeerConnectedCallback = null;
-    this.onPeerDisconnectedCallback = null;
+    this.onMessageCallbacks = [];
+    this.onPeerConnectedCallbacks = [];
+    this.onPeerDisconnectedCallbacks = [];
 
     log.info('P2PService destroyed');
   }

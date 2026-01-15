@@ -24,7 +24,7 @@ import { t } from '../core/i18n.js';
  * @param {Object} [options] - Display options
  * @param {boolean} [options.compact=false] - Use compact display
  * @param {boolean} [options.showStatus=true] - Show answer status
- * @param {number} [options.highlightId] - ID to highlight
+ * @param {string} [options.highlightId] - ID to highlight
  * @returns {HTMLElement}
  */
 export function createLiveScoreboard(scores, options = {}) {

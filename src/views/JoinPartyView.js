@@ -10,6 +10,11 @@ import { createRoomCodeInput, isValidRoomCode } from '../components/RoomCodeInpu
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { joinRoom, generateParticipantId } from '../services/party-api.js';
+import {
+  PartyConnectionManager,
+  CONNECTION_MODES,
+} from '../services/party-connection-manager.js';
+import { setConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'JoinPartyView' });
 
@@ -188,6 +193,25 @@ export default class JoinPartyView extends BaseView {
         participantId,
         participantCount: roomData.participants?.length,
       });
+
+      // Initialize P2P connection manager as guest
+      const connectionManager = new PartyConnectionManager(
+        code,
+        participantId,
+        false // isHost = false (guest)
+      );
+
+      // Store connection for lobby view to retrieve
+      setConnection(connectionManager);
+
+      // Set up error handler for connection issues
+      connectionManager.onError((error) => {
+        log.warn('Connection error during join', { error: error.message });
+        // Continue to lobby anyway - it will handle fallback mode
+      });
+
+      // Start P2P connection (don't await - let it connect while navigating)
+      connectionManager.connect();
 
       // Store participant ID for lobby/quiz views
       sessionStorage.setItem('partyParticipantId', participantId);

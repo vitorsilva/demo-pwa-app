@@ -13,12 +13,17 @@ import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
 import { shareContent } from '../utils/share.js';
 import { logger } from '../utils/logger.js';
 import {
+  PartyConnectionManager,
+  CONNECTION_MODES,
+} from '../services/party-connection-manager.js';
+import {
   createRoom,
   getRoom,
   endRoom,
   startQuiz as startQuizApi,
   generateParticipantId,
 } from '../services/party-api.js';
+import { setConnection, clearConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'CreatePartyView' });
 
@@ -34,6 +39,7 @@ export default class CreatePartyView extends BaseView {
     this.selectedQuizId = null;
     this.quizzes = [];
     this.pollInterval = null;
+    this.connectionManager = null;
   }
 
   async render() {
@@ -219,6 +225,42 @@ export default class CreatePartyView extends BaseView {
 
       this.roomCode = roomData.code;
 
+      // Initialize P2P connection manager as host
+      this.connectionManager = new PartyConnectionManager(
+        this.roomCode,
+        this.hostId,
+        true // isHost
+      );
+
+      // Store in connection store so it persists across view navigation
+      setConnection(this.connectionManager);
+
+      // Set up connection event handlers
+      this.connectionManager.onModeChange((mode, previousMode) => {
+        log.info('Connection mode changed', { from: previousMode, to: mode });
+        this._updateConnectionStatus(mode);
+      });
+
+      this.connectionManager.onPeerJoined((peerId) => {
+        log.info('Peer joined', { peerId });
+        // For now, still use HTTP to get participant names
+        // P2P only gives us peer IDs, not names
+        this._pollParticipants();
+      });
+
+      this.connectionManager.onPeerLeft((peerId) => {
+        log.info('Peer left', { peerId });
+        this._pollParticipants();
+      });
+
+      this.connectionManager.onError((error) => {
+        log.warn('Connection error', { error: error.message });
+        // In HTTP fallback mode, we'll rely on polling
+      });
+
+      // Start P2P connection
+      await this.connectionManager.connect();      
+
       // Initialize participants from API response
       this.participants = this._mapParticipants(roomData.participants || []);
 
@@ -239,9 +281,6 @@ export default class CreatePartyView extends BaseView {
 
       // Render participant list
       this.updateParticipantList();
-
-      // Start polling for participant updates
-      this._startPolling();
 
       log.info('Room created', { roomCode: this.roomCode, hostId: this.hostId });
     } catch (error) {
@@ -269,26 +308,15 @@ export default class CreatePartyView extends BaseView {
 
   /**
    * Start polling for participant updates.
+   * Only used in HTTP fallback mode.
    */
   _startPolling() {
     if (this.pollInterval) return;
 
-    log.info('Starting polling for room', { roomCode: this.roomCode });
+    log.info('Starting HTTP polling for room', { roomCode: this.roomCode });
 
-    this.pollInterval = setInterval(async () => {
-      try {
-        const roomData = await getRoom(this.roomCode);
-        const newParticipants = this._mapParticipants(roomData.participants || []);
-
-        // Check if participant list changed
-        if (JSON.stringify(newParticipants) !== JSON.stringify(this.participants)) {
-          log.info('Participants updated', { count: newParticipants.length });
-          this.participants = newParticipants;
-          this.updateParticipantList();
-        }
-      } catch (error) {
-        log.error('Failed to poll room', { error: error.message });
-      }
+    this.pollInterval = setInterval(() => {
+      this._pollParticipants();
     }, POLL_INTERVAL_MS);
   }
 
@@ -301,6 +329,40 @@ export default class CreatePartyView extends BaseView {
       this.pollInterval = null;
     }
   }
+
+  /**
+   * Update UI based on connection mode.
+   * @param {string} mode - Connection mode from CONNECTION_MODES
+   */
+  _updateConnectionStatus(mode) {
+    // For now, just log the status
+    // Task B.6 will add a visual ConnectionModeIndicator component
+    if (mode === CONNECTION_MODES.P2P) {
+      log.info('Connected via P2P');
+    } else if (mode === CONNECTION_MODES.HTTP_FALLBACK) {
+      log.info('Using HTTP fallback - starting polling');
+      this._startPolling();
+    }
+  }
+
+  /**
+   * Fetch participants once from the server.
+   * Used when P2P events notify us of changes.
+   */
+  async _pollParticipants() {
+    try {
+      const roomData = await getRoom(this.roomCode);
+      const newParticipants = this._mapParticipants(roomData.participants || []);
+
+      if (JSON.stringify(newParticipants) !== JSON.stringify(this.participants)) {
+        log.info('Participants updated', { count: newParticipants.length });
+        this.participants = newParticipants;
+        this.updateParticipantList();
+      }
+    } catch (error) {
+      log.error('Failed to fetch participants', { error: error.message });
+    }
+  }  
 
   updateParticipantList() {
     const container = this.querySelector('#participantContainer');
@@ -377,12 +439,24 @@ export default class CreatePartyView extends BaseView {
       }
     }
 
+    // Clean up P2P connection when explicitly cancelling
+    clearConnection();
+
+    // Clear session storage
+    sessionStorage.removeItem('partyParticipantId');
+    sessionStorage.removeItem('partyRoomCode');
+    sessionStorage.removeItem('partyIsHost');
+
     log.info('Party cancelled', { roomCode: this.roomCode });
     this.navigateTo('/');
   }
 
   destroy() {
     this._stopPolling();
+    // Note: Do NOT clear the connection here - it should persist
+    // across view navigation. Connection is only cleared when
+    // explicitly cancelling the party via cancelParty().
+    this.connectionManager = null;
     super.destroy();
   }
 }

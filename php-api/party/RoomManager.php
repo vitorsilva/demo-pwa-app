@@ -84,7 +84,7 @@ class RoomManager
         $stmt->execute([
             $code,
             $hostId,
-            $hostName,
+            $hostName ?? 'Anonymous',  // Default for P2P mode
             $quizData ? json_encode($quizData) : null,
             $seconds,
             $maxParticipants,
@@ -93,7 +93,7 @@ class RoomManager
         $roomId = (int) $this->db->lastInsertId();
 
         // Add host as first participant
-        $this->addParticipant($roomId, $hostId, $hostName, true);
+        $this->addParticipant($roomId, $hostId, $$hostName ?? 'Anonymous', true);
 
         // Record rate limit action
         $this->recordRateLimitAction($_SERVER['REMOTE_ADDR'] ?? 'unknown', 'create_room');
@@ -246,7 +246,7 @@ class RoomManager
             throw new Exception('Room not found', 404);
         }
 
-        $this->addParticipant((int) $room['id'], $participantId, $name, false);
+        $this->addParticipant((int) $room['id'], $participantId, $name ?? 'Guest', false);
 
         return $this->getRoomById((int) $room['id']);
     }

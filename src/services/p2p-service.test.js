@@ -24,6 +24,7 @@ class MockRTCPeerConnection {
     this.remoteDescription = null;
     this.connectionState = 'new';
     this.iceConnectionState = 'new';
+    this.signalingState = 'stable';
     this.onicecandidate = null;
     this.onconnectionstatechange = null;
     this.ondatachannel = null;
@@ -46,10 +47,22 @@ class MockRTCPeerConnection {
 
   async setLocalDescription(desc) {
     this.localDescription = desc;
+    // Update signaling state based on description type
+    if (desc && desc.type === 'offer') {
+      this.signalingState = 'have-local-offer';
+    } else if (desc && desc.type === 'answer') {
+      this.signalingState = 'stable';
+    }
   }
 
   async setRemoteDescription(desc) {
     this.remoteDescription = desc;
+    // Update signaling state based on description type
+    if (desc && desc.type === 'offer') {
+      this.signalingState = 'have-remote-offer';
+    } else if (desc && desc.type === 'answer') {
+      this.signalingState = 'stable';
+    }
   }
 
   async addIceCandidate(candidate) {
@@ -328,15 +341,53 @@ describe('P2PService', () => {
   });
 
   describe('onPeerConnected', () => {
-    it('should call callback when peer connects', async () => {
+    it('should call callback when peer connects and data channel opens', async () => {
       const callback = vi.fn();
       p2pService.onPeerConnected(callback);
 
       await p2pService.createConnection('peer-1');
 
       const peer = p2pService.peers.get('peer-1');
+
+      // Simulate connection state change
       peer.connection._setConnectionState('connected');
 
+      // Callback should NOT be called yet (data channel not ready)
+      expect(callback).not.toHaveBeenCalled();
+
+      // Simulate data channel opening
+      const dataChannel = peer.connection._dataChannels[0];
+      dataChannel.readyState = 'open';
+      if (dataChannel.onopen) {
+        dataChannel.onopen();
+      }
+
+      // NOW callback should be called
+      expect(callback).toHaveBeenCalledWith('peer-1');
+    });
+
+    it('should call callback when data channel opens before connection state', async () => {
+      const callback = vi.fn();
+      p2pService.onPeerConnected(callback);
+
+      await p2pService.createConnection('peer-1');
+
+      const peer = p2pService.peers.get('peer-1');
+
+      // Simulate data channel opening first
+      const dataChannel = peer.connection._dataChannels[0];
+      dataChannel.readyState = 'open';
+      if (dataChannel.onopen) {
+        dataChannel.onopen();
+      }
+
+      // Callback should NOT be called yet (connection not ready)
+      expect(callback).not.toHaveBeenCalled();
+
+      // Simulate connection state change
+      peer.connection._setConnectionState('connected');
+
+      // NOW callback should be called
       expect(callback).toHaveBeenCalledWith('peer-1');
     });
   });

@@ -13,6 +13,7 @@ import { shareContent } from '../utils/share.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom } from '../services/party-api.js';
+import { getConnection, clearConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'PartyResultsView' });
 
@@ -33,10 +34,26 @@ export default class PartyResultsView extends BaseView {
     this.quiz = options.quiz;
     this.participantId = options.participantId || sessionStorage.getItem('partyParticipantId') || '';
     this.isHost = options.isHost || sessionStorage.getItem('partyIsHost') === 'true';
+    this.connectionManager = null
   }
 
   async render() {
-    // If no standings provided, fetch from API
+    // Try to get standings from P2P session first
+    this.connectionManager = getConnection();
+
+    if (this.connectionManager) {
+      const session = this.connectionManager.getSession();
+      if (session && session.quiz) {
+        this.standings = session.getStandings().map(p => ({
+          ...p,
+          isYou: p.id === session.participantId,
+        }));
+        this.quiz = session.quiz;
+        log.info('Results loaded from P2P session', { participants: this.standings.length });
+      }
+    }
+
+    // If no standings from session, fetch from API
     if (this.standings.length === 0 && this.roomCode) {
       try {
         const roomData = await getRoom(this.roomCode);
@@ -280,4 +297,19 @@ export default class PartyResultsView extends BaseView {
     log.info('Save locally - not implemented yet');
     alert(t('party.saveFeatureComingSoon'));
   }
+
+  destroy() {
+    // Clean up P2P connection - this is the final view in the party flow
+    if (this.connectionManager) {
+      clearConnection();
+      this.connectionManager = null;
+    }
+
+    // Clear session storage
+    sessionStorage.removeItem('partyRoomCode');
+    sessionStorage.removeItem('partyParticipantId');
+    sessionStorage.removeItem('partyIsHost');
+
+    super.destroy();
+  }  
 }

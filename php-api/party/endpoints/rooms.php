@@ -29,8 +29,8 @@ try {
     if ($method === 'POST' && count($segments) === 0) {
         $body = ApiHelper::getJsonBody();
         $hostId = ApiHelper::requireField($body, 'hostId');
-        $hostName = ApiHelper::requireField($body, 'hostName');
-        $quizData = $body['quizData'] ?? null;
+        $hostName = $body['hostName'] ?? null;  // Optional for P2P mode
+        $quizData = $body['quizData'] ?? null;  // Optional for P2P mode
         $secondsPerQuestion = $body['secondsPerQuestion'] ?? null;
 
         $room = $roomManager->createRoom($hostId, $hostName, $quizData, $secondsPerQuestion);
@@ -54,7 +54,7 @@ try {
         $code = $segments[0];
         $body = ApiHelper::getJsonBody();
         $participantId = ApiHelper::requireField($body, 'participantId');
-        $name = ApiHelper::requireField($body, 'name');
+        $name = $body['name'] ?? null;  // Optional for P2P mode
 
         $room = $roomManager->joinRoom($code, $participantId, $name);
         ApiHelper::success($room);
@@ -112,15 +112,18 @@ try {
     }
 
     // Route: POST /rooms/{code}/answer - Submit answer
+    // DEPRECATED: In P2P mode, answers go directly to host via WebRTC.   
+    // This endpoint remains for HTTP fallback mode only.
     if ($method === 'POST' && count($segments) === 2 && $segments[1] === 'answer') {
         $code = $segments[0];
         $body = ApiHelper::getJsonBody();
-        $participantId = ApiHelper::requireField($body, 'participantId');
+        $participantId = ApiHelper::requireField($body, 'participantId'); 
         $questionIndex = (int) ApiHelper::requireField($body, 'questionIndex');
         $answerIndex = (int) ($body['answerIndex'] ?? -1);
         $timeMs = (int) ($body['timeMs'] ?? 0);
 
         $result = $roomManager->submitAnswer($code, $participantId, $questionIndex, $answerIndex, $timeMs);
+        $result['_fallback'] = true;  // Flag for telemetry tracking      
         ApiHelper::success($result);
     }
 
