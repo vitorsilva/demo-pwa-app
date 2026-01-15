@@ -103,21 +103,7 @@ export default defineConfig(({ command }) => {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
 
                 runtimeCaching: [
-                    // API calls (Network First)
-                    {
-                        urlPattern: /^https:\/\/.*\.netlify\.app\/\.netlify\/functions\/.*/,
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'api-cache',
-                            expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 5 * 60 // 5 minutes
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200]
-                            }
-                        }
-                    },
+
                     // Tailwind CDN (Cache First)
                     {
                         urlPattern: /^https:\/\/cdn\.tailwindcss\.com\/.*/,
@@ -149,7 +135,7 @@ export default defineConfig(({ command }) => {
 
                 cleanupOutdatedCaches: true,
                 navigateFallback: `${base}index.html`,
-                navigateFallbackDenylist: [/^\/api/, /^\/\.netlify/]
+                navigateFallbackDenylist: [/^\/api/]
             },
 
             devOptions: {
