@@ -2,7 +2,7 @@
  * Quiz Service - Business logic for quiz operations
  * Views should use this instead of importing db or api directly
  */
-import { getRecentSessions, getSession, saveSession, updateSession, updateQuestionExplanation as dbUpdateQuestionExplanation, quizExistsBySourceId as dbQuizExistsBySourceId } from '../core/db.js';
+import { getRecentSessions, getSession, saveSession, updateSession, deleteSession, updateQuestionExplanation as dbUpdateQuestionExplanation, quizExistsBySourceId as dbQuizExistsBySourceId } from '../core/db.js';
 import { generateQuestions as apiGenerateQuestions, generateExplanation as apiGenerateExplanation, generateWrongAnswerExplanation as apiGenerateWrongAnswerExplanation } from '../api/index.js';
 
 /**
@@ -96,6 +96,20 @@ export async function generateWrongAnswerExplanation(question, userAnswer, corre
  */
 export async function updateQuestionExplanation(sessionId, questionIndex, rightAnswerExplanation) {
   return dbUpdateQuestionExplanation(sessionId, questionIndex, rightAnswerExplanation);
+}
+
+/**
+ * Delete a quiz from history
+ * @param {number} id - Quiz session ID
+ * @returns {Promise<boolean>} True if deleted, false if not found
+ */
+export async function deleteQuiz(id) {
+  const session = await getSession(id);
+  if (!session) {
+    return false;
+  }
+  await deleteSession(id);
+  return true;
 }
 
 /**
