@@ -96,6 +96,11 @@ async function init() {
     router.init();
     logger.info('Router initialized');
 
+    // Expose router for E2E testing (access current view)
+    if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+      window.__router = router;
+    }
+
     // Initialize network status monitoring
     initNetworkMonitoring();
 
