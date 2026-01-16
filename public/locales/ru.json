@@ -31,6 +31,12 @@
     "startQuiz": "Начать тест",
     "cannotReplay": "Нельзя повторить"
   },
+  "history": {
+    "deleteQuiz": "Удалить тест",
+    "deleteQuizConfirm": "Удалить этот тест?",
+    "deleteQuizDescription": "Это навсегда удалит \"{{topic}}\" из вашей истории.",
+    "quizDeleted": "Тест удалён"
+  },
   "topicInput": {
     "title": "Новый тест",
     "whatToPractice": "Что вы хотите изучить?",

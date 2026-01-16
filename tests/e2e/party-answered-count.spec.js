@@ -12,8 +12,9 @@
 import { test, expect } from '@playwright/test';
 import { setupAuthenticatedState } from './helpers.js';
 
-// Skip these tests if not running with Docker backend
-const PARTY_API_URL = process.env.VITE_PARTY_API_URL || 'http://localhost:8080/party';
+// Skip Docker-dependent tests unless VITE_PARTY_API_URL is explicitly set
+// (meaning Docker backend is intentionally configured for testing)
+const isDockerConfigured = Boolean(process.env.VITE_PARTY_API_URL);
 
 /**
  * Helper to switch to party mode.
@@ -156,6 +157,11 @@ test.describe('Party Mode Answered Count (Issue #120)', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.describe('Results page answered count display', () => {
+    // Skip these tests in CI - they require Docker backend with real WebRTC signaling
+    test.beforeEach(() => {
+      test.skip(!isDockerConfigured, 'Requires Docker backend (set VITE_PARTY_API_URL=http://localhost:8080/party)');
+    });
+
     test('should show correct answered count for host who answered all questions', async ({ browser }) => {
       // Create isolated browser contexts for host and guest
       const hostContext = await browser.newContext();

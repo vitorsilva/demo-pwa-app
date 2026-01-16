@@ -17,7 +17,8 @@ import {
     getSessionsByTopic,
     getRecentSessions,
     updateSession,
-    updateQuestionExplanation,  
+    updateQuestionExplanation,
+    deleteSession,
     deleteSampleSessions,
     getSetting,
     saveSetting,
@@ -588,13 +589,88 @@ describe('Sessions CRUD Operations', () => {
             }]
           });
 
-          await updateQuestionExplanation(sessionId, 0, 'H2O is the chemical formula for water');        
+          await updateQuestionExplanation(sessionId, 0, 'H2O is the chemical formula for water');
 
           const session = await getSession(sessionId);
           expect(session.questions[0].question).toBe('What is H2O?');
           expect(session.questions[0].correct).toBe(0);
           expect(session.questions[0].userAnswer).toBe(0);
           expect(session.questions[0].rightAnswerExplanation).toBe('H2O is the chemical formula for water');
+        });
+      });
+
+      describe('deleteSession', () => {
+        beforeEach(async () => {
+          indexedDB.deleteDatabase(DB_NAME);
+        });
+
+        it('should delete a session by ID', async () => {
+          const sessionId = await saveSession({
+            topicId: 'math',
+            topic: 'Mathematics',
+            timestamp: Date.now(),
+            score: 5,
+            totalQuestions: 5
+          });
+
+          // Verify session exists
+          let session = await getSession(sessionId);
+          expect(session).toBeDefined();
+
+          // Delete the session
+          await deleteSession(sessionId);
+
+          // Verify session is gone
+          session = await getSession(sessionId);
+          expect(session).toBeUndefined();
+        });
+
+        it('should not throw if session does not exist', async () => {
+          // Should not throw when deleting non-existent session
+          await expect(deleteSession(99999)).resolves.not.toThrow();
+        });
+
+        it('should only delete the specified session', async () => {
+          // Clear any leftover data first
+          await clearAllUserData();
+          await deleteSampleSessions();
+
+          const id1 = await saveSession({ topicId: 'math', timestamp: Date.now(), score: 5 });
+          const id2 = await saveSession({ topicId: 'science', timestamp: Date.now(), score: 8 });
+          const id3 = await saveSession({ topicId: 'history', timestamp: Date.now(), score: 7 });
+
+          // Delete only the second session
+          await deleteSession(id2);
+
+          // Verify only id2 is deleted
+          expect(await getSession(id1)).toBeDefined();
+          expect(await getSession(id2)).toBeUndefined();
+          expect(await getSession(id3)).toBeDefined();
+
+          // Verify total count
+          const allSessions = await getAllSessions();
+          expect(allSessions).toHaveLength(2);
+        });
+
+        it('should delete sample sessions too', async () => {
+          const sampleId = await saveSession({
+            topicId: 'sample',
+            timestamp: Date.now(),
+            score: 10,
+            isSample: true
+          });
+
+          // Verify sample session exists
+          let session = await getSession(sampleId);
+          expect(session).toBeDefined();
+          expect(session.isSample).toBe(true);
+
+          // Delete the sample session
+          await deleteSession(sampleId);
+
+          // Verify it's gone
+          session = await getSession(sampleId);
+          expect(session).toBeUndefined();
         });
       });
 

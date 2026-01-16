@@ -31,6 +31,12 @@
     "startQuiz": "Start een Quiz",
     "cannotReplay": "Kan niet opnieuw spelen"
   },
+  "history": {
+    "deleteQuiz": "Quiz verwijderen",
+    "deleteQuizConfirm": "Deze quiz verwijderen?",
+    "deleteQuizDescription": "Dit verwijdert \"{{topic}}\" permanent uit je geschiedenis.",
+    "quizDeleted": "Quiz verwijderd"
+  },
   "topicInput": {
     "title": "Nieuwe Quiz",
     "whatToPractice": "Wat wil je oefenen?",

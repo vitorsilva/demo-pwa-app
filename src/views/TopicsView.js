@@ -1,10 +1,11 @@
  import BaseView from './BaseView.js';
-  import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
+  import { getQuizHistory, getQuizSession, deleteQuiz } from '../services/quiz-service.js';
   import state from '../core/state.js';
   import { t } from '../core/i18n.js';
   import { formatRelativeDate } from '../utils/formatters.js';
   import { formatCost, isFreeModel } from '../services/cost-service.js';
   import { showShareQuizModal } from '../components/ShareQuizModal.js';
+  import { showDeleteQuizModal } from '../components/DeleteQuizModal.js';
   import { logger } from '../utils/logger.js';
   import { createModeToggle } from '../components/ModeToggle.js';
 
@@ -169,6 +170,12 @@
               <span class="material-symbols-outlined text-xl">link</span>
             </button>
             ` : ''}
+            <button class="delete-quiz-btn flex size-10 items-center justify-center rounded-full hover:bg-red-500/10 text-red-500 transition-colors"
+              data-session-id="${session.id}"
+              data-topic="${session.topic.replace(/"/g, '&quot;')}"
+              aria-label="${t('history.deleteQuiz')}">
+              <span class="material-symbols-outlined text-xl">delete</span>
+            </button>
             <p class="${colorClass.split(' ')[0]} text-lg
   font-bold">${scoreDisplay}</p>
             ${canReplay ? '<span class="material-symbols-outlined text-subtext-light dark:text-subtext-dark">chevron_right</span>' : ''}
@@ -195,6 +202,17 @@
           e.stopPropagation(); // Prevent triggering quiz item click
           const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
           await this.shareQuiz(sessionId);
+        });
+      });
+
+      // Delete quiz button handlers
+      const deleteButtons = document.querySelectorAll('.delete-quiz-btn');
+      deleteButtons.forEach(btn => {
+        this.addEventListener(btn, 'click', async (e) => {
+          e.stopPropagation(); // Prevent triggering quiz item click
+          const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
+          const topic = /** @type {HTMLElement} */ (btn).dataset.topic;
+          await this.handleDeleteQuiz(sessionId, topic);
         });
       });
     }
@@ -233,5 +251,44 @@
         gradeLevel: session.gradeLevel,
         questions: session.questions
       });
+    }
+
+    async handleDeleteQuiz(sessionId, topic) {
+      const confirmed = await showDeleteQuizModal(topic);
+
+      if (!confirmed) {
+        return;
+      }
+
+      logger.action('delete_quiz', {
+        sessionId,
+        topic
+      });
+
+      const success = await deleteQuiz(sessionId);
+
+      if (success) {
+        this.showSuccessToast(t('history.quizDeleted'));
+        // Re-render the view to update the list
+        await this.render();
+      }
+    }
+
+    showSuccessToast(message) {
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-fade-in';
+      toast.innerHTML = `
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.add('animate-fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
   }

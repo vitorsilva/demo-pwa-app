@@ -31,6 +31,12 @@
     "startQuiz": "Quiz starten",
     "cannotReplay": "Kann nicht wiederholt werden"
   },
+  "history": {
+    "deleteQuiz": "Quiz löschen",
+    "deleteQuizConfirm": "Dieses Quiz löschen?",
+    "deleteQuizDescription": "Dies wird \"{{topic}}\" dauerhaft aus deinem Verlauf entfernen.",
+    "quizDeleted": "Quiz gelöscht"
+  },
   "topicInput": {
     "title": "Neues Quiz",
     "whatToPractice": "Was möchtest du üben?",
