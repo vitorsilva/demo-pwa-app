@@ -31,6 +31,12 @@
     "startQuiz": "Start en quiz",
     "cannotReplay": "Kan ikke spilles på nytt"
   },
+  "history": {
+    "deleteQuiz": "Slett quiz",
+    "deleteQuizConfirm": "Slette denne quizen?",
+    "deleteQuizDescription": "Dette vil permanent fjerne \"{{topic}}\" fra historikken din.",
+    "quizDeleted": "Quiz slettet"
+  },
   "topicInput": {
     "title": "Ny quiz",
     "whatToPractice": "Hva vil du øve på?",
