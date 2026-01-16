@@ -253,10 +253,12 @@ if ('serviceWorker' in navigator) {
   });
 } else {
   // Browser doesn't support service workers
+  // Type assertion needed because TypeScript narrows navigator to 'never' in else branch
+  const nav = /** @type {Navigator} */ (navigator);
   logger.warn('Service Worker not supported', {
-    userAgent: navigator.userAgent
+    userAgent: nav.userAgent
   });
   telemetry.track('sw_not_supported', {
-    userAgent: navigator.userAgent
+    userAgent: nav.userAgent
   });
 }

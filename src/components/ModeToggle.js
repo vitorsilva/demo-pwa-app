@@ -51,7 +51,7 @@ export function createModeToggle() {
 
   // Add click handler
   toggle.addEventListener('click', (e) => {
-    const btn = /** @type {HTMLElement} */ (e.target).closest('[data-mode]');
+    const btn = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('[data-mode]'));
     if (btn) {
       const mode = /** @type {'learning' | 'party'} */ (btn.dataset.mode);
       setMode(mode);
