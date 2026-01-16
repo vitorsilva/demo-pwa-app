@@ -7,6 +7,7 @@
 
 import BaseView from './BaseView.js';
 import { t } from '../core/i18n.js';
+import { getSetting, saveSetting } from '../core/settings.js';
 import { createRoomCodeDisplay } from '../components/RoomCodeDisplay.js';
 import { createParticipantList } from '../components/ParticipantList.js';
 import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
@@ -40,14 +41,21 @@ export default class CreatePartyView extends BaseView {
     this.quizzes = [];
     this.pollInterval = null;
     this.connectionManager = null;
+    /** @type {boolean} Track if screenName was empty on load for auto-save */
+    this._screenNameWasEmpty = false;
   }
 
   async render() {
     // Load available quizzes
     this.quizzes = await getQuizHistory(20);
 
-    // Get saved name from localStorage (same key as guest to share preference)
-    const savedName = localStorage.getItem('partyPlayerName') || '';
+    // Get saved name: prefer screenName setting, fall back to partyPlayerName
+    const screenName = getSetting('screenName') || '';
+    const fallbackName = localStorage.getItem('partyPlayerName') || '';
+    const savedName = screenName || fallbackName;
+
+    // Track if screenName was empty for auto-save feature
+    this._screenNameWasEmpty = !screenName;
 
     this.setHTML(`
       <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
@@ -87,6 +95,10 @@ export default class CreatePartyView extends BaseView {
                        placeholder:text-subtext-light/50"
                 data-testid="host-name-input"
               />
+              <p id="nameSavedFeedback" class="hidden text-green-500 text-sm mt-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check</span>
+                ${t('settings.nameSavedToSettings')}
+              </p>
             </div>
 
             <button
@@ -217,10 +229,22 @@ export default class CreatePartyView extends BaseView {
     );
     this.addEventListener(hostNameInput, 'input', () => {
       this._updateCreateButtonState();
-      // Save name on input for persistence (same key as guest)
       const name = hostNameInput.value.trim();
       if (name) {
+        // Save to legacy storage for backwards compatibility
         localStorage.setItem('partyPlayerName', name);
+
+        // Auto-save to screenName setting if it was empty on load
+        if (this._screenNameWasEmpty) {
+          saveSetting('screenName', name);
+          // Show feedback
+          const feedback = this.querySelector('#nameSavedFeedback');
+          if (feedback) {
+            feedback.classList.remove('hidden');
+            // Only show once
+            this._screenNameWasEmpty = false;
+          }
+        }
       }
     });
 
