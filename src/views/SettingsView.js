@@ -32,6 +32,24 @@
   leading-tight tracking-[-0.015em] pb-3 pt-4">${t('settings.preferences')}</h2>
 
   <div class="flex flex-col gap-4">
+    <!-- Screen Name -->
+    <label class="flex flex-col">
+      <p class="text-base font-medium pb-2 text-text-light
+  dark:text-text-dark">${t('settings.screenName')}</p>
+      <input
+        type="text"
+        id="screenName"
+        maxlength="20"
+        placeholder="${t('settings.screenNamePlaceholder')}"
+        data-testid="screen-name-input"
+        class="form-input flex w-full rounded-lg h-14 p-4
+  text-base font-normal leading-normal bg-card-light dark:bg-card-dark
+  border border-border-light dark:border-border-dark text-text-light
+  dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-primary
+  placeholder:text-subtext-light/50"
+      />
+    </label>
+
     <!-- Default Grade Level -->
     <label class="flex flex-col">
       <p class="text-base font-medium pb-2 text-text-light
@@ -303,11 +321,13 @@
       const settings = getSettings();
 
       // Set each dropdown to its saved value
+      const screenNameInput = this.querySelector('#screenName');
       const gradeSelect = this.querySelector('#defaultGradeLevel');
       const questionsSelect = this.querySelector('#questionsPerQuiz');
       const difficultySelect = this.querySelector('#difficulty');
       const languageSelect = this.querySelector('#languageSelect');
 
+      if (screenNameInput) screenNameInput.value = settings.screenName || '';
       if (gradeSelect) gradeSelect.value = settings.defaultGradeLevel;
       if (questionsSelect) questionsSelect.value = settings.questionsPerQuiz;
       if (difficultySelect) difficultySelect.value = settings.difficulty;
@@ -437,10 +457,16 @@
 
 
     bindEvents() {
+      const screenNameInput = this.querySelector('#screenName');
       const gradeSelect = this.querySelector('#defaultGradeLevel');
       const questionsSelect = this.querySelector('#questionsPerQuiz');
       const difficultySelect = this.querySelector('#difficulty');
       const languageSelect = this.querySelector('#languageSelect');
+
+      // Save screen name on blur (when user finishes typing)
+      this.addEventListener(screenNameInput, 'blur', (e) => {
+        saveSetting('screenName', e.target.value.trim());
+      });
 
       this.addEventListener(gradeSelect, 'change', (e) => {
         saveSetting('defaultGradeLevel', e.target.value);
