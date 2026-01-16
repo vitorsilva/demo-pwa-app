@@ -13,6 +13,105 @@ Create the frontend provider router that reads the active provider from settings
 
 ---
 
+## Branch & Commit Strategy
+
+### Branch Naming
+
+```
+feature/epic11-phase2-provider-router
+```
+
+### Implementation Order
+
+```
+main (with Phase 1 merged)
+  │
+  └── feature/epic11-phase2-provider-router
+        ├── commit: feat(llm): add feature flag MULTI_PROVIDER_LLM
+        ├── commit: feat(llm): add providers config
+        ├── commit: feat(llm): add provider settings service
+        ├── commit: feat(llm): add provider router
+        ├── commit: refactor(llm): update api.real.js to use router
+        ├── commit: test(llm): add unit tests for provider router
+        ├── commit: test(llm): add unit tests for providers config
+        ├── commit: test(llm): add E2E tests for provider routing
+        └── PR → merge to main
+```
+
+### Commit Message Format
+
+```
+feat(llm): add provider router
+
+- Route OpenRouter calls directly (CORS supported)
+- Route other providers through backend proxy
+- Read active provider from settings
+- Support configurable max_tokens and temperature
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+### Commit Prefixes
+
+| Type | Scope | Example |
+|------|-------|---------|
+| Feature | `llm` | `feat(llm): add provider router` |
+| Refactor | `llm` | `refactor(llm): update api.real.js to use router` |
+| Test | `llm` | `test(llm): add unit tests for provider router` |
+
+---
+
+## Feature Flag
+
+### Add Feature Flag
+
+**File:** `src/core/features.js`
+
+```javascript
+export const FEATURE_FLAGS = {
+  // ... existing flags ...
+
+  MULTI_PROVIDER_LLM: {
+    phase: 'DISABLED',  // Start disabled for safe deployment
+    description: 'Allow users to configure and use multiple LLM providers'
+  }
+};
+```
+
+### Flag Lifecycle
+
+| Phase | Behavior |
+|-------|----------|
+| `DISABLED` | New provider router code deployed but inactive. OpenRouter used directly (existing behavior). |
+| `SETTINGS_ONLY` | Settings UI shows multi-provider options. Can configure but not use yet. |
+| `ENABLED` | Full functionality. Provider selection active. |
+
+### Usage in Code
+
+```javascript
+import { isFeatureEnabled } from '../core/features.js';
+
+// In provider-router.js
+export async function completion(messages, options = {}) {
+  // If feature disabled, use OpenRouter directly (existing behavior)
+  if (!isFeatureEnabled('MULTI_PROVIDER_LLM')) {
+    return await callOpenRouterLegacy(messages, options);
+  }
+
+  // New multi-provider logic
+  const providerId = await getActiveProvider();
+  // ...
+}
+```
+
+### Flag Documentation
+
+Create `docs/learning/epic10_hygiene/FLAG_MULTI_PROVIDER_LLM.md` for future cleanup reference.
+
+---
+
 ## Tasks
 
 ### 2.1 Create Provider Configuration
@@ -587,17 +686,261 @@ describe('Providers Config', () => {
 });
 ```
 
+**File:** `tests/unit/provider-settings-service.test.js`
+
+```javascript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  getActiveProvider,
+  setActiveProvider,
+  getProviderKey,
+  setProviderKey,
+  hasProviderKey,
+  getConfiguredProviders
+} from '../../src/services/provider-settings-service.js';
+import { db } from '../../src/core/db.js';
+
+vi.mock('../../src/core/db.js');
+
+describe('Provider Settings Service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('getActiveProvider', () => {
+    it('returns default provider when not set', async () => {
+      db.settings.get.mockResolvedValue(null);
+      const provider = await getActiveProvider();
+      expect(provider).toBe('openrouter');
+    });
+
+    it('returns stored provider', async () => {
+      db.settings.get.mockResolvedValue({ value: 'openai' });
+      const provider = await getActiveProvider();
+      expect(provider).toBe('openai');
+    });
+  });
+
+  describe('setActiveProvider', () => {
+    it('stores provider in db', async () => {
+      await setActiveProvider('anthropic');
+      expect(db.settings.put).toHaveBeenCalledWith({
+        key: 'llm_active_provider',
+        value: 'anthropic'
+      });
+    });
+  });
+
+  describe('getProviderKey', () => {
+    it('returns null when no key stored', async () => {
+      db.settings.get.mockResolvedValue(null);
+      const key = await getProviderKey('openai');
+      expect(key).toBeNull();
+    });
+
+    it('returns stored key', async () => {
+      db.settings.get.mockResolvedValue({ value: 'sk-test-key' });
+      const key = await getProviderKey('openai');
+      expect(key).toBe('sk-test-key');
+    });
+  });
+
+  describe('hasProviderKey', () => {
+    it('returns false when no key', async () => {
+      db.settings.get.mockResolvedValue(null);
+      expect(await hasProviderKey('openai')).toBe(false);
+    });
+
+    it('returns true when key exists', async () => {
+      db.settings.get.mockResolvedValue({ value: 'sk-key' });
+      expect(await hasProviderKey('openai')).toBe(true);
+    });
+  });
+
+  describe('getConfiguredProviders', () => {
+    it('returns list of providers with keys', async () => {
+      db.settings.toArray.mockResolvedValue([
+        { key: 'llm_key_openai', value: 'sk-key1' },
+        { key: 'llm_key_anthropic', value: 'sk-key2' },
+        { key: 'other_setting', value: 'foo' }
+      ]);
+
+      const providers = await getConfiguredProviders();
+      expect(providers).toEqual(['openai', 'anthropic']);
+    });
+  });
+});
+```
+
+### E2E Tests
+
+**File:** `tests/e2e/provider-routing.spec.js`
+
+```javascript
+import { test, expect } from '@playwright/test';
+
+test.describe('Provider Routing', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/app/');
+  });
+
+  test('uses OpenRouter by default (feature flag disabled)', async ({ page }) => {
+    // Feature flag is DISABLED by default, should use existing OpenRouter behavior
+    // Set up mock OpenRouter token
+    await page.evaluate(() => {
+      localStorage.setItem('openrouter_token', 'test-token');
+    });
+
+    await page.reload();
+
+    // Create a quiz and verify it works
+    await page.click('[data-testid="create-quiz-button"]');
+    await page.fill('[data-testid="topic-input"]', 'Test Topic');
+
+    // Should not show provider selector when feature is disabled
+    await expect(page.locator('[data-testid="provider-selector"]')).not.toBeVisible();
+  });
+
+  test('shows provider options when feature flag enabled', async ({ page }) => {
+    // Enable feature flag via localStorage override
+    await page.evaluate(() => {
+      localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+    });
+
+    await page.reload();
+
+    // Navigate to settings
+    await page.click('[data-testid="settings-button"]');
+
+    // Should see LLM Providers section
+    await expect(page.locator('text=LLM Providers')).toBeVisible();
+  });
+
+  test('feature flag can be overridden for testing', async ({ page }) => {
+    // Test the localStorage override mechanism
+    await page.evaluate(() => {
+      localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+    });
+
+    const isEnabled = await page.evaluate(() => {
+      // This would be imported in real app
+      const override = localStorage.getItem('__test_feature_MULTI_PROVIDER_LLM');
+      return override === 'ENABLED';
+    });
+
+    expect(isEnabled).toBe(true);
+  });
+
+});
+
+test.describe('Provider Routing Integration @integration', () => {
+
+  // These tests require the backend proxy to be deployed
+  // Run with: npm run test:e2e -- --grep @integration
+
+  test.skip(({ }, testInfo) => !process.env.RUN_INTEGRATION_TESTS, 'Requires RUN_INTEGRATION_TESTS=true');
+
+  test('routes to OpenRouter directly', async ({ page, request }) => {
+    // Enable feature and set OpenRouter as active
+    await page.evaluate(() => {
+      localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+      localStorage.setItem('openrouter_token', process.env.TEST_OPENROUTER_KEY || 'test');
+    });
+
+    // Intercept network request to verify routing
+    const routePromise = page.waitForRequest(req =>
+      req.url().includes('openrouter.ai')
+    );
+
+    // Trigger an LLM call (e.g., generate quiz)
+    // ... test implementation depends on UI
+  });
+
+  test('routes to proxy for non-CORS providers', async ({ page }) => {
+    // Enable feature and set OpenAI as active
+    await page.evaluate(async () => {
+      localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+
+      // Set up IndexedDB with OpenAI provider
+      const request = indexedDB.open('saberloop');
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction('settings', 'readwrite');
+        tx.objectStore('settings').put({ key: 'llm_active_provider', value: 'openai' });
+        tx.objectStore('settings').put({ key: 'llm_key_openai', value: 'sk-test' });
+      };
+    });
+
+    // Intercept network request to verify proxy routing
+    const routePromise = page.waitForRequest(req =>
+      req.url().includes('saberloop.com/llm/completion.php')
+    );
+
+    // Trigger an LLM call
+    // ... test implementation depends on UI
+  });
+
+});
+```
+
+### Feature Flag Tests
+
+**File:** `tests/unit/features-multi-provider.test.js`
+
+```javascript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { isFeatureEnabled, FEATURE_FLAGS } from '../../src/core/features.js';
+
+describe('MULTI_PROVIDER_LLM Feature Flag', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('flag exists in FEATURE_FLAGS', () => {
+    expect(FEATURE_FLAGS.MULTI_PROVIDER_LLM).toBeDefined();
+    expect(FEATURE_FLAGS.MULTI_PROVIDER_LLM.description).toContain('LLM provider');
+  });
+
+  it('returns false when DISABLED', () => {
+    // Assuming default phase is DISABLED
+    expect(isFeatureEnabled('MULTI_PROVIDER_LLM')).toBe(false);
+  });
+
+  it('can be overridden via localStorage for testing', () => {
+    localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+    expect(isFeatureEnabled('MULTI_PROVIDER_LLM')).toBe(true);
+  });
+
+  it('localStorage override takes precedence', () => {
+    localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'DISABLED');
+    expect(isFeatureEnabled('MULTI_PROVIDER_LLM')).toBe(false);
+
+    localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+    expect(isFeatureEnabled('MULTI_PROVIDER_LLM')).toBe(true);
+  });
+});
+```
+
 ---
 
 ## Acceptance Criteria
 
+- [ ] Feature flag `MULTI_PROVIDER_LLM` added to `features.js`
+- [ ] Feature flag documentation created in `epic10_hygiene/FLAG_MULTI_PROVIDER_LLM.md`
 - [ ] Provider router created and working
 - [ ] OpenRouter calls go direct (no proxy)
 - [ ] Other providers route through backend proxy
 - [ ] Provider settings service stores/retrieves settings
 - [ ] api.real.js uses provider router
-- [ ] All unit tests pass
-- [ ] Existing functionality still works with OpenRouter
+- [ ] Feature flag controls new vs legacy behavior
+- [ ] All unit tests pass (provider router, providers config, settings service, feature flag)
+- [ ] All E2E tests pass (provider routing, feature flag override)
+- [ ] Existing functionality still works with OpenRouter when flag DISABLED
 
 ---
 

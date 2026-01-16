@@ -13,6 +13,71 @@ Create the PHP backend proxy that routes LLM requests to different providers, an
 
 ---
 
+## Branch & Commit Strategy
+
+### Branch Naming
+
+```
+feature/epic11-phase1-llm-backend
+```
+
+### Implementation Order
+
+```
+main
+  │
+  └── feature/epic11-phase1-llm-backend
+        ├── commit: feat(llm): add deployment script
+        ├── commit: feat(llm): add health check endpoint
+        ├── commit: feat(llm): add response sanitizer utility
+        ├── commit: feat(llm): add telemetry utility
+        ├── commit: feat(llm): add completion endpoint and handler
+        ├── commit: feat(llm): add OpenAI provider
+        ├── commit: feat(llm): add Anthropic provider
+        ├── commit: feat(llm): add Google provider
+        ├── commit: feat(llm): add xAI provider
+        ├── commit: test(llm): add PHP unit tests
+        ├── commit: test(llm): add E2E tests for proxy
+        └── PR → merge to main
+```
+
+### Commit Message Format
+
+```
+feat(llm): add OpenAI provider
+
+- Implement OpenAI chat completions proxy
+- Add response normalization
+- Add error handling with user-friendly messages
+- Use ResponseSanitizer for content extraction
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+### Commit Prefixes
+
+| Type | Scope | Example |
+|------|-------|---------|
+| Feature | `llm` | `feat(llm): add Anthropic provider` |
+| Test | `llm` | `test(llm): add PHP unit tests` |
+| Fix | `llm` | `fix(llm): handle empty response from provider` |
+| Docs | `llm` | `docs(llm): update API documentation` |
+
+---
+
+## Feature Flag
+
+This phase does **not** require a feature flag because:
+- Backend proxy is deployed to `/llm/` endpoint (separate from main app)
+- No frontend changes yet
+- Proxy is only called when explicitly configured in later phases
+
+The feature flag `MULTI_PROVIDER_LLM` will be added in **Phase 2** when frontend integration begins.
+
+---
+
 ## Tasks
 
 ### 1.1 Create Deployment Script
