@@ -5,47 +5,67 @@
 Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) is made directly from the browser using OpenRouter (user-provided API keys). Party Mode uses a PHP signaling server for WebRTC coordination.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         Browser                              │
-│                        (Frontend)                            │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────┐    ┌──────────────────┐               │
-│  │   SPA Router     │    │   IndexedDB      │               │
-│  │   (Hash-based)   │    │   (Persistence)  │               │
-│  └────────┬─────────┘    └──────────────────┘               │
-│           │                      │                           │
-│  ┌────────▼─────────────────────────────────┐               │
-│  │              Views                        │               │
-│  │  Home │ Quiz │ Results │ Settings │ Help  │               │
-│  │  Topics │ Welcome │ Loading │ Import │    │               │
-│  │  Party: Create │ Join │ Lobby │ Quiz │    │               │
-│  └────────┬─────────────────────────────────┘               │
-│           │                                                  │
-│  ┌────────▼─────────────────────────────────┐               │
-│  │           API Client Layer               │               │
-│  │     (Mock API / OpenRouter Client)       │               │
-│  └────────┬─────────────────────────────────┘               │
-│           │                                                  │
-└───────────┼──────────────────────────────────────────────────┘
-            │ HTTPS (direct from browser)
-            │
-            ▼
-┌───────────────────────────────────────────────────────────────┐
-│                       OpenRouter API                          │
-│              (User-provided API key in browser)               │
-├───────────────────────────────────────────────────────────────┤
-│                                                               │
-│  Supported Models:                                            │
-│  - Claude (Anthropic)                                         │
-│  - GPT-4 (OpenAI)                                             │
-│  - Gemini (Google)                                            │
-│  - Llama, Mistral, and more                                   │
-│                                                               │
-└───────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Browser (Frontend)                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐       │
+│  │   SPA Router     │    │   IndexedDB      │    │   Telemetry      │       │
+│  │   (Hash-based)   │    │   (Persistence)  │    │   (Batching)     │       │
+│  └────────┬─────────┘    └──────────────────┘    └────────┬─────────┘       │
+│           │                      │                        │                  │
+│  ┌────────▼─────────────────────────────────┐             │                  │
+│  │              Views                        │             │                  │
+│  │  Home │ Quiz │ Results │ Settings │ Help  │             │                  │
+│  │  Topics │ Welcome │ Loading │ Import │    │             │                  │
+│  │  Party: Create │ Join │ Lobby │ Quiz │    │             │                  │
+│  └────────┬─────────────────────────────────┘             │                  │
+│           │                                                │                  │
+│  ┌────────▼─────────────────────────────────┐             │                  │
+│  │           API Client Layer               │             │                  │
+│  │  OpenRouter │ Party API │ Telemetry API  │◄────────────┘                  │
+│  └──────┬─────────────┬─────────────┬───────┘                                │
+│         │             │             │                                        │
+└─────────┼─────────────┼─────────────┼────────────────────────────────────────┘
+          │             │             │
+          │ HTTPS       │ HTTPS       │ HTTPS
+          │             │             │
+          ▼             │             │
+┌─────────────────────┐ │             │
+│   OpenRouter API    │ │             │
+│  (AI Quiz Gen)      │ │             │
+├─────────────────────┤ │             │
+│ Claude, GPT-4,      │ │             │
+│ Gemini, Llama, etc. │ │             │
+└─────────────────────┘ │             │
+                        │             │
+                        ▼             ▼
+          ┌─────────────────────────────────────────────────┐
+          │              PHP Backend (VPS)                   │
+          │              saberloop.com/app/php-api/          │
+          ├─────────────────────────────────────────────────┤
+          │                                                  │
+          │  ┌─────────────────────┐  ┌──────────────────┐  │
+          │  │  Party Signaling    │  │  Telemetry       │  │
+          │  │  Server             │  │  Ingestion       │  │
+          │  ├─────────────────────┤  ├──────────────────┤  │
+          │  │ • Room management   │  │ • Event batching │  │
+          │  │ • WebRTC signaling  │  │ • Log storage    │  │
+          │  │ • Peer coordination │  │ • Cleanup (cron) │  │
+          │  └──────────┬──────────┘  └──────────────────┘  │
+          │             │                                    │
+          │  ┌──────────▼──────────┐                        │
+          │  │       MySQL         │                        │
+          │  │  (Party sessions)   │                        │
+          │  └─────────────────────┘                        │
+          │                                                  │
+          └─────────────────────────────────────────────────┘
 ```
 
-**Note:** Core quiz functionality requires no server-side backend - the app is fully static for solo play. Party Mode requires the PHP signaling server (`php-api/party/`) for WebRTC coordination.
+**Architecture Notes:**
+- **Solo Play**: Fully client-side, no backend required. AI calls go directly to OpenRouter.
+- **Party Mode**: Requires PHP signaling server for WebRTC coordination between peers.
+- **Telemetry**: Self-hosted event ingestion for privacy (no third-party analytics).
 
 ## Components
 
