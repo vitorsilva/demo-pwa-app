@@ -58,7 +58,7 @@ export default class CreatePartyView extends BaseView {
     this._screenNameWasEmpty = !screenName;
 
     this.setHTML(`
-      <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+      <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
         <!-- Header -->
         <div class="flex items-center p-4 gap-4 bg-background-light dark:bg-background-dark">
           <button id="backBtn" data-testid="back-btn" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -67,17 +67,17 @@ export default class CreatePartyView extends BaseView {
           <h1 class="text-text-light dark:text-text-dark text-lg font-bold">${t('party.create')}</h1>
         </div>
 
-        <div class="flex-grow px-4 pb-24">
+        <div class="flex-1 px-4 pb-4 flex flex-col min-h-0">
           <!-- Step 1: Select Quiz (before room created) -->
-          <div id="selectQuizSection" class="py-6">
-            <h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4">${t('party.selectQuiz')}</h2>
+          <div id="selectQuizSection" class="flex flex-col flex-1 min-h-0 py-4">
+            <h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4 flex-shrink-0">${t('party.selectQuiz')}</h2>
 
-            <div id="quizList" class="flex flex-col gap-3 max-h-64 overflow-y-auto">
+            <div id="quizList" class="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
               ${this.renderQuizList()}
             </div>
 
             <!-- Host Name Input -->
-            <div class="mt-4">
+            <div class="mt-4 flex-shrink-0">
               <label for="hostName" class="text-subtext-light dark:text-subtext-dark text-sm block mb-2">
                 ${t('party.yourName')}
               </label>
@@ -104,7 +104,7 @@ export default class CreatePartyView extends BaseView {
             <button
               id="createRoomBtn"
               disabled
-              class="mt-6 w-full py-4 rounded-xl bg-primary text-white font-bold text-lg
+              class="mt-4 w-full py-4 rounded-xl bg-primary text-white font-bold text-lg flex-shrink-0
                      disabled:bg-gray-400 disabled:cursor-not-allowed
                      hover:bg-primary/90 transition-colors"
             >
