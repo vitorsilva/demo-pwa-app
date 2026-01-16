@@ -178,7 +178,7 @@ test.describe('Usage Cost Display', () => {
     await expect(creditsBalance).toContainText('$0.00');
   });
 
-  test('should not show credits when API fails', async ({ page }) => {
+  test('should show free tier fallback when credits API fails', async ({ page }) => {
     // Mock the credits API to fail
     await page.route('**/api/v1/auth/key', async (route) => {
       await route.fulfill({
@@ -194,9 +194,12 @@ test.describe('Usage Cost Display', () => {
     // Wait for Settings page to load
     await expect(page.getByTestId('settings-title')).toBeVisible();
 
-    // Credits balance should not be visible (API failed)
+    // When API fails, should gracefully degrade to free tier status
+    // The element should be visible showing free tier info, not specific credits
     const creditsBalance = page.getByTestId('credits-balance');
-    await expect(creditsBalance).not.toBeVisible();
+    await expect(creditsBalance).toBeVisible();
+    // Should NOT contain a dollar amount (e.g., "$5.50 remaining")
+    await expect(creditsBalance).not.toContainText(/\$\d+\.\d+/);
   });
 
 });
