@@ -63,7 +63,7 @@ export async function saveImportedQuiz(quiz) {
     // Prepare session data for IndexedDB
     const session = {
       ...quiz,
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       userAnswers: [],
       score: 0,
       totalQuestions: quiz.questions.length,

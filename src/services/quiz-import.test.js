@@ -141,7 +141,7 @@
         expect(saveSession).toHaveBeenCalledWith(
           expect.objectContaining({
             topic: 'Test',
-            timestamp: expect.any(String),
+            timestamp: expect.any(Number),
             userAnswers: [],
             score: 0,
             totalQuestions: 1,
