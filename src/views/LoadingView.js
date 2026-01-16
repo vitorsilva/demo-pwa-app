@@ -68,7 +68,7 @@ export default class LoadingView extends BaseView {
               ${this.escapeHtml(topic)}
             </h1>
             <p class="text-sm text-subtext-light dark:text-subtext-dark mt-1">
-              ${t('loading.level', { level: gradeLevel || t('topicInput.middleSchool') })}
+              ${t('loading.level', { level: this.getTranslatedGradeLevel(gradeLevel) || t('topicInput.middleSchool') })}
             </p>
           </div>
 
@@ -127,6 +127,22 @@ export default class LoadingView extends BaseView {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  /**
+   * Translate raw grade level value to localized display text.
+   * The grade level is stored as English value ('middle school', 'high school', 'college')
+   * but needs to be displayed in the user's selected language.
+   * @param {string} gradeLevel - Raw grade level value (e.g., 'middle school')
+   * @returns {string} Translated grade level text
+   */
+  getTranslatedGradeLevel(gradeLevel) {
+    const gradeLevelMap = {
+      'middle school': t('topicInput.middleSchool'),
+      'high school': t('topicInput.highSchool'),
+      'college': t('topicInput.college')
+    };
+    return gradeLevelMap[gradeLevel] || gradeLevel;
   }
 
   startMessageRotation() {
