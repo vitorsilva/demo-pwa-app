@@ -197,6 +197,35 @@ export default class PartyResultsView extends BaseView {
   }
 
   /**
+   * Count answered questions from answers data.
+   * Handles both array format (P2P) and object format (HTTP API).
+   *
+   * Issue #120: PHP backend returns answers as object {questionIndex: answerIndex}.
+   * P2P mode returns answers as array [answerIndex, answerIndex, ...].
+   *
+   * @private
+   * @param {Array|Object} answers - Answers data (array or object)
+   * @returns {number} Count of answered questions
+   */
+  _countAnswered(answers) {
+    if (!answers) return 0;
+
+    // Handle array format (P2P mode)
+    if (Array.isArray(answers)) {
+      return answers.filter(a => a !== undefined && a !== null).length;
+    }
+
+    // Handle object format (HTTP API mode)
+    // Object keys are question indices, values are answer indices
+    // e.g., {0: 1, 2: 3, 4: 0} means questions 0, 2, 4 were answered
+    if (typeof answers === 'object') {
+      return Object.keys(answers).length;
+    }
+
+    return 0;
+  }
+
+  /**
    * Render standings list.
    *
    * @private
@@ -221,7 +250,7 @@ export default class PartyResultsView extends BaseView {
             </p>
             <p class="text-subtext-light dark:text-subtext-dark text-sm">
               ${t('party.answeredCount', {
-                answered: participant.answers?.filter(a => a !== undefined).length || 0,
+                answered: this._countAnswered(participant.answers),
                 total: this.quiz?.questions?.length || 0,
               })}
             </p>
