@@ -447,4 +447,105 @@ test.describe('Party Mode', () => {
       expect(buttonText?.toLowerCase()).toContain('saved');
     });
   });
+
+  test.describe('Host Name Input (Issue #111)', () => {
+    // Tests verify that host can enter their name when creating a party
+
+    test('should show name input field on create party view', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Navigate to create party
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Name input should be visible
+      const nameInput = page.getByTestId('host-name-input');
+      await expect(nameInput).toBeVisible();
+    });
+
+    test('should have name input with correct placeholder', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Navigate to create party
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Check placeholder text
+      const nameInput = page.getByTestId('host-name-input');
+      await expect(nameInput).toHaveAttribute('placeholder', /enter|name/i);
+    });
+
+    test('should enforce max length on name input', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      const nameInput = page.getByTestId('host-name-input');
+      await expect(nameInput).toHaveAttribute('maxlength', '20');
+    });
+
+    test('should disable create button when name is empty', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Select a quiz first
+      const quizItem = page.locator('.quiz-select-item').first();
+      if (await quizItem.isVisible()) {
+        await quizItem.click();
+      }
+
+      // Clear name input if it has value
+      const nameInput = page.getByTestId('host-name-input');
+      await nameInput.fill('');
+
+      // Create button should be disabled
+      const createBtn = page.locator('#createRoomBtn');
+      await expect(createBtn).toBeDisabled();
+    });
+
+    test('should enable create button when quiz selected and name entered', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Select a quiz
+      const quizItem = page.locator('.quiz-select-item').first();
+      if (await quizItem.isVisible()) {
+        await quizItem.click();
+      }
+
+      // Enter name
+      const nameInput = page.getByTestId('host-name-input');
+      await nameInput.fill('TestHost');
+
+      // Create button should be enabled
+      const createBtn = page.locator('#createRoomBtn');
+      await expect(createBtn).toBeEnabled();
+    });
+
+    test('should save host name to localStorage', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Enter a name
+      const nameInput = page.getByTestId('host-name-input');
+      await nameInput.fill('PersistentHost');
+
+      // Navigate away and back
+      await page.goto('/#/');
+      await page.waitForLoadState('networkidle');
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Name should be pre-filled from localStorage
+      const nameInputAfter = page.getByTestId('host-name-input');
+      await expect(nameInputAfter).toHaveValue('PersistentHost');
+    });
+  });
 });
