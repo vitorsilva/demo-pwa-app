@@ -5,10 +5,7 @@
  * Run periodically via cron to clean up expired data:
  * - End expired rooms (older than 2 hours)
  * - Delete old signaling messages
- * - Delete old rate limit records
- *
- * Cron example (run every 15 minutes):
- * */15 * * * * php /path/to/party/cleanup.php >> /path/to/party/logs/cleanup.log 2>&1
+ * - Delete old rate limit records.
  */
 
 // Allow running from CLI only or with a secret token
