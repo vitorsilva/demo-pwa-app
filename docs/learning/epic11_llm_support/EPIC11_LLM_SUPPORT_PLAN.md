@@ -266,15 +266,15 @@ saberloop.com/
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ OpenAI                            ○ Not configured││
-│  │  │ GPT-4o, GPT-4o-mini                             │   ││
-│  │  │                              [Add API Key]      │   ││
+│  │  │ OpenAI                            ✅ Valid       │   ││
+│  │  │ GPT-4o, GPT-4o-mini • sk-...7x2Q               │   ││
+│  │  │                     [Change Key] [Remove]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ Anthropic                         ○ Not configured││
-│  │  │ Claude 3.5 Sonnet, Claude 3 Opus                │   ││
-│  │  │                              [Add API Key]      │   ││
+│  │  │ Anthropic                      🔄 Validating... │   ││
+│  │  │ Claude 3.5 Sonnet, Claude 3 Opus               │   ││
+│  │  │                     [Change Key] [Remove]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
@@ -345,18 +345,36 @@ saberloop.com/
 │  │ LLM Provider                                            ││
 │  │ ┌─────────────────────────────────────────────────────┐ ││
 │  │ │ ○ OpenRouter (default)                              │ ││
-│  │ │   claude-3.5-sonnet • ~$0.015/quiz                  │ ││
+│  │ │   Model: [claude-3.5-sonnet              ▼]         │ ││
+│  │ │   ~$0.015/quiz                                      │ ││
 │  │ ├─────────────────────────────────────────────────────┤ ││
 │  │ │ ○ OpenAI                                            │ ││
-│  │ │   gpt-4o-mini • ~$0.0006/quiz                       │ ││
+│  │ │   Model: [gpt-4o-mini                    ▼]         │ ││
+│  │ │   ~$0.0006/quiz                                     │ ││
 │  │ ├─────────────────────────────────────────────────────┤ ││
 │  │ │ ● Google AI                                         │ ││
-│  │ │   gemini-2.5-flash • ~$0.0003/quiz (free tier)      │ ││
+│  │ │   Model: [gemini-2.5-flash               ▼]         │ ││
+│  │ │   ~$0.0003/quiz (free tier)                         │ ││
 │  │ └─────────────────────────────────────────────────────┘ ││
 │  └─────────────────────────────────────────────────────────┘│
 │                                                              │
 │                              [Generate Quiz]                 │
 │                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Provider Selector (Expanded Model Dropdown)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  │ ● Google AI                                         │    │
+│  │   Model: [gemini-2.5-flash               ▼]         │    │
+│  │          ┌─────────────────────────────────┐        │    │
+│  │          │ gemini-2.5-flash    $0.075/1M  │◀──────│    │
+│  │          │ gemini-2.5-pro      $1.25/1M   │        │    │
+│  │          │ gemini-flash-lite   $0.075/1M  │        │    │
+│  │          └─────────────────────────────────┘        │    │
+│  │   ~$0.0003/quiz (free tier)                         │    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -396,30 +414,51 @@ saberloop.com/
       "connected": "Connected",
       "notConfigured": "Not configured",
       "addApiKey": "Add API Key",
-      "removeKey": "Remove Key",
+      "changeKey": "Change Key",
+      "removeKey": "Remove",
       "disconnect": "Disconnect",
       "currentDefault": "Current default",
-      "freeTier": "Free tier available"
+      "freeTier": "Free tier available",
+      "keyStatus": {
+        "valid": "Valid",
+        "invalid": "Invalid",
+        "validating": "Validating...",
+        "notSet": "Not configured"
+      },
+      "keyMasked": "{{prefix}}...{{suffix}}"
     },
     "addKeyModal": {
       "title": "Add {{provider}} API Key",
+      "titleChange": "Change {{provider}} API Key",
       "enterKey": "Enter your {{provider}} API key. You can get one from:",
       "securityNote": "Your API key is stored locally on your device. It is sent to our server only when making LLM calls. We never store your key on our servers.",
       "availableModels": "Available Models",
       "cancel": "Cancel",
       "saveKey": "Save Key",
-      "invalidFormat": "Invalid API key format. {{provider}} keys should start with '{{prefix}}'."
+      "invalidFormat": "Invalid API key format. {{provider}} keys should start with '{{prefix}}'.",
+      "keyUpdated": "API key updated. Validating...",
+      "validationSuccess": "API key is valid!",
+      "validationFailed": "API key validation failed: {{error}}"
+    },
+    "removeKeyModal": {
+      "title": "Remove {{provider}} API Key",
+      "confirm": "Are you sure you want to remove your {{provider}} API key?",
+      "cancel": "Cancel",
+      "remove": "Remove Key"
     }
   },
   "quiz": {
     "providerSelector": {
       "title": "LLM Provider",
+      "selectModel": "Model",
       "default": "default",
       "costPerQuiz": "~{{cost}}/quiz",
+      "costPerMillion": "{{cost}}/1M",
       "freeTierAvailable": "free tier"
     },
     "providerIndicator": {
-      "poweredBy": "Powered by {{provider}}"
+      "poweredBy": "Powered by {{provider}}",
+      "model": "Model: {{model}}"
     }
   },
   "errors": {
@@ -645,22 +684,33 @@ Implement rate limiting on `/llm/completion` to prevent abuse:
 
 ---
 
-## Open Questions
+## Design Decisions (Resolved)
 
-1. **Model selection per provider:** Should users be able to select specific models, or use a default per provider?
-   - *Proposal:* Start with default model per provider, add model selection in future phase
+1. **Model selection per provider:** ✅ **Allow specific model selection**
+   - Users can select specific models for each provider
+   - Show available models with pricing in the UI
+   - Remember last selected model per provider
 
-2. **Key validation:** Should we validate keys by making a test API call?
-   - *Proposal:* Validate format only; actual validation happens on first use
+2. **Key validation:** ✅ **Hybrid approach (Option C)**
+   - On save: Format validation only (instant feedback, works offline)
+   - After save: Async background validation when online
+   - Update status indicator: "Validating..." → "Valid" / "Invalid"
+   - Benefits: Fast UX, eventual confirmation, works offline
 
-3. **Cost tracking:** How to track costs for direct provider calls?
-   - *Proposal:* Use token counts from responses, multiply by known pricing
+3. **Cost tracking:** ✅ **Yes, display costs for all providers**
+   - Use token counts from API responses
+   - Multiply by known pricing per model
+   - Show in results view same as OpenRouter
 
-4. **Offline keys:** What if user adds key while offline?
-   - *Proposal:* Store locally, validate on next online use
+4. **Offline keys:** ✅ **No special handling needed**
+   - Store locally in IndexedDB
+   - Validate on first actual use
+   - Same pattern as current OpenRouter implementation
 
-5. **Key migration:** What if user switches from OpenRouter to direct provider mid-quiz?
-   - *Proposal:* Keep current provider for ongoing quiz, apply new selection to next quiz
+5. **Mid-quiz provider switch:** ✅ **Not allowed**
+   - Provider is locked for duration of quiz
+   - Selection only applies to next quiz creation
+   - Prevents inconsistent quiz data
 
 ---
 
