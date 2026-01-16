@@ -640,3 +640,68 @@ describe('Sessions CRUD Operations', () => {
           expect(sessions).toHaveLength(0);
         });
       });
+
+      describe('quizExistsBySourceId', () => {
+        beforeEach(async () => {
+          indexedDB.deleteDatabase(DB_NAME);
+        });
+
+        it('should return true when quiz with sourceQuizId exists', async () => {
+          // Import the function
+          const { quizExistsBySourceId } = await import('./db.js');
+
+          // Save a session with a sourceQuizId
+          await saveSession({
+            sourceQuizId: 'party-quiz-123',
+            topicId: 'math',
+            timestamp: Date.now(),
+            score: 5
+          });
+
+          const exists = await quizExistsBySourceId('party-quiz-123');
+          expect(exists).toBe(true);
+        });
+
+        it('should return false when quiz with sourceQuizId does not exist', async () => {
+          const { quizExistsBySourceId } = await import('./db.js');
+
+          // Save a session without sourceQuizId
+          await saveSession({
+            topicId: 'math',
+            timestamp: Date.now(),
+            score: 5
+          });
+
+          const exists = await quizExistsBySourceId('nonexistent-quiz-id');
+          expect(exists).toBe(false);
+        });
+
+        it('should return false for empty database', async () => {
+          const { quizExistsBySourceId } = await import('./db.js');
+
+          const exists = await quizExistsBySourceId('any-quiz-id');
+          expect(exists).toBe(false);
+        });
+
+        it('should distinguish between different sourceQuizIds', async () => {
+          const { quizExistsBySourceId } = await import('./db.js');
+
+          await saveSession({
+            sourceQuizId: 'quiz-A',
+            topicId: 'math',
+            timestamp: Date.now(),
+            score: 5
+          });
+
+          await saveSession({
+            sourceQuizId: 'quiz-B',
+            topicId: 'science',
+            timestamp: Date.now(),
+            score: 8
+          });
+
+          expect(await quizExistsBySourceId('quiz-A')).toBe(true);
+          expect(await quizExistsBySourceId('quiz-B')).toBe(true);
+          expect(await quizExistsBySourceId('quiz-C')).toBe(false);
+        });
+      });

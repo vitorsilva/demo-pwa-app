@@ -129,6 +129,18 @@ export async function getAllTopics() {
   }
   
   /**
+   * Check if a quiz with the given source ID already exists.
+   * Used to detect duplicates when saving party quizzes.
+   * @param {string} sourceQuizId - The original quiz ID to check for
+   * @returns {Promise<boolean>} True if quiz exists, false otherwise
+   */
+  export async function quizExistsBySourceId(sourceQuizId) {
+    const db = await getDB();
+    const allSessions = await db.getAll('sessions');
+    return allSessions.some(session => session.sourceQuizId === sourceQuizId);
+  }
+
+  /**
    * Delete all sample sessions (used when reloading samples)
    */
   export async function deleteSampleSessions() {

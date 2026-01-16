@@ -14,6 +14,7 @@ import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom } from '../services/party-api.js';
 import { getConnection, clearConnection } from '../services/party-connection-store.js';
+import { quizExists, saveQuizSession } from '../services/quiz-service.js';
 
 const log = logger.child({ module: 'PartyResultsView' });
 
@@ -292,13 +293,69 @@ export default class PartyResultsView extends BaseView {
 
   /**
    * Save quiz locally for replay.
+   * Saves the party quiz to IndexedDB for future solo play.
+   * Checks for duplicates and strips privacy-sensitive fields.
    *
    * @private
    */
   async _saveLocally() {
-    // TODO: Implement saving quiz to IndexedDB
-    log.info('Save locally - not implemented yet');
-    alert(t('party.saveFeatureComingSoon'));
+    const saveBtn = this.querySelector('#saveBtn');
+
+    if (!this.quiz) {
+      log.warn('No quiz data available to save');
+      return;
+    }
+
+    // Get the quiz ID for duplicate detection
+    const sourceQuizId = this.quiz.id || `party-${this.roomCode}-${Date.now()}`;
+
+    try {
+      // Check if quiz already exists
+      const exists = await quizExists(sourceQuizId);
+
+      if (exists) {
+        // Quiz already saved - show feedback and disable button
+        log.info('Quiz already saved', { sourceQuizId });
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = t('party.quizAlreadySaved');
+        }
+        return;
+      }
+
+      // Prepare quiz data for saving (strip privacy fields)
+      const sanitizedQuiz = {
+        sourceQuizId,
+        topic: this.quiz.topic || t('party.quizFallback'),
+        gradeLevel: this.quiz.gradeLevel || 'high-school',
+        questions: this.quiz.questions,
+        timestamp: Date.now(),
+        source: 'party', // Mark as saved from party mode
+        // Do NOT include: creator, partySessionId, hostId, roomCode
+      };
+
+      // Save to IndexedDB
+      await saveQuizSession(sanitizedQuiz);
+
+      log.info('Quiz saved successfully', { sourceQuizId, topic: sanitizedQuiz.topic });
+
+      // Update button to show success
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = t('party.quizSaved');
+      }
+    } catch (error) {
+      log.error('Failed to save quiz', { error: error.message });
+      // Show error feedback (could be enhanced with a toast notification)
+      if (saveBtn) {
+        saveBtn.textContent = t('party.saveFailed');
+        // Re-enable after a delay to allow retry
+        setTimeout(() => {
+          saveBtn.disabled = false;
+          saveBtn.textContent = t('party.saveLocally');
+        }, 3000);
+      }
+    }
   }
 
   destroy() {
