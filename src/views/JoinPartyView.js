@@ -6,6 +6,7 @@
 
 import BaseView from './BaseView.js';
 import { t } from '../core/i18n.js';
+import { getSetting, saveSetting } from '../core/settings.js';
 import { createRoomCodeInput, isValidRoomCode } from '../components/RoomCodeInput.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
@@ -28,11 +29,18 @@ export default class JoinPartyView extends BaseView {
     // Check for code from router (URL) or constructor options
     this.prefillCode = options.prefillCode || router.getPartyJoinCode() || '';
     this.roomCodeInput = null;
+    /** @type {boolean} Track if screenName was empty on load for auto-save */
+    this._screenNameWasEmpty = false;
   }
 
   async render() {
-    // Get saved name from localStorage
-    const savedName = localStorage.getItem('partyPlayerName') || '';
+    // Get saved name: prefer screenName setting, fall back to partyPlayerName
+    const screenName = getSetting('screenName') || '';
+    const fallbackName = localStorage.getItem('partyPlayerName') || '';
+    const savedName = screenName || fallbackName;
+
+    // Track if screenName was empty for auto-save feature
+    this._screenNameWasEmpty = !screenName;
 
     this.setHTML(`
       <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
@@ -68,6 +76,10 @@ export default class JoinPartyView extends BaseView {
                        placeholder:text-subtext-light/50"
                 data-testid="player-name-input"
               />
+              <p id="nameSavedFeedback" class="hidden text-green-500 text-sm mt-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check</span>
+                ${t('settings.nameSavedToSettings')}
+              </p>
             </div>
 
             <!-- Join Button -->
@@ -127,7 +139,23 @@ export default class JoinPartyView extends BaseView {
     const nameInput = /** @type {HTMLInputElement} */ (
       this.querySelector('#playerName')
     );
-    this.addEventListener(nameInput, 'input', () => this.validateForm());
+    this.addEventListener(nameInput, 'input', () => {
+      this.validateForm();
+      const name = nameInput.value.trim();
+      if (name) {
+        // Auto-save to screenName setting if it was empty on load
+        if (this._screenNameWasEmpty) {
+          saveSetting('screenName', name);
+          // Show feedback
+          const feedback = this.querySelector('#nameSavedFeedback');
+          if (feedback) {
+            feedback.classList.remove('hidden');
+            // Only show once
+            this._screenNameWasEmpty = false;
+          }
+        }
+      }
+    });
 
     // Join button
     const joinBtn = this.querySelector('#joinBtn');

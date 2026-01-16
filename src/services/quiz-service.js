@@ -2,7 +2,7 @@
  * Quiz Service - Business logic for quiz operations
  * Views should use this instead of importing db or api directly
  */
-import { getRecentSessions, getSession, saveSession, updateSession, updateQuestionExplanation as dbUpdateQuestionExplanation } from '../core/db.js';
+import { getRecentSessions, getSession, saveSession, updateSession, updateQuestionExplanation as dbUpdateQuestionExplanation, quizExistsBySourceId as dbQuizExistsBySourceId } from '../core/db.js';
 import { generateQuestions as apiGenerateQuestions, generateExplanation as apiGenerateExplanation, generateWrongAnswerExplanation as apiGenerateWrongAnswerExplanation } from '../api/index.js';
 
 /**
@@ -96,4 +96,14 @@ export async function generateWrongAnswerExplanation(question, userAnswer, corre
  */
 export async function updateQuestionExplanation(sessionId, questionIndex, rightAnswerExplanation) {
   return dbUpdateQuestionExplanation(sessionId, questionIndex, rightAnswerExplanation);
+}
+
+/**
+ * Check if a quiz with the given source ID already exists.
+ * Used to detect duplicates when saving party quizzes.
+ * @param {string} sourceQuizId - The original quiz ID to check for
+ * @returns {Promise<boolean>} True if quiz exists, false otherwise
+ */
+export async function quizExists(sourceQuizId) {
+  return dbQuizExistsBySourceId(sourceQuizId);
 }

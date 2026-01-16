@@ -7,6 +7,7 @@
 
 import BaseView from './BaseView.js';
 import { t } from '../core/i18n.js';
+import { getSetting, saveSetting } from '../core/settings.js';
 import { createRoomCodeDisplay } from '../components/RoomCodeDisplay.js';
 import { createParticipantList } from '../components/ParticipantList.js';
 import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
@@ -40,14 +41,24 @@ export default class CreatePartyView extends BaseView {
     this.quizzes = [];
     this.pollInterval = null;
     this.connectionManager = null;
+    /** @type {boolean} Track if screenName was empty on load for auto-save */
+    this._screenNameWasEmpty = false;
   }
 
   async render() {
     // Load available quizzes
     this.quizzes = await getQuizHistory(20);
 
+    // Get saved name: prefer screenName setting, fall back to partyPlayerName
+    const screenName = getSetting('screenName') || '';
+    const fallbackName = localStorage.getItem('partyPlayerName') || '';
+    const savedName = screenName || fallbackName;
+
+    // Track if screenName was empty for auto-save feature
+    this._screenNameWasEmpty = !screenName;
+
     this.setHTML(`
-      <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+      <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
         <!-- Header -->
         <div class="flex items-center p-4 gap-4 bg-background-light dark:bg-background-dark">
           <button id="backBtn" data-testid="back-btn" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -56,19 +67,44 @@ export default class CreatePartyView extends BaseView {
           <h1 class="text-text-light dark:text-text-dark text-lg font-bold">${t('party.create')}</h1>
         </div>
 
-        <div class="flex-grow px-4 pb-24">
+        <div class="flex-1 px-4 pb-4 flex flex-col min-h-0">
           <!-- Step 1: Select Quiz (before room created) -->
-          <div id="selectQuizSection" class="py-6">
-            <h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4">${t('party.selectQuiz')}</h2>
+          <div id="selectQuizSection" class="flex flex-col flex-1 min-h-0 py-4">
+            <h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4 flex-shrink-0">${t('party.selectQuiz')}</h2>
 
-            <div id="quizList" class="flex flex-col gap-3 max-h-64 overflow-y-auto">
+            <div id="quizList" class="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
               ${this.renderQuizList()}
+            </div>
+
+            <!-- Host Name Input -->
+            <div class="mt-4 flex-shrink-0">
+              <label for="hostName" class="text-subtext-light dark:text-subtext-dark text-sm block mb-2">
+                ${t('party.yourName')}
+              </label>
+              <input
+                type="text"
+                id="hostName"
+                value="${savedName}"
+                maxlength="20"
+                placeholder="${t('party.enterName')}"
+                class="w-full px-4 py-3 rounded-xl
+                       bg-card-light dark:bg-card-dark
+                       text-text-light dark:text-text-dark
+                       border-2 border-transparent
+                       focus:border-primary focus:outline-none
+                       placeholder:text-subtext-light/50"
+                data-testid="host-name-input"
+              />
+              <p id="nameSavedFeedback" class="hidden text-green-500 text-sm mt-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check</span>
+                ${t('settings.nameSavedToSettings')}
+              </p>
             </div>
 
             <button
               id="createRoomBtn"
               disabled
-              class="mt-6 w-full py-4 rounded-xl bg-primary text-white font-bold text-lg
+              class="mt-4 w-full py-4 rounded-xl bg-primary text-white font-bold text-lg flex-shrink-0
                      disabled:bg-gray-400 disabled:cursor-not-allowed
                      hover:bg-primary/90 transition-colors"
             >
@@ -182,11 +218,38 @@ export default class CreatePartyView extends BaseView {
           /** @type {HTMLElement} */ (item).dataset.quizId
         );
 
-        // Enable create button
-        const createBtn = this.querySelector('#createRoomBtn');
-        if (createBtn) createBtn.removeAttribute('disabled');
+        // Update create button state
+        this._updateCreateButtonState();
       });
     });
+
+    // Host name input
+    const hostNameInput = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    );
+    this.addEventListener(hostNameInput, 'input', () => {
+      this._updateCreateButtonState();
+      const name = hostNameInput.value.trim();
+      if (name) {
+        // Save to legacy storage for backwards compatibility
+        localStorage.setItem('partyPlayerName', name);
+
+        // Auto-save to screenName setting if it was empty on load
+        if (this._screenNameWasEmpty) {
+          saveSetting('screenName', name);
+          // Show feedback
+          const feedback = this.querySelector('#nameSavedFeedback');
+          if (feedback) {
+            feedback.classList.remove('hidden');
+            // Only show once
+            this._screenNameWasEmpty = false;
+          }
+        }
+      }
+    });
+
+    // Check initial state (in case name is pre-filled from localStorage)
+    this._updateCreateButtonState();
 
     // Create room button
     const createRoomBtn = this.querySelector('#createRoomBtn');
@@ -201,10 +264,39 @@ export default class CreatePartyView extends BaseView {
     this.addEventListener(cancelPartyBtn, 'click', () => this.cancelParty());
   }
 
+  /**
+   * Update the create button enabled/disabled state based on quiz and name.
+   * @private
+   */
+  _updateCreateButtonState() {
+    const hostName = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    )?.value.trim();
+    const createBtn = this.querySelector('#createRoomBtn');
+
+    if (this.selectedQuizId && hostName && hostName.length > 0) {
+      createBtn?.removeAttribute('disabled');
+    } else {
+      createBtn?.setAttribute('disabled', 'true');
+    }
+  }
+
   async createRoom() {
     if (!this.selectedQuizId) {
       return;
     }
+
+    // Get host name from input
+    const hostName = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    )?.value.trim();
+
+    if (!hostName) {
+      return;
+    }
+
+    // Save name for next time (same key as guest to share preference)
+    localStorage.setItem('partyPlayerName', hostName);
 
     // Show loading
     const overlay = this.querySelector('#loadingOverlay');
@@ -218,7 +310,7 @@ export default class CreatePartyView extends BaseView {
       // Create room via API
       const roomData = await createRoom({
         hostId: this.hostId,
-        hostName: 'You', // TODO: Allow user to set name
+        hostName: hostName,
         quizData: quiz,
         secondsPerQuestion: 30,
       });

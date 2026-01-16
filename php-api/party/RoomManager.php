@@ -186,17 +186,44 @@ class RoomManager
             $answeredIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
         }
 
-        return array_map(function ($p) use ($answeredIds, $currentQuestion) {
+        // Get all answers for all participants (for answered count display)
+        // Issue #120: Include answers array so results page can show "X/Y questions answered"
+        $allAnswers = [];
+        $stmt = $this->db->prepare('
+            SELECT participant_id, question_index, answer_index
+            FROM party_answers
+            WHERE room_id = ?
+            ORDER BY question_index ASC
+        ');
+        $stmt->execute([$roomId]);
+        $answerRows = $stmt->fetchAll();
+
+        // Group answers by participant
+        foreach ($answerRows as $row) {
+            $pid = $row['participant_id'];
+            $qIdx = (int) $row['question_index'];
+            $aIdx = (int) $row['answer_index'];
+
+            if (!isset($allAnswers[$pid])) {
+                $allAnswers[$pid] = [];
+            }
+            $allAnswers[$pid][$qIdx] = $aIdx;
+        }
+
+        return array_map(function ($p) use ($answeredIds, $currentQuestion, $allAnswers) {
+            $pid = $p['participant_id'];
             $result = [
-                'id' => $p['participant_id'],
+                'id' => $pid,
                 'name' => $p['name'],
                 'isHost' => (bool) $p['is_host'],
                 'score' => (int) $p['score'],
                 'joinedAt' => $p['joined_at'],
+                // Issue #120: Include answers array for answered count display
+                'answers' => isset($allAnswers[$pid]) ? $allAnswers[$pid] : [],
             ];
             // Add hasAnsweredCurrent if currentQuestion was specified
             if ($currentQuestion !== null) {
-                $result['hasAnsweredCurrent'] = in_array($p['participant_id'], $answeredIds);
+                $result['hasAnsweredCurrent'] = in_array($pid, $answeredIds);
             }
             return $result;
         }, $participants);

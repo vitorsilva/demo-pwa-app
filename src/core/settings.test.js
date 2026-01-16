@@ -17,6 +17,7 @@
         expect(settings.questionsPerQuiz).toBe('5');
         expect(settings.difficulty).toBe('mixed');
         expect(settings.selectedModel).toBe(DEFAULT_MODEL);
+        expect(settings.screenName).toBe('');
       });
 
       it('should return stored settings merged with defaults', () => {
@@ -134,6 +135,32 @@
         );
 
         setItemSpy.mockRestore();
+      });
+    });
+
+    describe('screenName setting', () => {
+      it('should get/set screenName setting', () => {
+        // Initially empty
+        expect(getSetting('screenName')).toBe('');
+
+        // Save a screen name
+        saveSetting('screenName', 'TestPlayer');
+
+        // Verify it was saved
+        expect(getSetting('screenName')).toBe('TestPlayer');
+      });
+
+      it('should persist screenName to localStorage', () => {
+        saveSetting('screenName', 'PartyHost');
+
+        const stored = JSON.parse(localStorage.getItem('quizmaster_settings'));
+        expect(stored.screenName).toBe('PartyHost');
+      });
+
+      it('should return empty string when screenName not set', () => {
+        // Don't set anything, just verify default
+        const screenName = getSetting('screenName');
+        expect(screenName).toBe('');
       });
     });
 

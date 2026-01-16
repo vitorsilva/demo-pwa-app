@@ -96,16 +96,28 @@ async function init() {
     router.init();
     logger.info('Router initialized');
 
+    // Expose router for E2E testing (access current view)
+    if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+      window.__router = router;
+    }
+
     // Initialize network status monitoring
     initNetworkMonitoring();
 
     // Initialize ad manager (for AdSense integration)
     initAdManager();
 
+    // Check if current URL is a party join route (should bypass onboarding)
+    // Party join links are shared externally, so new users arriving via these
+    // links should go directly to the join screen, not onboarding
+    const hash = window.location.hash.slice(1) || '/';
+    const isPartyJoinRoute = hash.startsWith('/party/join/');
+
     // Redirect to welcome if needed (after router init)
+    // Skip redirect if user arrived via party join link
     const showWelcome = await shouldShowWelcome();
-    logger.debug('Show welcome check', { showWelcome });
-    if (showWelcome) {
+    logger.debug('Show welcome check', { showWelcome, isPartyJoinRoute });
+    if (showWelcome && !isPartyJoinRoute) {
       window.location.hash = '#/welcome';
     }    
 

@@ -14,6 +14,7 @@ import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom } from '../services/party-api.js';
 import { getConnection, clearConnection } from '../services/party-connection-store.js';
+import { quizExists, saveQuizSession } from '../services/quiz-service.js';
 
 const log = logger.child({ module: 'PartyResultsView' });
 
@@ -196,6 +197,35 @@ export default class PartyResultsView extends BaseView {
   }
 
   /**
+   * Count answered questions from answers data.
+   * Handles both array format (P2P) and object format (HTTP API).
+   *
+   * Issue #120: PHP backend returns answers as object {questionIndex: answerIndex}.
+   * P2P mode returns answers as array [answerIndex, answerIndex, ...].
+   *
+   * @private
+   * @param {Array|Object} answers - Answers data (array or object)
+   * @returns {number} Count of answered questions
+   */
+  _countAnswered(answers) {
+    if (!answers) return 0;
+
+    // Handle array format (P2P mode)
+    if (Array.isArray(answers)) {
+      return answers.filter(a => a !== undefined && a !== null).length;
+    }
+
+    // Handle object format (HTTP API mode)
+    // Object keys are question indices, values are answer indices
+    // e.g., {0: 1, 2: 3, 4: 0} means questions 0, 2, 4 were answered
+    if (typeof answers === 'object') {
+      return Object.keys(answers).length;
+    }
+
+    return 0;
+  }
+
+  /**
    * Render standings list.
    *
    * @private
@@ -220,7 +250,7 @@ export default class PartyResultsView extends BaseView {
             </p>
             <p class="text-subtext-light dark:text-subtext-dark text-sm">
               ${t('party.answeredCount', {
-                answered: participant.answers?.filter(a => a !== undefined).length || 0,
+                answered: this._countAnswered(participant.answers),
                 total: this.quiz?.questions?.length || 0,
               })}
             </p>
@@ -292,13 +322,69 @@ export default class PartyResultsView extends BaseView {
 
   /**
    * Save quiz locally for replay.
+   * Saves the party quiz to IndexedDB for future solo play.
+   * Checks for duplicates and strips privacy-sensitive fields.
    *
    * @private
    */
   async _saveLocally() {
-    // TODO: Implement saving quiz to IndexedDB
-    log.info('Save locally - not implemented yet');
-    alert(t('party.saveFeatureComingSoon'));
+    const saveBtn = this.querySelector('#saveBtn');
+
+    if (!this.quiz) {
+      log.warn('No quiz data available to save');
+      return;
+    }
+
+    // Get the quiz ID for duplicate detection
+    const sourceQuizId = this.quiz.id || `party-${this.roomCode}-${Date.now()}`;
+
+    try {
+      // Check if quiz already exists
+      const exists = await quizExists(sourceQuizId);
+
+      if (exists) {
+        // Quiz already saved - show feedback and disable button
+        log.info('Quiz already saved', { sourceQuizId });
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = t('party.quizAlreadySaved');
+        }
+        return;
+      }
+
+      // Prepare quiz data for saving (strip privacy fields)
+      const sanitizedQuiz = {
+        sourceQuizId,
+        topic: this.quiz.topic || t('party.quizFallback'),
+        gradeLevel: this.quiz.gradeLevel || 'high-school',
+        questions: this.quiz.questions,
+        timestamp: Date.now(),
+        source: 'party', // Mark as saved from party mode
+        // Do NOT include: creator, partySessionId, hostId, roomCode
+      };
+
+      // Save to IndexedDB
+      await saveQuizSession(sanitizedQuiz);
+
+      log.info('Quiz saved successfully', { sourceQuizId, topic: sanitizedQuiz.topic });
+
+      // Update button to show success
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = t('party.quizSaved');
+      }
+    } catch (error) {
+      log.error('Failed to save quiz', { error: error.message });
+      // Show error feedback (could be enhanced with a toast notification)
+      if (saveBtn) {
+        saveBtn.textContent = t('party.saveFailed');
+        // Re-enable after a delay to allow retry
+        setTimeout(() => {
+          saveBtn.disabled = false;
+          saveBtn.textContent = t('party.saveLocally');
+        }, 3000);
+      }
+    }
   }
 
   destroy() {
