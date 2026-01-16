@@ -15,7 +15,8 @@
     questionsPerQuiz: '5',
     difficulty: 'mixed',
     selectedModel: DEFAULT_MODEL,
-    appMode: 'learning'
+    appMode: 'learning',
+    screenName: ''
   };
 
   // Export for use in other modules
