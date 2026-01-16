@@ -127,7 +127,17 @@ export async function getAllTopics() {
     await db.put('sessions', session);
     return session;
   }
-  
+
+  /**
+   * Delete a single quiz session by ID
+   * @param {number} id - Session ID to delete
+   * @returns {Promise<void>}
+   */
+  export async function deleteSession(id) {
+    const db = await getDB();
+    return db.delete('sessions', id);
+  }
+
   /**
    * Check if a quiz with the given source ID already exists.
    * Used to detect duplicates when saving party quizzes.
