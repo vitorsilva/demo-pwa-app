@@ -46,6 +46,9 @@ export default class CreatePartyView extends BaseView {
     // Load available quizzes
     this.quizzes = await getQuizHistory(20);
 
+    // Get saved name from localStorage (same key as guest to share preference)
+    const savedName = localStorage.getItem('partyPlayerName') || '';
+
     this.setHTML(`
       <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
         <!-- Header -->
@@ -63,6 +66,27 @@ export default class CreatePartyView extends BaseView {
 
             <div id="quizList" class="flex flex-col gap-3 max-h-64 overflow-y-auto">
               ${this.renderQuizList()}
+            </div>
+
+            <!-- Host Name Input -->
+            <div class="mt-4">
+              <label for="hostName" class="text-subtext-light dark:text-subtext-dark text-sm block mb-2">
+                ${t('party.yourName')}
+              </label>
+              <input
+                type="text"
+                id="hostName"
+                value="${savedName}"
+                maxlength="20"
+                placeholder="${t('party.enterName')}"
+                class="w-full px-4 py-3 rounded-xl
+                       bg-card-light dark:bg-card-dark
+                       text-text-light dark:text-text-dark
+                       border-2 border-transparent
+                       focus:border-primary focus:outline-none
+                       placeholder:text-subtext-light/50"
+                data-testid="host-name-input"
+              />
             </div>
 
             <button
@@ -182,11 +206,26 @@ export default class CreatePartyView extends BaseView {
           /** @type {HTMLElement} */ (item).dataset.quizId
         );
 
-        // Enable create button
-        const createBtn = this.querySelector('#createRoomBtn');
-        if (createBtn) createBtn.removeAttribute('disabled');
+        // Update create button state
+        this._updateCreateButtonState();
       });
     });
+
+    // Host name input
+    const hostNameInput = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    );
+    this.addEventListener(hostNameInput, 'input', () => {
+      this._updateCreateButtonState();
+      // Save name on input for persistence (same key as guest)
+      const name = hostNameInput.value.trim();
+      if (name) {
+        localStorage.setItem('partyPlayerName', name);
+      }
+    });
+
+    // Check initial state (in case name is pre-filled from localStorage)
+    this._updateCreateButtonState();
 
     // Create room button
     const createRoomBtn = this.querySelector('#createRoomBtn');
@@ -201,10 +240,39 @@ export default class CreatePartyView extends BaseView {
     this.addEventListener(cancelPartyBtn, 'click', () => this.cancelParty());
   }
 
+  /**
+   * Update the create button enabled/disabled state based on quiz and name.
+   * @private
+   */
+  _updateCreateButtonState() {
+    const hostName = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    )?.value.trim();
+    const createBtn = this.querySelector('#createRoomBtn');
+
+    if (this.selectedQuizId && hostName && hostName.length > 0) {
+      createBtn?.removeAttribute('disabled');
+    } else {
+      createBtn?.setAttribute('disabled', 'true');
+    }
+  }
+
   async createRoom() {
     if (!this.selectedQuizId) {
       return;
     }
+
+    // Get host name from input
+    const hostName = /** @type {HTMLInputElement} */ (
+      this.querySelector('#hostName')
+    )?.value.trim();
+
+    if (!hostName) {
+      return;
+    }
+
+    // Save name for next time (same key as guest to share preference)
+    localStorage.setItem('partyPlayerName', hostName);
 
     // Show loading
     const overlay = this.querySelector('#loadingOverlay');
@@ -218,7 +286,7 @@ export default class CreatePartyView extends BaseView {
       // Create room via API
       const roomData = await createRoom({
         hostId: this.hostId,
-        hostName: 'You', // TODO: Allow user to set name
+        hostName: hostName,
         quizData: quiz,
         secondsPerQuestion: 30,
       });
