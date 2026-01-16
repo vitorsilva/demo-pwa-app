@@ -11,7 +11,7 @@
     /**
      * Register a route
      * @param {string} path - Route path (e.g., '/home')
-     * @param {Function} ViewClass - View class to render
+     * @param {new (options?: Object) => Object} ViewClass - View class constructor to render
      */
     addRoute(path, ViewClass) {
       this.routes.set(path, ViewClass);
@@ -231,7 +231,7 @@
 
     /**
      * Render a view
-     * @param {Function} ViewClass - View class to instantiate
+     * @param {new (options?: Object) => Object} ViewClass - View class constructor to instantiate
      * @param {Object} [options] - Optional options to pass to view constructor
      */
     render(ViewClass, options = {}) {

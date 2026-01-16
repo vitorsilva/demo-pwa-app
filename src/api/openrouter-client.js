@@ -7,6 +7,10 @@
   import { getSelectedModel } from '../services/model-service.js';
   import { withRetry, isRetryableError } from '../utils/retry.js';
 
+  /**
+   * @typedef {Error & {status?: number, response?: Response}} ApiError
+   */
+
   const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
   /**
@@ -47,7 +51,7 @@
 
         // If response is not ok, throw an error with status for retry logic
         if (!res.ok) {
-          const error = new Error(`HTTP ${res.status}`);
+          const error = /** @type {ApiError} */ (new Error(`HTTP ${res.status}`));
           error.status = res.status;
           error.response = res;
           throw error;
@@ -57,14 +61,14 @@
       },
       {
         maxRetries: 3,
-        shouldRetry: (error) => {
+        shouldRetry: (/** @type {ApiError} */ error) => {
           // Don't retry client errors (except 429 rate limit)
           if (error.status === 401 || error.status === 402 || error.status === 400) {
             return false;
           }
           return isRetryableError(error);
         },
-        onRetry: ({ attempt, error, delay }) => {
+        onRetry: (/** @type {{attempt: number, error: ApiError, delay: number}} */ { attempt, error, delay }) => {
           logger.info('API call retry', {
             attempt,
             delay,
@@ -172,7 +176,7 @@
           });
 
           if (!res.ok) {
-            const error = new Error(`HTTP ${res.status}`);
+            const error = /** @type {ApiError} */ (new Error(`HTTP ${res.status}`));
             error.status = res.status;
             throw error;
           }
