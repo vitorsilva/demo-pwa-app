@@ -335,6 +335,7 @@ export class PartySession {
   addParticipant(peerId, name) {
     if (!this.isHost) return;
 
+    /** @type {Participant} */
     const participant = {
       id: peerId,
       name,

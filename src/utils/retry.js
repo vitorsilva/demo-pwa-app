@@ -6,6 +6,10 @@
 import { logger } from './logger.js';
 
 /**
+ * @typedef {Error & {status?: number}} RetryableError
+ */
+
+/**
  * Default retry configuration
  */
 const DEFAULT_OPTIONS = {
@@ -77,7 +81,7 @@ export async function withRetry(fn, options = {}) {
 
 /**
  * Determine if an error is retryable
- * @param {Error} error - The error to check
+ * @param {RetryableError} error - The error to check
  * @returns {boolean} True if the error is retryable
  */
 export function isRetryableError(error) {
