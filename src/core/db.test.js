@@ -27,6 +27,7 @@ import {
     removeOpenRouterKey,
     isOpenRouterConnected,
     clearAllUserData,
+    normalizeTimestamp,
     DB_NAME,
     DB_VERSION
   } from './db.js';
@@ -714,6 +715,78 @@ describe('Sessions CRUD Operations', () => {
 
           const sessions = await getAllSessions();
           expect(sessions).toHaveLength(0);
+        });
+      });
+
+      describe('getRecentSessions - mixed timestamp sorting', () => {
+        beforeEach(async () => {
+          // Clear all data before each test to ensure isolation
+          await clearAllUserData();
+          await deleteSampleSessions();
+        });
+
+        it('returns sessions sorted by timestamp descending (newest first)', async () => {
+          const now = Date.now();
+          await saveSession({ topic: 'Old Quiz', timestamp: now - 86400000 * 7 }); // 7 days ago
+          await saveSession({ topic: 'Today Quiz', timestamp: now });
+          await saveSession({ topic: 'Yesterday Quiz', timestamp: now - 86400000 }); // 1 day ago
+
+          const sessions = await getRecentSessions(10);
+
+          expect(sessions[0].topic).toBe('Today Quiz');
+          expect(sessions[1].topic).toBe('Yesterday Quiz');
+          expect(sessions[2].topic).toBe('Old Quiz');
+        });
+
+        it('handles sessions with null/zero timestamps', async () => {
+          const now = Date.now();
+          await saveSession({ topic: 'No Timestamp', timestamp: 0 });
+          await saveSession({ topic: 'Recent', timestamp: now });
+
+          const sessions = await getRecentSessions(10);
+
+          expect(sessions[0].topic).toBe('Recent');
+          expect(sessions[1].topic).toBe('No Timestamp');
+        });
+
+        it('handles mixed timestamp types (string ISO and number)', async () => {
+          const now = Date.now();
+          const lastWeekISO = new Date(now - 86400000 * 7).toISOString(); // String (legacy)
+
+          await saveSession({ topic: 'Last Week Import', timestamp: lastWeekISO }); // String
+          await saveSession({ topic: 'Today Played', timestamp: now }); // Number
+          await saveSession({ topic: 'Yesterday Played', timestamp: now - 86400000 }); // Number
+
+          const sessions = await getRecentSessions(10);
+
+          // Should sort by actual date value, not data type
+          expect(sessions[0].topic).toBe('Today Played');
+          expect(sessions[1].topic).toBe('Yesterday Played');
+          expect(sessions[2].topic).toBe('Last Week Import');
+        });
+      });
+
+      describe('normalizeTimestamp', () => {
+        it('returns number timestamps unchanged', () => {
+          expect(normalizeTimestamp(1737072000000)).toBe(1737072000000);
+        });
+
+        it('converts ISO string to number', () => {
+          const iso = '2026-01-16T12:00:00.000Z';
+          expect(normalizeTimestamp(iso)).toBe(Date.parse(iso));
+        });
+
+        it('returns 0 for null/undefined', () => {
+          expect(normalizeTimestamp(null)).toBe(0);
+          expect(normalizeTimestamp(undefined)).toBe(0);
+        });
+
+        it('returns 0 for invalid strings', () => {
+          expect(normalizeTimestamp('not-a-date')).toBe(0);
+        });
+
+        it('returns 0 for zero', () => {
+          expect(normalizeTimestamp(0)).toBe(0);
         });
       });
 

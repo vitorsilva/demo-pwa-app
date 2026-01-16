@@ -84,10 +84,34 @@ export async function getAllTopics() {
     return db.getAll('sessions');
   }
 
+  /**
+   * Normalize timestamp to numeric milliseconds.
+   * Handles: numbers, ISO strings, null, undefined, 0
+   * @param {number|string|null|undefined} ts - Timestamp value
+   * @returns {number} Normalized timestamp in milliseconds
+   */
+  export function normalizeTimestamp(ts) {
+    if (!ts) return 0;
+    if (typeof ts === 'number') return ts;
+    if (typeof ts === 'string') {
+      const parsed = Date.parse(ts);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  }
+
   export async function getRecentSessions(limit = 10) {
     const db = await getDB();
-    const all = await db.getAllFromIndex('sessions', 'byTimestamp');
-    return all.reverse().slice(0, limit);
+    const all = await db.getAll('sessions');
+
+    // Normalize and sort by timestamp descending (newest first)
+    all.sort((a, b) => {
+      const tsA = normalizeTimestamp(a.timestamp);
+      const tsB = normalizeTimestamp(b.timestamp);
+      return tsB - tsA;
+    });
+
+    return all.slice(0, limit);
   }
 
   export async function updateSession(id, updates) {
