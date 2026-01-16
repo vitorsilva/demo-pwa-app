@@ -31,6 +31,12 @@
     "startQuiz": "Iniciar um Quiz",
     "cannotReplay": "Não pode ser repetido"
   },
+  "history": {
+    "deleteQuiz": "Apagar quiz",
+    "deleteQuizConfirm": "Apagar este quiz?",
+    "deleteQuizDescription": "Isto vai remover permanentemente \"{{topic}}\" do teu histórico.",
+    "quizDeleted": "Quiz apagado"
+  },
   "topicInput": {
     "title": "Novo Quiz",
     "whatToPractice": "O que queres praticar?",
