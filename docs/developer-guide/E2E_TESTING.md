@@ -396,6 +396,126 @@ Error: connect ECONNREFUSED 127.0.0.1:3000
 - Kill any process using the port: `npx kill-port 3000`
 - Or start manually in a separate terminal: `npm run dev`
 
+## Multi-User Testing (Party Mode)
+
+Party Mode requires testing multiple users interacting simultaneously. This uses **Docker** for the PHP backend and **Playwright multi-context** for isolated browser sessions.
+
+### Docker Setup
+
+```bash
+# Start PHP + MySQL stack
+docker-compose -f docker-compose.php.yml up -d php-api mysql
+
+# Verify containers are running
+docker-compose -f docker-compose.php.yml ps
+
+# Run database migrations (first time only)
+docker-compose -f docker-compose.php.yml exec php-api php /var/www/html/party/migrate.php
+```
+
+### Environment Configuration
+
+Add to `.env` for local Party Mode testing:
+
+```bash
+VITE_PARTY_API_URL=http://localhost:8080/party
+```
+
+### Multi-Context Pattern
+
+Playwright multi-context creates isolated browser sessions (separate cookies, storage):
+
+```javascript
+import { test, expect } from '@playwright/test';
+import { setupAuthenticatedState } from './helpers.js';
+
+test('host and guest complete party quiz', async ({ browser }) => {
+  // Create isolated browser contexts
+  const hostContext = await browser.newContext();
+  const guestContext = await browser.newContext();
+
+  const hostPage = await hostContext.newPage();
+  const guestPage = await guestContext.newPage();
+
+  // Initialize both with authenticated state
+  await setupAuthenticatedState(hostPage);
+  await setupAuthenticatedState(guestPage);
+
+  // Host creates room
+  await hostPage.goto('/#/party/create');
+  // ... host creates quiz and gets room code
+
+  // Guest joins room
+  await guestPage.goto('/#/party/join');
+  // ... guest enters room code and joins
+
+  // Both play through quiz
+  // ... answer questions, verify scores
+
+  // Cleanup
+  await hostContext.close();
+  await guestContext.close();
+});
+```
+
+### What Multi-Context Tests
+
+| Scenario | How It Works |
+|----------|--------------|
+| Real HTTP polling | Both contexts communicate through Docker backend |
+| Score synchronization | Verify both see same scores after answers |
+| Question progression | Host advances, guest sees new question |
+| Results display | Both see correct final standings |
+
+### What It Doesn't Test
+
+| Scenario | Why | Alternative |
+|----------|-----|-------------|
+| WebRTC P2P | Docker uses HTTP polling mode | Manual testing if P2P enabled |
+| 3+ players | Complex setup, diminishing returns | Test with 2 players |
+| Network failures | Unreliable to simulate | Manual disconnect testing |
+
+### Running Party Mode Tests
+
+```bash
+# Ensure Docker is running first!
+docker-compose -f docker-compose.php.yml up -d php-api mysql
+
+# Run party mode tests
+npx playwright test tests/e2e/party-mode.spec.js --headed
+
+# Run with UI for debugging
+npx playwright test tests/e2e/party-mode.spec.js --ui
+```
+
+### Troubleshooting Docker Tests
+
+**CORS errors:**
+Add test server origin to `php-api/party/config.local.php`:
+```php
+'allowed_origins' => [
+    'http://localhost:8888',
+    'http://localhost:3000',  // Playwright test server
+],
+```
+
+**Database connection errors:**
+Ensure `config.local.php` uses Docker service name:
+```php
+'db' => [
+    'host' => 'mysql',  // Docker service name, NOT localhost
+    // ...
+],
+```
+
+**Old server caching:**
+Kill existing dev servers before running tests:
+```bash
+npx kill-port 3000
+```
+
+For detailed setup and troubleshooting, see [Phase 4: Multi-User Testing](../learning/epic06_sharing/PHASE4_MULTI_USER_TESTING.md).
+
 ## Best Practices
 
 1. **Use meaningful selectors** - `data-testid` over CSS classes
@@ -403,9 +523,11 @@ Error: connect ECONNREFUSED 127.0.0.1:3000
 3. **Test user workflows** - Complete flows, not isolated clicks
 4. **Clean up state** - Use `beforeEach` for consistent starting point
 5. **Keep tests independent** - Each test should work in isolation
+6. **Use multi-context for multi-user** - Don't mock when Docker can provide real backend
 
 ## Related Documentation
 
 - [Unit Testing](./UNIT_TESTING.md) - Vitest unit tests
 - [Maestro Testing](./MAESTRO_TESTING.md) - Mobile app tests
 - [Phase 4.4 Learning Notes](../learning/epic01_infrastructure/PHASE4.4_E2E_TESTING.md) - Detailed concepts
+- [Phase 4: Multi-User Testing](../learning/epic06_sharing/PHASE4_MULTI_USER_TESTING.md) - Party Mode testing setup
