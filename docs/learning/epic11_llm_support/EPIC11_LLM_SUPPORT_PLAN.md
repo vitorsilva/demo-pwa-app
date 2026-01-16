@@ -27,14 +27,24 @@ Add optional support for users to configure their own API keys from:
 
 OpenRouter remains the default and recommended option (CORS support, OAuth flow).
 
+**Key Design Decision:** Provider selection happens at the **Settings level only**, not during quiz creation. This simplifies the UX and ensures consistency across all LLM operations (questions, explanations).
+
+### LLM Operations Affected
+
+All LLM calls will use the selected provider:
+- **Quiz Generation** - Generate questions for a topic
+- **Explanation Generation** - Explain why an answer is correct/incorrect
+- **Future operations** - Any new LLM features will use the same provider
+
 ### Success Criteria
 
-- [ ] Users can add/remove API keys for each supported provider
-- [ ] Users can select which provider to use for quiz generation
+- [ ] Users can add/remove API keys for each supported provider in Settings
+- [ ] Users can select active provider and model in Settings
 - [ ] Backend proxy correctly routes requests to each provider
-- [ ] All existing functionality continues to work
-- [ ] Clear UI indication of which provider is active
+- [ ] All LLM operations use the selected provider
+- [ ] Clear UI indication of active provider in Settings
 - [ ] Cost tracking works for all providers
+- [ ] Deployment script for VPS `/llm/` endpoint
 
 ---
 
@@ -47,7 +57,9 @@ OpenRouter remains the default and recommended option (CORS support, OAuth flow)
 │                           BROWSER                                    │
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │ IndexedDB: Provider Keys                                      │   │
+│  │ IndexedDB: Provider Settings                                  │   │
+│  │  - active_provider: "openrouter" | "openai" | ...            │   │
+│  │  - active_model: "gpt-4o-mini" | "claude-3.5-sonnet" | ...   │   │
 │  │  - openrouter_key: "sk-or-..."                               │   │
 │  │  - openai_key: "sk-..."         (optional)                   │   │
 │  │  - anthropic_key: "sk-ant-..."  (optional)                   │   │
@@ -57,8 +69,9 @@ OpenRouter remains the default and recommended option (CORS support, OAuth flow)
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────────┐   │
 │  │ Provider Router (src/api/provider-router.js)                  │   │
-│  │  - Checks selected provider                                   │   │
+│  │  - Reads active provider from settings                        │   │
 │  │  - Routes to direct API (OpenRouter) or proxy (others)       │   │
+│  │  - Used by: quiz generation, explanation generation           │   │
 │  └─────────────────────┬────────────────────────────────────────┘   │
 │                        │                                             │
 └────────────────────────┼─────────────────────────────────────────────┘
@@ -97,7 +110,10 @@ saberloop.com/
 ├── telemetry/        # Telemetry endpoints (existing)
 └── llm/              # NEW: LLM proxy endpoints
     ├── completion.php
-    └── health.php
+    ├── health.php
+    └── src/
+        └── handlers/
+            └── LLMCompletion.php
 ```
 
 **Rationale:** Separate `/llm/` path for:
@@ -108,147 +124,73 @@ saberloop.com/
 
 ---
 
-## Phases
+## Phases Overview
 
-### Phase 1: Backend Proxy (P0)
+Each phase has its own detailed document with implementation steps, testing, and acceptance criteria.
 
-**Goal:** Create the LLM proxy that routes requests to different providers.
+| Phase | Document | Goal | Effort |
+|-------|----------|------|--------|
+| 1 | [PHASE1_BACKEND_PROXY.md](./PHASE1_BACKEND_PROXY.md) | Backend proxy + deployment script | 3-4 days |
+| 2 | [PHASE2_FRONTEND_ROUTER.md](./PHASE2_FRONTEND_ROUTER.md) | Frontend provider routing | 2-3 days |
+| 3 | [PHASE3_KEY_MANAGEMENT.md](./PHASE3_KEY_MANAGEMENT.md) | API key storage and management | 2-3 days |
+| 4 | [PHASE4_SETTINGS_UI.md](./PHASE4_SETTINGS_UI.md) | Settings UI for provider selection | 3-4 days |
+| 5 | [PHASE5_POLISH.md](./PHASE5_POLISH.md) | Error handling, edge cases, final polish | 2-3 days |
 
-#### Tasks
+**Total Estimate:** ~12-17 days
 
-1. **Create LLM proxy handler**
-   - `php-api/src/handlers/LLMCompletion.php`
-   - Support OpenAI, Anthropic, Google, xAI
-   - Normalize request/response formats
-   - Error handling per provider
+### Testing Strategy
 
-2. **Create endpoint**
-   - `php-api/llm/completion.php`
-   - CORS headers
-   - Input validation
+**Testing is integrated into each phase, not a separate phase.**
 
-3. **Create health check**
-   - `php-api/llm/health.php`
-   - Verify proxy is running
+Each phase includes:
+- Unit tests for new code
+- Integration tests where applicable
+- E2E tests for user-facing features
+- Maestro tests for mobile UI (Phases 3-5)
 
-4. **Deploy to VPS**
-   - Create `/llm/` directory
-   - Configure Apache/Nginx
-   - Test endpoints
-
-#### Acceptance Criteria
-
-- [ ] POST `/llm/completion` accepts provider, api_key, messages, model
-- [ ] Returns normalized response format
-- [ ] Handles errors gracefully
-- [ ] Does not log API keys
+Tests must pass before moving to the next phase.
 
 ---
 
-### Phase 2: Frontend Provider Router (P0)
+## Design Decisions (Resolved)
 
-**Goal:** Smart routing between direct OpenRouter calls and proxy calls.
+1. **Provider selection location:** ✅ **Settings only**
+   - Provider is selected in Settings, not during quiz creation
+   - Simplifies UX - one place to configure
+   - All LLM operations (questions, explanations) use same provider
+   - Change applies to next LLM call, not mid-operation
 
-#### Tasks
+2. **Model selection per provider:** ✅ **Allow specific model selection**
+   - Users can select specific models for each provider
+   - Show available models with pricing in the UI
+   - Remember last selected model per provider
 
-1. **Create provider configuration**
-   - `src/api/providers-config.js`
-   - Provider metadata (CORS support, key format, etc.)
+3. **Key validation:** ✅ **Hybrid approach**
+   - On save: Format validation only (instant feedback, works offline)
+   - After save: Async background validation when online
+   - Update status indicator: "Validating..." → "Valid" / "Invalid"
+   - Benefits: Fast UX, eventual confirmation, works offline
 
-2. **Create provider router**
-   - `src/api/provider-router.js`
-   - Route based on selected provider
-   - Handle both direct and proxy calls
+4. **Cost tracking:** ✅ **Yes, display costs for all providers**
+   - Use token counts from API responses
+   - Multiply by known pricing per model
+   - Show in results view same as OpenRouter
 
-3. **Update api.real.js**
-   - Use provider router instead of direct OpenRouter calls
-   - Maintain backward compatibility
+5. **Offline keys:** ✅ **No special handling needed**
+   - Store locally in IndexedDB
+   - Validate on first actual use
+   - Same pattern as current OpenRouter implementation
 
-#### Acceptance Criteria
-
-- [ ] OpenRouter calls go direct (no change from current)
-- [ ] Other provider calls go through proxy
-- [ ] Response format is consistent regardless of provider
-
----
-
-### Phase 3: Key Management (P1)
-
-**Goal:** Allow users to add/remove API keys for each provider.
-
-#### Tasks
-
-1. **Create key storage service**
-   - `src/services/api-keys-service.js`
-   - Store/retrieve keys from IndexedDB
-   - Validate key format
-
-2. **Create settings UI component**
-   - `src/components/ProviderSettings.js`
-   - Add/edit/remove keys
-   - Show key status (valid/invalid/not set)
-
-3. **Update SettingsView**
-   - Add provider settings section
-   - Integrate with existing settings
-
-#### Acceptance Criteria
-
-- [ ] Users can add API keys for each provider
-- [ ] Keys are stored securely in IndexedDB
-- [ ] Invalid key formats are rejected
-- [ ] Keys can be removed
+6. **Mid-operation provider switch:** ✅ **Not allowed**
+   - Provider is locked for duration of quiz
+   - Cannot change while quiz in progress
+   - Selection only applies to next quiz creation
 
 ---
 
-### Phase 4: Provider Selection UI (P1)
+## UI Design Summary
 
-**Goal:** Allow users to choose which provider to use.
-
-#### Tasks
-
-1. **Add provider selector**
-   - In quiz creation flow
-   - Show only providers with configured keys
-   - Remember last selection
-
-2. **Show active provider indicator**
-   - In quiz view
-   - In results view
-
-3. **Update cost tracking**
-   - Show costs for selected provider
-   - Different pricing per provider
-
-#### Acceptance Criteria
-
-- [ ] Users can select provider before generating quiz
-- [ ] Provider selection persists across sessions
-- [ ] Cost estimates adjust based on provider
-
----
-
-### Phase 5: Testing & Polish (P2)
-
-**Goal:** Comprehensive testing and UX improvements.
-
-#### Tasks
-
-1. Unit tests for proxy
-2. Unit tests for provider router
-3. E2E tests for full flow
-4. Maestro tests for mobile UI
-5. Error handling improvements
-6. Loading states
-7. i18n strings
-
----
-
-## UI Design
-
-### Wireframes
-
-#### Settings View - Provider Configuration
+### Settings View - LLM Providers Section
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -259,33 +201,41 @@ saberloop.com/
 │  │ LLM Providers                                           ││
 │  ├─────────────────────────────────────────────────────────┤│
 │  │                                                         ││
+│  │  Active Provider: [OpenRouter                    ▼]     ││
+│  │  Active Model:    [claude-3.5-sonnet             ▼]     ││
+│  │  Estimated cost:  ~$0.015/quiz                          ││
+│  │                                                         ││
+│  │  ─────────────────────────────────────────────────────  ││
+│  │                                                         ││
+│  │  Configured Providers:                                  ││
+│  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ OpenRouter                        ✅ Connected   │   ││
-│  │  │ Current default • OAuth connected               │   ││
+│  │  │ ● OpenRouter                      ✅ Connected   │   ││
+│  │  │   OAuth connected                              │   ││
 │  │  │                              [Disconnect]       │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ OpenAI                            ✅ Valid       │   ││
-│  │  │ GPT-4o, GPT-4o-mini • sk-...7x2Q               │   ││
+│  │  │ ○ OpenAI                          ✅ Valid       │   ││
+│  │  │   sk-...7x2Q                                    │   ││
 │  │  │                     [Change Key] [Remove]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ Anthropic                      🔄 Validating... │   ││
-│  │  │ Claude 3.5 Sonnet, Claude 3 Opus               │   ││
+│  │  │ ○ Anthropic                    🔄 Validating... │   ││
+│  │  │   sk-ant-...                                    │   ││
 │  │  │                     [Change Key] [Remove]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ Google AI                         ○ Not configured││
-│  │  │ Gemini 2.5 Flash, Gemini 2.5 Pro • Free tier    │   ││
+│  │  │ ○ Google AI                    ○ Not configured │   ││
+│  │  │   Gemini models • Free tier available          │   ││
 │  │  │                              [Add API Key]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
 │  │  ┌─────────────────────────────────────────────────┐   ││
-│  │  │ xAI                               ○ Not configured││
-│  │  │ Grok 4 Fast, Grok 3                             │   ││
+│  │  │ ○ xAI                          ○ Not configured │   ││
+│  │  │   Grok models                                   │   ││
 │  │  │                              [Add API Key]      │   ││
 │  │  └─────────────────────────────────────────────────┘   ││
 │  │                                                         ││
@@ -293,447 +243,66 @@ saberloop.com/
 │                                                              │
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │ ℹ️ OpenRouter is recommended for easiest setup.         ││
-│  │    Add direct provider keys for lower costs or          ││
-│  │    specific model access.                               ││
+│  │    Add direct provider keys for lower costs.            ││
 │  └─────────────────────────────────────────────────────────┘│
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### Add API Key Modal
+### Active Provider Indicator (Quiz View)
+
+Small indicator showing which provider is being used:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Add OpenAI API Key                                    [X]  │
+│  Question 3 of 5                     Powered by OpenRouter  │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Enter your OpenAI API key. You can get one from:           │
-│  https://platform.openai.com/api-keys                       │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ sk-...                                                  ││
-│  └─────────────────────────────────────────────────────────┘│
-│                                                              │
-│  ⚠️ Your API key is stored locally on your device.          │
-│     It is sent to our server only when making LLM calls.    │
-│     We never store your key on our servers.                 │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │  Available Models:                                      ││
-│  │  • gpt-4o ($2.50/1M in, $10/1M out)                    ││
-│  │  • gpt-4o-mini ($0.15/1M in, $0.60/1M out)             ││
-│  │  • gpt-4-turbo ($10/1M in, $30/1M out)                 ││
-│  └─────────────────────────────────────────────────────────┘│
-│                                                              │
-│                              [Cancel]  [Save Key]            │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### Provider Selector (Quiz Creation)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Create Quiz                                                 │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Topic: [World War II                              ]        │
-│                                                              │
-│  Grade Level: [8th Grade                          ▼]        │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ LLM Provider                                            ││
-│  │ ┌─────────────────────────────────────────────────────┐ ││
-│  │ │ ○ OpenRouter (default)                              │ ││
-│  │ │   Model: [claude-3.5-sonnet              ▼]         │ ││
-│  │ │   ~$0.015/quiz                                      │ ││
-│  │ ├─────────────────────────────────────────────────────┤ ││
-│  │ │ ○ OpenAI                                            │ ││
-│  │ │   Model: [gpt-4o-mini                    ▼]         │ ││
-│  │ │   ~$0.0006/quiz                                     │ ││
-│  │ ├─────────────────────────────────────────────────────┤ ││
-│  │ │ ● Google AI                                         │ ││
-│  │ │   Model: [gemini-2.5-flash               ▼]         │ ││
-│  │ │   ~$0.0003/quiz (free tier)                         │ ││
-│  │ └─────────────────────────────────────────────────────┘ ││
-│  └─────────────────────────────────────────────────────────┘│
-│                                                              │
-│                              [Generate Quiz]                 │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### Provider Selector (Expanded Model Dropdown)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  │ ● Google AI                                         │    │
-│  │   Model: [gemini-2.5-flash               ▼]         │    │
-│  │          ┌─────────────────────────────────┐        │    │
-│  │          │ gemini-2.5-flash    $0.075/1M  │◀──────│    │
-│  │          │ gemini-2.5-pro      $1.25/1M   │        │    │
-│  │          │ gemini-flash-lite   $0.075/1M  │        │    │
-│  │          └─────────────────────────────────┘        │    │
-│  │   ~$0.0003/quiz (free tier)                         │    │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### Provider Indicator (Quiz View)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Question 3 of 5                          [Google AI] 🤖    │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  What was the primary cause of World War II?                │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ A) The assassination of Archduke Franz Ferdinand        ││
-│  └─────────────────────────────────────────────────────────┘│
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ B) Germany's invasion of Poland                         ││
-│  └─────────────────────────────────────────────────────────┘│
 │  ...                                                         │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+Full wireframes are in each phase document.
 
 ---
 
 ## i18n Strings
 
-### New Translation Keys
+See [PHASE4_SETTINGS_UI.md](./PHASE4_SETTINGS_UI.md) for complete i18n string definitions.
 
-```javascript
-// src/i18n/en.json (additions)
-{
-  "settings": {
-    "llmProviders": {
-      "title": "LLM Providers",
-      "description": "Configure AI providers for quiz generation",
-      "openrouterRecommended": "OpenRouter is recommended for easiest setup. Add direct provider keys for lower costs or specific model access.",
-      "connected": "Connected",
-      "notConfigured": "Not configured",
-      "addApiKey": "Add API Key",
-      "changeKey": "Change Key",
-      "removeKey": "Remove",
-      "disconnect": "Disconnect",
-      "currentDefault": "Current default",
-      "freeTier": "Free tier available",
-      "keyStatus": {
-        "valid": "Valid",
-        "invalid": "Invalid",
-        "validating": "Validating...",
-        "notSet": "Not configured"
-      },
-      "keyMasked": "{{prefix}}...{{suffix}}"
-    },
-    "addKeyModal": {
-      "title": "Add {{provider}} API Key",
-      "titleChange": "Change {{provider}} API Key",
-      "enterKey": "Enter your {{provider}} API key. You can get one from:",
-      "securityNote": "Your API key is stored locally on your device. It is sent to our server only when making LLM calls. We never store your key on our servers.",
-      "availableModels": "Available Models",
-      "cancel": "Cancel",
-      "saveKey": "Save Key",
-      "invalidFormat": "Invalid API key format. {{provider}} keys should start with '{{prefix}}'.",
-      "keyUpdated": "API key updated. Validating...",
-      "validationSuccess": "API key is valid!",
-      "validationFailed": "API key validation failed: {{error}}"
-    },
-    "removeKeyModal": {
-      "title": "Remove {{provider}} API Key",
-      "confirm": "Are you sure you want to remove your {{provider}} API key?",
-      "cancel": "Cancel",
-      "remove": "Remove Key"
-    }
-  },
-  "quiz": {
-    "providerSelector": {
-      "title": "LLM Provider",
-      "selectModel": "Model",
-      "default": "default",
-      "costPerQuiz": "~{{cost}}/quiz",
-      "costPerMillion": "{{cost}}/1M",
-      "freeTierAvailable": "free tier"
-    },
-    "providerIndicator": {
-      "poweredBy": "Powered by {{provider}}",
-      "model": "Model: {{model}}"
-    }
-  },
-  "errors": {
-    "providerError": "Error from {{provider}}: {{message}}",
-    "proxyError": "Could not connect to LLM service. Please try again.",
-    "invalidApiKey": "Invalid API key for {{provider}}. Please check your key in Settings.",
-    "rateLimited": "Rate limit exceeded for {{provider}}. Please wait and try again.",
-    "quotaExceeded": "API quota exceeded for {{provider}}. Check your account balance."
-  }
-}
-```
-
-### Languages to Update
-
-- `src/i18n/en.json` - English (primary)
-- `src/i18n/pt.json` - Portuguese
-- `src/i18n/es.json` - Spanish
-- (other languages as applicable)
-
----
-
-## Testing Strategy
-
-### Unit Tests
-
-#### Backend (PHP)
-
-```
-tests/php/
-├── LLMCompletionTest.php
-│   ├── test_validates_required_fields
-│   ├── test_rejects_unsupported_provider
-│   ├── test_builds_openai_payload_correctly
-│   ├── test_builds_anthropic_payload_correctly
-│   ├── test_builds_google_payload_correctly
-│   ├── test_builds_xai_payload_correctly
-│   ├── test_normalizes_openai_response
-│   ├── test_normalizes_anthropic_response
-│   ├── test_normalizes_google_response
-│   ├── test_handles_provider_errors
-│   └── test_does_not_log_api_keys
-```
-
-#### Frontend (Vitest)
-
-```
-tests/unit/
-├── provider-router.test.js
-│   ├── routes OpenRouter calls directly
-│   ├── routes other providers through proxy
-│   ├── handles missing API key
-│   └── returns normalized response format
-├── api-keys-service.test.js
-│   ├── stores key in IndexedDB
-│   ├── retrieves key from IndexedDB
-│   ├── validates key format
-│   ├── deletes key
-│   └── lists configured providers
-└── providers-config.test.js
-    ├── returns correct CORS status
-    ├── returns correct key prefix
-    └── returns correct endpoint
-```
-
-### E2E Tests (Playwright)
-
-```
-tests/e2e/
-├── provider-settings.spec.js
-│   ├── displays all providers in settings
-│   ├── shows OpenRouter as connected
-│   ├── can add API key for provider
-│   ├── validates key format
-│   ├── can remove API key
-│   └── persists keys across sessions
-├── provider-selection.spec.js
-│   ├── shows only configured providers
-│   ├── can select different provider
-│   ├── shows cost estimate per provider
-│   └── remembers provider selection
-└── provider-quiz-flow.spec.js (with mocked proxy)
-    ├── generates quiz via OpenRouter (direct)
-    ├── generates quiz via OpenAI (proxy)
-    ├── generates quiz via Anthropic (proxy)
-    ├── handles provider error gracefully
-    └── shows provider indicator during quiz
-```
-
-### Maestro Tests (Mobile)
-
-```
-tests/maestro/
-├── provider_settings_flow.yaml
-│   ├── navigate to settings
-│   ├── scroll to LLM providers section
-│   ├── tap add API key
-│   ├── enter key
-│   ├── verify key saved
-│   └── verify provider shows as configured
-├── provider_selection_flow.yaml
-│   ├── navigate to quiz creation
-│   ├── expand provider selector
-│   ├── select different provider
-│   ├── verify selection persisted
-│   └── generate quiz with selected provider
-└── provider_error_handling.yaml
-    ├── configure invalid key
-    ├── attempt to generate quiz
-    └── verify error message displayed
-```
-
-### Test Data / Mocking Strategy
-
-1. **E2E tests:** Mock the `/llm/completion` endpoint to return predictable responses
-2. **Unit tests:** Mock fetch/HTTP calls
-3. **Integration tests:** Can optionally use real providers with test keys (manual, not CI)
-
----
-
-## Deployment Strategy
-
-### Backend Deployment
-
-#### Directory Structure on VPS
-
-```
-/var/www/saberloop.com/
-├── app/              # Frontend (existing)
-├── party/            # Party Mode (existing)
-│   ├── endpoints/
-│   ├── Database.php
-│   └── ...
-├── telemetry/        # Telemetry (existing)
-│   └── ...
-└── llm/              # NEW
-    ├── completion.php
-    ├── health.php
-    └── src/
-        └── handlers/
-            └── LLMCompletion.php
-```
-
-#### Apache/Nginx Configuration
-
-Add to existing configuration:
-
-```apache
-# LLM Proxy endpoints
-<Directory /var/www/saberloop.com/llm>
-    AllowOverride All
-    Require all granted
-</Directory>
-
-# Rate limiting for LLM proxy (optional)
-<Location /llm/completion>
-    SetEnvIf Request_URI "^/llm/completion" rate_limit
-    # Limit to 60 requests per minute per IP
-</Location>
-```
-
-#### Deployment Steps
-
-1. Create `/llm/` directory on VPS
-2. Upload PHP files
-3. Test health endpoint: `curl https://saberloop.com/llm/health.php`
-4. Test completion endpoint with test data
-5. Monitor logs for errors
-
-### Frontend Deployment
-
-Standard deployment via existing FTP/CI process:
-1. Build: `npm run build`
-2. Deploy: `npm run deploy`
-
-### Rollout Strategy
-
-1. **Phase 1:** Deploy backend proxy (no frontend changes)
-2. **Phase 2:** Deploy frontend with feature flag disabled
-3. **Phase 3:** Enable feature flag for beta testers
-4. **Phase 4:** Enable for all users
-5. **Phase 5:** Remove feature flag
-
-#### Feature Flag
-
-```javascript
-// src/core/feature-flags.js
-export const FEATURES = {
-  MULTI_PROVIDER_LLM: false  // Enable when ready
-};
-```
+Summary of new string namespaces:
+- `settings.llmProviders.*` - Provider settings UI
+- `settings.addKeyModal.*` - Add/change key modal
+- `settings.removeKeyModal.*` - Remove key confirmation
+- `quiz.providerIndicator.*` - Active provider display
+- `errors.provider*` - Provider-specific errors
 
 ---
 
 ## Security Considerations
 
-### API Key Handling
-
-| Location | Storage | Notes |
-|----------|---------|-------|
-| Browser | IndexedDB | User's own keys, encrypted at rest by browser |
-| In transit | HTTPS | All requests use TLS |
-| Backend | Memory only | Keys read from request, never persisted |
-| Logs | Excluded | Never log request bodies containing keys |
-
-### Rate Limiting
-
-Implement rate limiting on `/llm/completion` to prevent abuse:
-- 60 requests per minute per IP
-- Return 429 Too Many Requests when exceeded
-
-### Input Validation
-
-- Validate provider is in allowed list
-- Validate API key format (prefix check)
-- Validate messages array structure
-- Sanitize any user content
-
-### Error Messages
-
-- Don't expose internal errors to client
-- Don't include API keys in error responses
-- Log detailed errors server-side only
-
----
-
-## Design Decisions (Resolved)
-
-1. **Model selection per provider:** ✅ **Allow specific model selection**
-   - Users can select specific models for each provider
-   - Show available models with pricing in the UI
-   - Remember last selected model per provider
-
-2. **Key validation:** ✅ **Hybrid approach (Option C)**
-   - On save: Format validation only (instant feedback, works offline)
-   - After save: Async background validation when online
-   - Update status indicator: "Validating..." → "Valid" / "Invalid"
-   - Benefits: Fast UX, eventual confirmation, works offline
-
-3. **Cost tracking:** ✅ **Yes, display costs for all providers**
-   - Use token counts from API responses
-   - Multiply by known pricing per model
-   - Show in results view same as OpenRouter
-
-4. **Offline keys:** ✅ **No special handling needed**
-   - Store locally in IndexedDB
-   - Validate on first actual use
-   - Same pattern as current OpenRouter implementation
-
-5. **Mid-quiz provider switch:** ✅ **Not allowed**
-   - Provider is locked for duration of quiz
-   - Selection only applies to next quiz creation
-   - Prevents inconsistent quiz data
-
----
-
-## Timeline Estimate
-
-| Phase | Effort | Dependencies |
-|-------|--------|--------------|
-| Phase 1: Backend Proxy | 2-3 days | None |
-| Phase 2: Frontend Router | 1-2 days | Phase 1 |
-| Phase 3: Key Management | 2-3 days | Phase 2 |
-| Phase 4: Provider Selection UI | 2-3 days | Phase 3 |
-| Phase 5: Testing & Polish | 3-4 days | Phase 4 |
-
-**Total:** ~10-15 days
+| Concern | Mitigation |
+|---------|------------|
+| Key in request body | HTTPS encrypts entire body |
+| Key in server logs | Don't log request bodies with keys |
+| Key validation | Validate key format before forwarding |
+| Rate limiting | Add per-IP rate limits to proxy endpoint |
+| Abuse | Consider adding CAPTCHA for heavy usage |
 
 ---
 
 ## References
 
+### Internal Documentation
+
 - `docs/learning/epic11_llm_support/RESEARCH_PROVIDER_ANALYSIS.md` - Provider research
 - `docs/architecture/LLM_INTEGRATION_EVOLUTION.md` - Historical context
 - `docs/learning/epic03_quizmaster_v2/PHASE3.6_OPENROUTER.md` - Current OpenRouter implementation
 - `php-api/src/AnthropicClient.php` - Existing Anthropic client (reference)
+
+### Deployment Reference
+
+- `scripts/deploy-party.sh` - Party Mode deployment script (reference)
+- `php-api/party/` - Party Mode structure (reference)
 
 ---
 
