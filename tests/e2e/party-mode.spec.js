@@ -548,4 +548,86 @@ test.describe('Party Mode', () => {
       await expect(nameInputAfter).toHaveValue('PersistentHost');
     });
   });
+
+  test.describe('Create Party Layout (Issue #121)', () => {
+    // Tests verify that quiz list fills available space and button is at bottom
+
+    test('quiz list should fill available space on create party', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set viewport to a known size for consistent testing
+      await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Get the quiz list element
+      const quizList = page.locator('#quizList');
+      await expect(quizList).toBeVisible();
+
+      // Get quiz list bounding box
+      const quizListBox = await quizList.boundingBox();
+
+      // Quiz list height should be greater than the old fixed max-h-64 (256px)
+      // With proper flex layout, it should expand to fill available space
+      // On a 667px viewport minus header (~60px), name input (~100px), and button (~100px),
+      // the quiz list should be at least 300px tall
+      expect(quizListBox?.height).toBeGreaterThan(256);
+    });
+
+    test('create party button should be at bottom of screen', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      // Set viewport to a known size for consistent testing
+      await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Get viewport height and create button position
+      const viewportHeight = 667;
+      const createBtn = page.locator('#createRoomBtn');
+      await expect(createBtn).toBeVisible();
+
+      const buttonBox = await createBtn.boundingBox();
+
+      // Button should be in the bottom portion of the screen (last ~150px)
+      // Bottom of button should be near viewport bottom
+      const buttonBottom = (buttonBox?.y ?? 0) + (buttonBox?.height ?? 0);
+      expect(buttonBottom).toBeGreaterThan(viewportHeight - 150);
+    });
+
+    test('quiz list should be scrollable with many quizzes', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.setViewportSize({ width: 375, height: 667 });
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Get the quiz list element
+      const quizList = page.locator('#quizList');
+      await expect(quizList).toBeVisible();
+
+      // Check that the element has overflow-y: auto or scroll
+      const overflowY = await quizList.evaluate((el) => {
+        return window.getComputedStyle(el).overflowY;
+      });
+      expect(['auto', 'scroll']).toContain(overflowY);
+    });
+
+    test('name input should remain visible (not scrolled away)', async ({ page }) => {
+      await setupWithPartyModeEnabled(page);
+
+      await page.setViewportSize({ width: 375, height: 667 });
+
+      await page.goto('/#/party/create');
+      await page.waitForLoadState('networkidle');
+
+      // Name input should be visible and fixed position (not inside scroll area)
+      const nameInput = page.getByTestId('host-name-input');
+      await expect(nameInput).toBeVisible();
+      await expect(nameInput).toBeInViewport();
+    });
+  });
 });
