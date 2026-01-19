@@ -1077,6 +1077,47 @@ class XAIProvider {
 
 ## Testing
 
+### Integration Testing Requirements
+
+**Real API keys are REQUIRED for full integration testing.** Without them, integration tests are skipped.
+
+Add to your local `.env` file (copy from `.env.example`):
+
+```bash
+# Required for integration tests
+TEST_OPENAI_KEY=sk-your-openai-key
+TEST_ANTHROPIC_KEY=sk-ant-your-anthropic-key
+TEST_GOOGLE_KEY=AIza-your-google-key
+TEST_XAI_KEY=xai-your-xai-key
+```
+
+**Getting API Keys:**
+
+| Provider | Console URL | Key Format |
+|----------|-------------|------------|
+| OpenAI | https://platform.openai.com/api-keys | `sk-...` |
+| Anthropic | https://console.anthropic.com/settings/keys | `sk-ant-...` |
+| Google AI | https://aistudio.google.com/apikey | `AIza...` |
+| xAI | https://console.x.ai | `xai-...` |
+
+**Cost Considerations:**
+- Integration tests use minimal tokens (`max_tokens: 20`)
+- Each test costs ~$0.001 or less
+- Tests can be run individually to minimize costs
+- Tests are skipped in CI (no secrets exposed)
+
+**Running Integration Tests:**
+
+```bash
+# Run with all provider keys
+TEST_OPENAI_KEY=sk-... TEST_ANTHROPIC_KEY=sk-ant-... npx playwright test --grep @manual
+
+# Run with just one provider
+TEST_OPENAI_KEY=sk-your-key npx playwright test tests/e2e/llm-proxy.spec.js --grep @manual
+```
+
+---
+
 ### Unit Tests (PHP)
 
 **File:** `tests/php/LLMCompletionTest.php`
@@ -1304,28 +1345,104 @@ test.describe('LLM Proxy Backend', () => {
 // Integration tests with real API keys (skip in CI, run manually)
 test.describe('LLM Proxy Integration @manual', () => {
 
-  test.skip(({ }, testInfo) => !process.env.TEST_OPENAI_KEY, 'Requires TEST_OPENAI_KEY');
+  test.describe('OpenAI', () => {
+    test.skip(({ }, testInfo) => !process.env.TEST_OPENAI_KEY, 'Requires TEST_OPENAI_KEY');
 
-  test('OpenAI completion works', async ({ request }) => {
-    const response = await request.post(`${LLM_PROXY_URL}/completion.php`, {
-      data: {
-        provider: 'openai',
-        api_key: process.env.TEST_OPENAI_KEY,
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
-        options: { max_tokens: 20 }
-      },
-      headers: { 'Content-Type': 'application/json' }
+    test('OpenAI completion works', async ({ request }) => {
+      const response = await request.post(`${LLM_PROXY_URL}/completion.php`, {
+        data: {
+          provider: 'openai',
+          api_key: process.env.TEST_OPENAI_KEY,
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
+          options: { max_tokens: 20 }
+        },
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      expect(response.ok()).toBe(true);
+      const data = await response.json();
+
+      expect(data.text).toBeDefined();
+      expect(data.provider).toBe('openai');
+      expect(data.usage).toBeDefined();
+      expect(data.usage.prompt_tokens).toBeGreaterThan(0);
     });
-
-    expect(response.ok()).toBe(true);
-    const data = await response.json();
-
-    expect(data.text).toBeDefined();
-    expect(data.provider).toBe('openai');
-    expect(data.usage).toBeDefined();
-    expect(data.usage.prompt_tokens).toBeGreaterThan(0);
   });
+
+  test.describe('Anthropic', () => {
+    test.skip(({ }, testInfo) => !process.env.TEST_ANTHROPIC_KEY, 'Requires TEST_ANTHROPIC_KEY');
+
+    test('Anthropic completion works', async ({ request }) => {
+      const response = await request.post(`${LLM_PROXY_URL}/completion.php`, {
+        data: {
+          provider: 'anthropic',
+          api_key: process.env.TEST_ANTHROPIC_KEY,
+          model: 'claude-3-haiku-20240307',
+          messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
+          options: { max_tokens: 20 }
+        },
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      expect(response.ok()).toBe(true);
+      const data = await response.json();
+
+      expect(data.text).toBeDefined();
+      expect(data.provider).toBe('anthropic');
+      expect(data.usage).toBeDefined();
+      expect(data.usage.prompt_tokens).toBeGreaterThan(0);
+    });
+  });
+
+  test.describe('Google AI', () => {
+    test.skip(({ }, testInfo) => !process.env.TEST_GOOGLE_KEY, 'Requires TEST_GOOGLE_KEY');
+
+    test('Google AI completion works', async ({ request }) => {
+      const response = await request.post(`${LLM_PROXY_URL}/completion.php`, {
+        data: {
+          provider: 'google',
+          api_key: process.env.TEST_GOOGLE_KEY,
+          model: 'gemini-1.5-flash',
+          messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
+          options: { max_tokens: 20 }
+        },
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      expect(response.ok()).toBe(true);
+      const data = await response.json();
+
+      expect(data.text).toBeDefined();
+      expect(data.provider).toBe('google');
+      expect(data.usage).toBeDefined();
+    });
+  });
+
+  test.describe('xAI', () => {
+    test.skip(({ }, testInfo) => !process.env.TEST_XAI_KEY, 'Requires TEST_XAI_KEY');
+
+    test('xAI completion works', async ({ request }) => {
+      const response = await request.post(`${LLM_PROXY_URL}/completion.php`, {
+        data: {
+          provider: 'xai',
+          api_key: process.env.TEST_XAI_KEY,
+          model: 'grok-2-latest',
+          messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
+          options: { max_tokens: 20 }
+        },
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      expect(response.ok()).toBe(true);
+      const data = await response.json();
+
+      expect(data.text).toBeDefined();
+      expect(data.provider).toBe('xai');
+      expect(data.usage).toBeDefined();
+    });
+  });
+
 });
 ```
 

@@ -533,6 +533,49 @@ export async function generateExplanation(question, userAnswer, correctAnswer, g
 
 ## Testing
 
+### Integration Testing Requirements
+
+**Real API keys are REQUIRED for full integration testing.** Without them, integration tests are skipped.
+
+Add to your local `.env` file (copy from `.env.example`):
+
+```bash
+# Required for integration tests
+TEST_OPENROUTER_KEY=sk-or-v1-your-openrouter-key
+TEST_OPENAI_KEY=sk-your-openai-key
+TEST_ANTHROPIC_KEY=sk-ant-your-anthropic-key
+TEST_GOOGLE_KEY=AIza-your-google-key
+TEST_XAI_KEY=xai-your-xai-key
+```
+
+**Getting API Keys:**
+
+| Provider | Console URL | Key Format |
+|----------|-------------|------------|
+| OpenRouter | https://openrouter.ai/keys | `sk-or-v1-...` |
+| OpenAI | https://platform.openai.com/api-keys | `sk-...` |
+| Anthropic | https://console.anthropic.com/settings/keys | `sk-ant-...` |
+| Google AI | https://aistudio.google.com/apikey | `AIza...` |
+| xAI | https://console.x.ai | `xai-...` |
+
+**Why Real Keys Are Needed:**
+- Unit tests mock the providers (no real API calls)
+- Integration tests verify actual end-to-end routing
+- Without real keys, we can't verify the proxy actually works
+- Tests are designed to be minimal cost (~$0.001 per test)
+
+**Running Integration Tests:**
+
+```bash
+# Run with environment variables
+TEST_OPENROUTER_KEY=sk-or-v1-xxx RUN_INTEGRATION_TESTS=true npx playwright test --grep @integration
+
+# Or source from .env
+source .env && RUN_INTEGRATION_TESTS=true npx playwright test --grep @integration
+```
+
+---
+
 ### Unit Tests
 
 **File:** `tests/unit/provider-router.test.js`
