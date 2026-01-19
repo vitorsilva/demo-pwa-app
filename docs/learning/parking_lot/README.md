@@ -313,6 +313,40 @@ The "parking lot" is a place to document ideas, experimental features, and optio
 
 ---
 
+### [Alert to Modal Conversion](./ALERT_TO_MODAL_CONVERSION.md) ⭐ **Ready to Implement**
+
+**Status:** Parked (added 2026-01-19)
+
+**What it is:**
+- Replace all native `alert()` and `confirm()` dialogs with custom modals
+- Create generic `AlertModal` and `ConfirmModal` components
+- Full testing coverage (unit, E2E, Maestro)
+- Complete i18n support
+
+**Scope:**
+- 9 `alert()` calls across 6 files
+- 5 `confirm()` calls across 4 files
+- 10 files to modify + 7 new files
+
+**Why it's optional:**
+- ✅ Native dialogs work (just look inconsistent)
+- ⚠️ UX polish, not functionality
+- ⚠️ Medium effort (~4-6 hours)
+
+**Why you might want it:**
+- 🎨 **Consistent UX** - All dialogs match app design system
+- 🌙 **Dark mode support** - Native dialogs don't respect theme
+- ♿ **Better accessibility** - Custom focus management
+- 📱 **Mobile polish** - Native dialogs feel jarring on mobile
+- 🧪 **Testable** - E2E and Maestro can interact with custom modals
+
+**When to revisit:**
+- During UX polish phase
+- Before major release
+- When users complain about inconsistent dialogs
+
+---
+
 ## How to Use This Folder
 
 ### If You're Planning Epic 3
@@ -390,7 +424,7 @@ If you have ideas for optional features:
 - 🅿️ Features that **might be revisited later**
 - 🅿️ Experiments that **depend on external factors**
 
-**Current count:** 10 ideas remaining (Azure Functions, Architecture Testing, OAuth, OpenRouter Migration, PHP VPS, iOS App Store, Internationalization, OpenRouter Onboarding UX, Dead Code Detection, Knip Enhancements)
+**Current count:** 11 ideas remaining (Azure Functions, Architecture Testing, OAuth, OpenRouter Migration, PHP VPS, iOS App Store, Internationalization, OpenRouter Onboarding UX, Dead Code Detection, Knip Enhancements, Alert to Modal Conversion)
 
 **Status:** All documented and ready to implement when desired
 
@@ -409,7 +443,7 @@ The following items have been promoted from parking lot to **Epic 5: Growth & Ex
 
 ---
 
-**Last Updated:** 2026-01-06
+**Last Updated:** 2026-01-19
 **Location:** `docs/parking_lot/`
 **Related:**
 - [Epic 3 Plan](../epic03_quizmaster_v2/EPIC3_QUIZMASTER_V2_PLAN.md)
