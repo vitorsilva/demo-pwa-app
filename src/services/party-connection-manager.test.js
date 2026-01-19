@@ -418,4 +418,145 @@
         expect(manager.mode).toBe(CONNECTION_MODES.HTTP_FALLBACK);
       });
     });
+
+    describe('_setMode edge cases', () => {
+      it('should not notify if mode is unchanged', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onModeChange(callback);
+
+        // Set mode to DISCONNECTED (already the default)
+        manager._setMode(CONNECTION_MODES.DISCONNECTED);
+
+        // Callback should not be called for same mode
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should notify when mode actually changes', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onModeChange(callback);
+
+        manager._setMode(CONNECTION_MODES.CONNECTING);
+
+        expect(callback).toHaveBeenCalledWith(CONNECTION_MODES.CONNECTING, CONNECTION_MODES.DISCONNECTED);
+      });
+    });
+
+    describe('getPeers with connected peers', () => {
+      it('should return peers from p2pService', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        await manager.connect();
+
+        mockP2PService.getConnectedPeers.mockReturnValue(['peer-1', 'peer-2']);
+
+        const peers = manager.getPeers();
+
+        expect(peers).toEqual(['peer-1', 'peer-2']);
+      });
+    });
+
+    describe('_handleAllPeersDisconnected edge cases', () => {
+      it('should not call onError if not in P2P mode', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const callback = vi.fn();
+        manager.onError(callback);
+        await manager.connect();
+
+        // Mode is CONNECTING, not P2P
+        mockP2PService.getConnectedPeers.mockReturnValue([]);
+
+        // Simulate peer disconnected
+        capturedOnPeerDisconnected('peer-123', 'connection_lost');
+
+        // Should not call error callback when not in P2P mode
+        expect(callback).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('connection retry logic', () => {
+      it('should retry connection on failure', async () => {
+        const connectionError = new Error('Connection failed');
+        mockSignalingClient.getPeers.mockRejectedValueOnce(connectionError);
+        mockSignalingClient.getPeers.mockResolvedValue(['host-123']);
+
+        manager = new PartyConnectionManager('ABC123', 'participant-1', false);
+        manager.retryCount = 0;
+
+        await manager.connect();
+
+        // First call fails, retry should be scheduled
+        expect(manager.retryCount).toBe(1);
+
+        // Advance time for retry
+        vi.advanceTimersByTime(2000);
+
+        // Allow async operations to complete
+        await Promise.resolve();
+      });
+    });
+
+    describe('_clearConnectionTimeout edge cases', () => {
+      it('should handle null connectionTimer', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        manager.connectionTimer = null;
+
+        // Should not throw
+        manager._clearConnectionTimeout();
+
+        expect(manager.connectionTimer).toBeNull();
+      });
+    });
+
+    describe('disconnect edge cases', () => {
+      it('should handle disconnect when services are null', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+
+        // Services are null by default before connect
+        await manager.disconnect();
+
+        expect(manager.mode).toBe(CONNECTION_MODES.DISCONNECTED);
+      });
+    });
+
+    describe('guest connection with no peers', () => {
+      it('should not call createConnection if no peers found', async () => {
+        mockSignalingClient.getPeers.mockResolvedValueOnce([]);
+
+        manager = new PartyConnectionManager('ABC123', 'participant-1', false);
+        await manager.connect();
+
+        expect(mockP2PService.createConnection).not.toHaveBeenCalled();
+        expect(manager.hostId).toBeNull();
+      });
+    });
+
+    describe('onError callback during fallback', () => {
+      it('should call onError when activating HTTP fallback', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+        const errorCallback = vi.fn();
+        manager.onError(errorCallback);
+
+        await manager.connect();
+        manager.retryCount = 2;
+
+        // Trigger connection failure that exceeds max retries
+        manager._handleConnectionFailure(new Error('Test error'));
+
+        expect(manager.mode).toBe(CONNECTION_MODES.HTTP_FALLBACK);
+        expect(errorCallback).toHaveBeenCalledWith(expect.any(Error));
+      });
+    });
+
+    describe('isConnected in CONNECTING mode', () => {
+      it('should return false when in CONNECTING mode', async () => {
+        manager = new PartyConnectionManager('ABC123', 'participant-1', true);
+
+        const connectPromise = manager.connect();
+        expect(manager.mode).toBe(CONNECTION_MODES.CONNECTING);
+        expect(manager.isConnected()).toBe(false);
+
+        await connectPromise;
+      });
+    });
   });

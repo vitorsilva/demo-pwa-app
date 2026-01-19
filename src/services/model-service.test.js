@@ -4,7 +4,9 @@ import {
   saveSelectedModel,
   getModelDisplayName,
   getAvailableModels,
-  clearModelCache
+  clearModelCache,
+  getModelPricing,
+  prefetchModelPricing
 } from './model-service.js';
 import { DEFAULT_MODEL } from '../core/settings.js';
 
@@ -248,6 +250,315 @@ describe('Model Service', () => {
 
       expect(fetch).toHaveBeenCalled();
       expect(models[0].id).toBe('new-model:free');
+    });
+
+    it('should handle invalid cache JSON gracefully', async () => {
+      localStorage.setItem('openrouter_models_cache', 'invalid-json');
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'model:free', pricing: { prompt: '0', completion: '0' } }]
+        })
+      });
+
+      const models = await getAvailableModels('test-api-key');
+      expect(fetch).toHaveBeenCalled();
+      expect(models).toHaveLength(1);
+    });
+  });
+
+  describe('getModelPricing', () => {
+    it('should return null when pricing cache is empty', () => {
+      const pricing = getModelPricing('some-model');
+      expect(pricing).toBeNull();
+    });
+
+    it('should return pricing for cached model', async () => {
+      // Populate pricing cache by fetching models
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'google/gemma:free', pricing: { prompt: '0', completion: '0' } },
+            { id: 'openai/gpt-4', pricing: { prompt: '0.03', completion: '0.06' } }
+          ]
+        })
+      });
+
+      await getAvailableModels('test-key');
+
+      const pricing = getModelPricing('openai/gpt-4');
+      expect(pricing).toEqual({ prompt: '0.03', completion: '0.06' });
+    });
+
+    it('should return null for unknown model', async () => {
+      // Populate pricing cache
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'known-model', pricing: { prompt: '0.01', completion: '0.02' } }]
+        })
+      });
+
+      await getAvailableModels('test-key');
+
+      const pricing = getModelPricing('unknown-model');
+      expect(pricing).toBeNull();
+    });
+
+    it('should return null for expired pricing cache', async () => {
+      // Set up expired pricing cache (25 hours old)
+      const expiredTimestamp = Date.now() - (25 * 60 * 60 * 1000);
+      localStorage.setItem('openrouter_pricing_cache', JSON.stringify({
+        pricing: { 'model-id': { prompt: '0.01', completion: '0.02' } },
+        timestamp: expiredTimestamp
+      }));
+
+      const pricing = getModelPricing('model-id');
+      expect(pricing).toBeNull();
+      // Cache should be cleared
+      expect(localStorage.getItem('openrouter_pricing_cache')).toBeNull();
+    });
+
+    it('should handle invalid pricing cache JSON gracefully', () => {
+      localStorage.setItem('openrouter_pricing_cache', 'invalid-json');
+
+      const pricing = getModelPricing('any-model');
+      expect(pricing).toBeNull();
+    });
+  });
+
+  describe('prefetchModelPricing', () => {
+    it('should skip if pricing cache already exists', async () => {
+      localStorage.setItem('openrouter_pricing_cache', JSON.stringify({
+        pricing: { 'model': { prompt: '0', completion: '0' } },
+        timestamp: Date.now()
+      }));
+
+      await prefetchModelPricing();
+
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('should fetch pricing for selected model', async () => {
+      localStorage.setItem('quizmaster_settings', JSON.stringify({
+        selectedModel: 'google/gemma:free'
+      }));
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'google/gemma:free', pricing: { prompt: '0', completion: '0' } },
+            { id: 'google/gemma', pricing: { prompt: '0.01', completion: '0.02' } }
+          ]
+        })
+      });
+
+      await prefetchModelPricing();
+
+      expect(fetch).toHaveBeenCalled();
+      // Should cache the pricing
+      const cached = localStorage.getItem('openrouter_pricing_cache');
+      expect(cached).not.toBeNull();
+    });
+
+    it('should handle API failure gracefully', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500
+      });
+
+      // Should not throw
+      await expect(prefetchModelPricing()).resolves.toBeUndefined();
+    });
+
+    it('should handle network error gracefully', async () => {
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+
+      // Should not throw
+      await expect(prefetchModelPricing()).resolves.toBeUndefined();
+    });
+
+    it('should handle empty API response', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] })
+      });
+
+      await prefetchModelPricing();
+      // Should complete without error
+      expect(fetch).toHaveBeenCalled();
+    });
+  });
+
+  describe('clearModelCache', () => {
+    it('should clear both models and pricing cache', () => {
+      localStorage.setItem('openrouter_models_cache', JSON.stringify({ models: [], timestamp: Date.now() }));
+      localStorage.setItem('openrouter_pricing_cache', JSON.stringify({ pricing: {}, timestamp: Date.now() }));
+
+      clearModelCache();
+
+      expect(localStorage.getItem('openrouter_models_cache')).toBeNull();
+      expect(localStorage.getItem('openrouter_pricing_cache')).toBeNull();
+    });
+  });
+
+  describe('getAvailableModels edge cases', () => {
+    it('should use display name when model name is missing', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'provider/model-name:free', pricing: { prompt: '0', completion: '0' } }]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models[0].name).toBe('Model Name');
+    });
+
+    it('should use empty string when description is missing', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'model:free', name: 'Model', pricing: { prompt: '0', completion: '0' } }]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models[0].description).toBe('');
+    });
+
+    it('should use 0 when context_length is missing', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'model:free', name: 'Model', pricing: { prompt: '0', completion: '0' } }]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models[0].contextLength).toBe(0);
+    });
+
+    it('should handle missing data property in response', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({})
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models).toHaveLength(0);
+    });
+  });
+
+  describe('getModelDisplayName additional cases', () => {
+    it('should handle model ID without dashes', () => {
+      expect(getModelDisplayName('provider/simplemodel:free')).toBe('Simplemodel');
+    });
+
+    it('should handle model ID with multiple parts', () => {
+      expect(getModelDisplayName('org/long-model-name-with-many-parts:free'))
+        .toBe('Long Model Name With Many Parts');
+    });
+
+    it('should handle empty string', () => {
+      expect(getModelDisplayName('')).toBe('Unknown Model');
+    });
+  });
+
+  describe('isFreeModel behavior via getAvailableModels', () => {
+    it('should filter out models with non-zero prompt price', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'free-model:free', name: 'Free', pricing: { prompt: '0', completion: '0' } },
+            { id: 'paid-prompt', name: 'Paid Prompt', pricing: { prompt: '0.01', completion: '0' } }
+          ]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models).toHaveLength(1);
+      expect(models[0].id).toBe('free-model:free');
+    });
+
+    it('should filter out models with non-zero completion price', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'free-model:free', name: 'Free', pricing: { prompt: '0', completion: '0' } },
+            { id: 'paid-completion', name: 'Paid Completion', pricing: { prompt: '0', completion: '0.02' } }
+          ]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models).toHaveLength(1);
+      expect(models[0].id).toBe('free-model:free');
+    });
+
+    it('should treat models with null pricing as free', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'no-pricing-model', name: 'No Pricing' }
+          ]
+        })
+      });
+
+      const models = await getAvailableModels('test-key');
+      expect(models).toHaveLength(1);
+    });
+  });
+
+  describe('caching edge cases', () => {
+    it('should handle localStorage setItem throwing', async () => {
+      // First fetch successfully
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [{ id: 'model:free', name: 'Model', pricing: { prompt: '0', completion: '0' } }]
+        })
+      });
+
+      // Mock localStorage to throw on setItem
+      const originalSetItem = localStorage.setItem;
+      localStorage.setItem = vi.fn().mockImplementation(() => {
+        throw new Error('QuotaExceeded');
+      });
+
+      // Should still return models despite cache failure
+      const models = await getAvailableModels('test-key');
+      expect(models).toHaveLength(1);
+
+      // Restore
+      localStorage.setItem = originalSetItem;
+    });
+  });
+
+  describe('prefetchModelPricing edge cases', () => {
+    it('should prefetch pricing for model without :free suffix', async () => {
+      localStorage.setItem('quizmaster_settings', JSON.stringify({
+        selectedModel: 'google/gemma-2-9b-it' // No :free suffix
+      }));
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          data: [
+            { id: 'google/gemma-2-9b-it', pricing: { prompt: '0.01', completion: '0.02' } }
+          ]
+        })
+      });
+
+      await prefetchModelPricing();
+
+      expect(fetch).toHaveBeenCalled();
     });
   });
 });

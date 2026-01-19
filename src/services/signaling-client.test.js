@@ -257,3 +257,201 @@ describe('getSignalingBaseUrl', () => {
     }
   });
 });
+
+describe('SignalingClient edge cases', () => {
+  let client;
+  let fetchMock;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    global.fetch = fetchMock;
+    client = new SignalingClient('https://example.com/party', 'ABC123', 'user-1');
+  });
+
+  afterEach(() => {
+    client.destroy();
+    vi.clearAllMocks();
+  });
+
+  describe('stopPolling edge cases', () => {
+    it('should handle stopPolling when pollInterval is null', () => {
+      // Ensure pollInterval is null
+      expect(client.pollInterval).toBeNull();
+
+      // Should not throw
+      client.stopPolling();
+
+      expect(client.isPolling).toBe(false);
+    });
+
+    it('should handle stopPolling when already stopped', () => {
+      client.startPolling(vi.fn());
+      client.stopPolling();
+
+      // Call stopPolling again
+      client.stopPolling();
+
+      expect(client.isPolling).toBe(false);
+      expect(client.pollInterval).toBeNull();
+    });
+  });
+
+  describe('_poll edge cases', () => {
+    it('should handle messages when onMessageCallback is null', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: { messages: [{ id: 1 }] } }),
+      });
+
+      // Start polling then clear callback
+      client.startPolling(vi.fn());
+      client.onMessageCallback = null;
+
+      // Should not throw even with null callback
+      await new Promise((r) => setTimeout(r, 100));
+
+      client.stopPolling();
+    });
+
+    it('should return early if not polling', async () => {
+      // isPolling is false by default
+      expect(client.isPolling).toBe(false);
+
+      // Call _poll directly - should return early
+      await client._poll();
+
+      // fetch should not have been called
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('should handle empty messages array', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: { messages: [] } }),
+      });
+
+      const callback = vi.fn();
+      client.startPolling(callback);
+
+      await new Promise((r) => setTimeout(r, 100));
+
+      // Callback should not be called for empty messages
+      expect(callback).not.toHaveBeenCalled();
+
+      client.stopPolling();
+    });
+  });
+
+  describe('_fetchMessages edge cases', () => {
+    it('should return empty array when data.data is undefined', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true }),
+      });
+
+      const messages = await client._fetchMessages();
+
+      expect(messages).toEqual([]);
+    });
+
+    it('should return empty array when data.data.messages is undefined', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: { otherField: 'value' } }),
+      });
+
+      const messages = await client._fetchMessages();
+
+      expect(messages).toEqual([]);
+    });
+  });
+
+  describe('getPeers edge cases', () => {
+    it('should return empty array when data.data.peers is undefined', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: {} }),
+      });
+
+      const peers = await client.getPeers();
+
+      expect(peers).toEqual([]);
+    });
+
+    it('should return empty array when data.data is undefined', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true }),
+      });
+
+      const peers = await client.getPeers();
+
+      expect(peers).toEqual([]);
+    });
+  });
+
+  describe('destroy', () => {
+    it('should stop polling and clear callback', () => {
+      const callback = vi.fn();
+      client.startPolling(callback);
+
+      client.destroy();
+
+      expect(client.isPolling).toBe(false);
+      expect(client.onMessageCallback).toBeNull();
+    });
+
+    it('should handle destroy when never started', () => {
+      // Should not throw
+      client.destroy();
+
+      expect(client.onMessageCallback).toBeNull();
+    });
+  });
+
+  describe('polling retry behavior', () => {
+    it('should reset consecutiveErrors on successful poll', async () => {
+      // First two calls fail, third succeeds
+      fetchMock
+        .mockRejectedValueOnce(new Error('Error 1'))
+        .mockRejectedValueOnce(new Error('Error 2'))
+        .mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: { messages: [] } }),
+        });
+
+      client.pollIntervalMs = 10;
+      client.maxConsecutiveErrors = 5;
+      client.startPolling(vi.fn());
+
+      // Wait for multiple polls
+      await new Promise((r) => setTimeout(r, 100));
+
+      // After success, consecutiveErrors should be 0
+      expect(client.consecutiveErrors).toBe(0);
+
+      client.stopPolling();
+    });
+
+    it('should not schedule next poll after stopping', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: { messages: [] } }),
+      });
+
+      client.pollIntervalMs = 50;
+      client.startPolling(vi.fn());
+
+      // Immediately stop
+      client.stopPolling();
+
+      const fetchCount = fetchMock.mock.calls.length;
+
+      // Wait to see if more polls happen
+      await new Promise((r) => setTimeout(r, 150));
+
+      // Should not have made many more calls
+      expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(fetchCount + 1);
+    });
+  });
+});

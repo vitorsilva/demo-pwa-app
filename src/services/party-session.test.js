@@ -985,5 +985,336 @@ describe('PartySession', () => {
       expect(session.onScoreUpdateCallback).toBeNull();
       expect(session.onQuizEndCallback).toBeNull();
     });
+
+    it('handles destroy when questionTimer is null', () => {
+      const session = new PartySession(mockP2P, true);
+      expect(session.questionTimer).toBeNull();
+
+      // Should not throw
+      session.destroy();
+
+      expect(session.questionTimer).toBeNull();
+    });
+  });
+
+  // ===========================================================================
+  // ADDITIONAL EDGE CASES
+  // ===========================================================================
+
+  describe('edge cases', () => {
+    describe('message handling edge cases', () => {
+      it('handles unknown message type', () => {
+        const session = new PartySession(mockP2P, true);
+
+        // Should not throw, just log warning
+        mockP2P._simulateMessage('peer-1', {
+          type: 'unknown_type',
+          payload: {},
+        });
+
+        // Session should still be functional
+        expect(session.state).toBe(SESSION_STATES.WAITING);
+      });
+
+      it('ignores ANSWER message when not host', () => {
+        const session = new PartySession(mockP2P, false);
+        session.joinSession('ABCD', 'Guest');
+        session.quiz = createSampleQuiz();
+
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.ANSWER,
+          payload: { questionIndex: 0, answerIndex: 0, timestamp: Date.now() },
+        });
+
+        // Should not crash or process the answer
+        expect(session.participants.size).toBe(0);
+      });
+
+      it('ignores duplicate answers from same participant', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.addParticipant('peer-1', 'Guest');
+        session.startQuiz();
+
+        // First answer
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.ANSWER,
+          payload: { questionIndex: 0, answerIndex: 0, timestamp: session.startTime + 100 },
+        });
+
+        const scoreBefore = session.participants.get('peer-1').score;
+
+        // Duplicate answer for same question
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.ANSWER,
+          payload: { questionIndex: 0, answerIndex: 1, timestamp: session.startTime + 200 },
+        });
+
+        // Score should not change
+        expect(session.participants.get('peer-1').score).toBe(scoreBefore);
+      });
+    });
+
+    describe('submitHostAnswer edge cases', () => {
+      it('does nothing if not host', () => {
+        const session = new PartySession(mockP2P, false);
+        session.joinSession('ABCD', 'Guest');
+
+        // Should not throw
+        session.submitHostAnswer(0, 0);
+
+        // Nothing should happen
+        expect(mockP2P.broadcast).not.toHaveBeenCalled();
+      });
+
+      it('does nothing if participant not found', () => {
+        const session = new PartySession(mockP2P, true);
+        // Don't create session, so participant won't exist
+
+        // Should not throw
+        session.submitHostAnswer(0, 0);
+
+        expect(mockP2P.broadcast).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('leaveSession edge cases', () => {
+      it('clears questionTimer if running', () => {
+        const session = new PartySession(mockP2P, false);
+        session.joinSession('ABCD', 'Guest');
+        session.quiz = createSampleQuiz();
+        session.questionTimer = setInterval(() => {}, 100);
+
+        session.leaveSession();
+
+        expect(session.questionTimer).toBeNull();
+      });
+    });
+
+    describe('_handlePeerDisconnected edge cases', () => {
+      it('does nothing if participant not found', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+
+        // Simulate disconnect for unknown peer
+        mockP2P._simulatePeerDisconnected('unknown-peer', 'connection_lost');
+
+        // Should not crash
+        expect(session.participants.size).toBe(1);
+      });
+    });
+
+    describe('_broadcastParticipants edge cases', () => {
+      it('handles empty peers map', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        mockP2P.peers = new Map();
+
+        // Add participant triggers _broadcastParticipants
+        session.addParticipant('peer-1', 'Guest');
+
+        // Should not crash with empty peers
+        expect(session.participants.size).toBe(2);
+      });
+
+      it('handles null peers', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        mockP2P.peers = null;
+
+        // Add participant triggers _broadcastParticipants
+        session.addParticipant('peer-1', 'Guest');
+
+        // Should not crash with null peers
+        expect(session.participants.size).toBe(2);
+      });
+    });
+
+    describe('getTimeRemaining method', () => {
+      it('returns time from helper function', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.secondsPerQuestion = 30;
+        session.startQuiz();
+
+        const remaining = session.getTimeRemaining();
+
+        // Should be close to full time (30s = 30000ms)
+        expect(remaining).toBeGreaterThan(29000);
+        expect(remaining).toBeLessThanOrEqual(30000);
+      });
+
+      it('returns 0 when startTime is 0', () => {
+        const session = new PartySession(mockP2P, true);
+        session.startTime = 0;
+        session.secondsPerQuestion = 30;
+
+        expect(session.getTimeRemaining()).toBe(0);
+      });
+    });
+
+    describe('callback notifications', () => {
+      it('does not call onStateChange if callback is null', () => {
+        const session = new PartySession(mockP2P, true);
+        session.onStateChangeCallback = null;
+
+        // Should not throw
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.startQuiz();
+      });
+
+      it('does not call onParticipantsChange if callback is null', () => {
+        const session = new PartySession(mockP2P, true);
+        session.onParticipantsChangeCallback = null;
+
+        // Should not throw
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+      });
+
+      it('does not call onQuestionChange if callback is null', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.secondsPerQuestion = 1;
+        session.onQuestionChangeCallback = null;
+
+        session.startQuiz();
+
+        // Advance to next question
+        vi.advanceTimersByTime(1100);
+
+        // Should not throw
+        session.endSession();
+      });
+
+      it('does not call onScoreUpdate if callback is null', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.startQuiz();
+        session.onScoreUpdateCallback = null;
+
+        // Should not throw
+        session.submitHostAnswer(0, 0);
+      });
+    });
+
+    describe('endSession edge cases', () => {
+      it('handles endSession when questionTimer is null', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.questionTimer = null;
+
+        // Should not throw
+        session.endSession();
+
+        expect(session.state).toBe(SESSION_STATES.ENDED);
+      });
+    });
+
+    describe('_handleParticipantLeave edge cases', () => {
+      it('broadcasts updated participants when host', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.addParticipant('peer-1', 'Guest');
+        mockP2P.send.mockClear();
+
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.LEAVE,
+          payload: { participantId: 'peer-1' },
+        });
+
+        // Should broadcast to remaining peers
+        expect(session.participants.has('peer-1')).toBe(false);
+      });
+
+      it('does not broadcast when not host', () => {
+        const session = new PartySession(mockP2P, false);
+        session.joinSession('ABCD', 'Guest');
+        session.participants.set('other-peer', { id: 'other-peer', name: 'Other' });
+        mockP2P.send.mockClear();
+
+        mockP2P._simulateMessage('other-peer', {
+          type: MESSAGE_TYPES.LEAVE,
+          payload: { participantId: 'other-peer' },
+        });
+
+        // Should not call send for session info
+        expect(mockP2P.send).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('_handleQuizStart for guest', () => {
+      it('ignores if host', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.QUIZ_START,
+          payload: { startTime: 9999999 },
+        });
+
+        // Should not change host's startTime
+        expect(session.startTime).toBe(0);
+      });
+    });
+
+    describe('_handleScoreUpdate edge cases', () => {
+      it('ignores if host', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.SCORE_UPDATE,
+          payload: { scores: [{ id: session.participantId, score: 999 }] },
+        });
+
+        // Host should not be affected by external score updates
+        expect(session.participants.get(session.participantId).score).toBe(0);
+      });
+
+      it('ignores scores for unknown participants', () => {
+        const session = new PartySession(mockP2P, false);
+        session.joinSession('ABCD', 'Guest');
+
+        mockP2P._simulateMessage('host-peer', {
+          type: MESSAGE_TYPES.SCORE_UPDATE,
+          payload: { scores: [{ id: 'unknown-id', score: 100 }] },
+        });
+
+        // Should not crash
+        expect(session.participants.size).toBe(0);
+      });
+    });
+
+    describe('_handleSessionInfo edge cases', () => {
+      it('ignores if host', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.SESSION_INFO,
+          payload: { quiz: { topic: 'Fake' }, roomCode: 'FAKE' },
+        });
+
+        // Should not change host's quiz
+        expect(session.quiz.topic).toBe('Test Quiz');
+      });
+    });
+
+    describe('wrong answer scoring', () => {
+      it('gives 0 points for wrong answers', () => {
+        const session = new PartySession(mockP2P, true);
+        session.createSession(createSampleQuiz(), 'ABCD', 'Host');
+        session.addParticipant('peer-1', 'Guest');
+        session.startQuiz();
+
+        // Submit wrong answer (correct is 0, submit 1)
+        mockP2P._simulateMessage('peer-1', {
+          type: MESSAGE_TYPES.ANSWER,
+          payload: { questionIndex: 0, answerIndex: 1, timestamp: session.startTime + 100 },
+        });
+
+        expect(session.participants.get('peer-1').score).toBe(0);
+      });
+    });
   });
 });

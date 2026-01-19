@@ -148,5 +148,137 @@
           })
         );
       });
+
+      it('handles save errors gracefully', async () => {
+        const { saveSession } = await import('../core/db.js');
+        saveSession.mockRejectedValueOnce(new Error('Database error'));
+
+        const quiz = {
+          topic: 'Test',
+          questions: [{ question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 0 }],
+          isImported: true,
+        };
+
+        const result = await saveImportedQuiz(quiz);
+
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('Database error');
+      });
+
+      it('returns error for IndexedDB quota exceeded', async () => {
+        const { saveSession } = await import('../core/db.js');
+        saveSession.mockRejectedValueOnce(new Error('QuotaExceededError'));
+
+        const quiz = {
+          topic: 'Test',
+          questions: [{ question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 0 }],
+        };
+
+        const result = await saveImportedQuiz(quiz);
+
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('QuotaExceededError');
+      });
+    });
+
+    describe('importQuizFromUrl additional edge cases', () => {
+      it('correctly sets importedAt timestamp', async () => {
+        const before = Date.now();
+        const encoded = createEncodedQuiz({ topic: 'Test' });
+        const result = await importQuizFromUrl(encoded);
+        const after = Date.now();
+
+        expect(result.quiz.importedAt).toBeGreaterThanOrEqual(before);
+        expect(result.quiz.importedAt).toBeLessThanOrEqual(after);
+      });
+
+      it('sets isImported to true', async () => {
+        const encoded = createEncodedQuiz({ topic: 'Test' });
+        const result = await importQuizFromUrl(encoded);
+
+        expect(result.quiz.isImported).toBe(true);
+      });
+
+      it('handles quiz with all fields populated', async () => {
+        const encoded = createEncodedQuiz({
+          topic: 'Full Quiz',
+          gradeLevel: 'college',
+          creator: 'Test Creator',
+          mode: 'party',
+          questions: [
+            { question: 'Q1?', options: ['A', 'B', 'C', 'D'], correct: 2, difficulty: 'hard' },
+          ],
+        });
+
+        const result = await importQuizFromUrl(encoded);
+
+        expect(result.success).toBe(true);
+        expect(result.quiz.topic).toBe('Full Quiz');
+        expect(result.quiz.gradeLevel).toBe('college');
+        expect(result.quiz.mode).toBe('party');
+        expect(result.quiz.originalCreator).toBe('Test Creator');
+        expect(result.quiz.creator).toBeUndefined();
+      });
+
+      it('returns specific error message from deserializer', async () => {
+        const result = await importQuizFromUrl('not-valid-base64!@#');
+
+        expect(result.success).toBe(false);
+        expect(result.error).toBeDefined();
+        expect(typeof result.error).toBe('string');
+      });
+    });
+
+    describe('saveImportedQuiz additional edge cases', () => {
+      it('creates session with correct structure', async () => {
+        const { saveSession } = await import('../core/db.js');
+
+        const quiz = {
+          topic: 'Session Test',
+          gradeLevel: 'high school',
+          questions: [
+            { question: 'Q1?', options: ['A', 'B', 'C', 'D'], correct: 0 },
+            { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 1 },
+          ],
+          isImported: true,
+        };
+
+        await saveImportedQuiz(quiz);
+
+        expect(saveSession).toHaveBeenCalledWith(
+          expect.objectContaining({
+            topic: 'Session Test',
+            gradeLevel: 'high school',
+            userAnswers: [],
+            score: 0,
+            totalQuestions: 2,
+            isImported: true,
+          })
+        );
+      });
+
+      it('preserves all quiz properties in session', async () => {
+        const { saveSession } = await import('../core/db.js');
+
+        const quiz = {
+          topic: 'Preserve Test',
+          gradeLevel: 'middle school',
+          mode: 'learning',
+          questions: [{ question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 0 }],
+          originalCreator: 'Someone',
+          isImported: true,
+          importedAt: 1234567890,
+        };
+
+        await saveImportedQuiz(quiz);
+
+        expect(saveSession).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mode: 'learning',
+            originalCreator: 'Someone',
+            importedAt: 1234567890,
+          })
+        );
+      });
     });
   });

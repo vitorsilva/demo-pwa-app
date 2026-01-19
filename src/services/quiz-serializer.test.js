@@ -225,6 +225,71 @@
         expect(max).toBeGreaterThan(0);
         expect(max).toBeLessThanOrEqual(15);
       });
+
+      it('returns exactly 10', () => {
+        const max = getMaxShareableQuestions();
+        expect(max).toBe(10);
+      });
+    });
+
+    describe('difficulty field handling', () => {
+      it('preserves difficulty field in roundtrip', () => {
+        const quiz = {
+          topic: 'Test',
+          questions: [
+            { question: 'Q1?', options: ['A', 'B', 'C', 'D'], correct: 0, difficulty: 'easy' },
+            { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 1, difficulty: 'hard' },
+          ],
+        };
+
+        const serialized = serializeQuiz(quiz);
+        const deserialized = deserializeQuiz(serialized.data);
+
+        expect(deserialized.quiz.questions[0].difficulty).toBe('easy');
+        expect(deserialized.quiz.questions[1].difficulty).toBe('hard');
+      });
+
+      it('handles questions without difficulty', () => {
+        const quiz = {
+          topic: 'Test',
+          questions: [
+            { question: 'Q1?', options: ['A', 'B', 'C', 'D'], correct: 0 },
+          ],
+        };
+
+        const serialized = serializeQuiz(quiz);
+        const deserialized = deserializeQuiz(serialized.data);
+
+        expect(deserialized.quiz.questions[0].difficulty).toBeUndefined();
+      });
+    });
+
+    describe('mode field handling', () => {
+      it('preserves party mode', () => {
+        const quiz = {
+          topic: 'Test',
+          mode: 'party',
+          questions: [{ question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 0 }],
+        };
+
+        const serialized = serializeQuiz(quiz);
+        const deserialized = deserializeQuiz(serialized.data);
+
+        expect(deserialized.quiz.mode).toBe('party');
+      });
+
+      it('preserves learning mode', () => {
+        const quiz = {
+          topic: 'Test',
+          mode: 'learning',
+          questions: [{ question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 0 }],
+        };
+
+        const serialized = serializeQuiz(quiz);
+        const deserialized = deserializeQuiz(serialized.data);
+
+        expect(deserialized.quiz.mode).toBe('learning');
+      });
     });
 
       it('produces output that does not change when URL encoded', () => {
