@@ -497,3 +497,156 @@ describe('generateQuestions schema validation', () => {
     expect(result.questions[0].correct).toBe(1);
   });
 });
+
+describe('generateExplanation retry logic', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const validExplanation = {
+    rightAnswerExplanation: 'The correct answer is B because Paris is the capital of France.',
+    wrongAnswerExplanation: 'London is the capital of the UK, not France.'
+  };
+
+  it('should succeed on first attempt when response is valid', async () => {
+    callOpenRouter.mockResolvedValueOnce({
+      text: JSON.stringify(validExplanation)
+    });
+
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+
+    expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+    expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should retry with stricter prompt on parse failure', async () => {
+    let callCount = 0;
+    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+      callCount++;
+      if (callCount === 1) {
+        return { text: 'This is not JSON at all' };
+      }
+      return { text: JSON.stringify(validExplanation) };
+    });
+
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+
+    expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    const secondCallPrompt = callOpenRouter.mock.calls[1][1];
+    expect(secondCallPrompt).toContain('CRITICAL: Respond with ONLY valid JSON');
+  });
+
+  it('should retry on schema validation failure', async () => {
+    let callCount = 0;
+    callOpenRouter.mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // Missing wrongAnswerExplanation
+        return { text: JSON.stringify({ rightAnswerExplanation: 'Something' }) };
+      }
+      return { text: JSON.stringify(validExplanation) };
+    });
+
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+
+    expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+  });
+
+  it('should NOT retry on rate limit error', async () => {
+    callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
+
+    await expect(
+      generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key')
+    ).rejects.toThrow('Rate limit exceeded');
+
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fail after max retry attempts', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: 'Invalid JSON response'
+    });
+
+    await expect(
+      generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key')
+    ).rejects.toThrow('Invalid response format from AI');
+
+    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+  });
+
+  it('should handle DeepSeek thinking tags in response', async () => {
+    callOpenRouter.mockResolvedValueOnce({
+      text: `<think>Let me explain this...</think>${JSON.stringify(validExplanation)}`
+    });
+
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+
+    expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('generateExplanation schema validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should reject response missing rightAnswerExplanation', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({ wrongAnswerExplanation: 'Something' })
+    });
+
+    await expect(
+      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+    ).rejects.toThrow('Missing or invalid rightAnswerExplanation field');
+  });
+
+  it('should reject response missing wrongAnswerExplanation', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({ rightAnswerExplanation: 'Something' })
+    });
+
+    await expect(
+      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+    ).rejects.toThrow('Missing or invalid wrongAnswerExplanation field');
+  });
+
+  it('should reject empty rightAnswerExplanation', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({ rightAnswerExplanation: '', wrongAnswerExplanation: 'Something' })
+    });
+
+    await expect(
+      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+    ).rejects.toThrow('rightAnswerExplanation cannot be empty');
+  });
+
+  it('should reject empty wrongAnswerExplanation', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({ rightAnswerExplanation: 'Something', wrongAnswerExplanation: '  ' })
+    });
+
+    await expect(
+      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+    ).rejects.toThrow('wrongAnswerExplanation cannot be empty');
+  });
+
+  it('should accept valid explanation with all required fields', async () => {
+    const validExplanation = {
+      rightAnswerExplanation: 'The answer is correct because...',
+      wrongAnswerExplanation: 'Your answer was incorrect because...'
+    };
+
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify(validExplanation)
+    });
+
+    const result = await generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key');
+
+    expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+    expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
+  });
+});

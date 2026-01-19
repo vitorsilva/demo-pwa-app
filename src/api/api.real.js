@@ -6,6 +6,29 @@
   import { extractJSON } from '../utils/json-extractor.js';
 
   /**
+   * Validate explanation schema - checks that parsed JSON has correct structure
+   * @param {Object} explanation - Parsed explanation object
+   * @throws {Error} If schema is invalid with specific field info
+   */
+  function validateExplanationSchema(explanation) {
+    if (!explanation || typeof explanation !== 'object') {
+      throw new Error('Explanation must be an object');
+    }
+    if (typeof explanation.rightAnswerExplanation !== 'string') {
+      throw new Error('Missing or invalid rightAnswerExplanation field');
+    }
+    if (typeof explanation.wrongAnswerExplanation !== 'string') {
+      throw new Error('Missing or invalid wrongAnswerExplanation field');
+    }
+    if (explanation.rightAnswerExplanation.trim() === '') {
+      throw new Error('rightAnswerExplanation cannot be empty');
+    }
+    if (explanation.wrongAnswerExplanation.trim() === '') {
+      throw new Error('wrongAnswerExplanation cannot be empty');
+    }
+  }
+
+  /**
    * Validate quiz schema - checks that parsed JSON has correct structure
    * @param {Object} quiz - Parsed quiz object
    * @param {number} expectedCount - Expected number of questions
@@ -276,36 +299,66 @@ Requirements:
 - Write in ${languageName} (${language})
 - Return ONLY the JSON object, no other text`;
 
-  try {
-    const result = await callOpenRouter(apiKey, prompt, {
-      maxTokens: 500,
-      temperature: 0.7
-    });
+  // Retry logic: attempt up to 2 times on parse/validation errors
+  const maxAttempts = 2;
+  let lastError;
 
-    // Parse JSON response using robust extractor
-    let data;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      data = extractJSON(result.text);
-    } catch (parseError) {
-      logger.error('Failed to parse explanation JSON', { parseError: parseError.message });
-      // Fallback: return empty explanations instead of failing
+      // On retry, add stricter JSON instruction to prompt
+      const currentPrompt = attempt === 1 ? prompt : `${prompt}
+
+CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown. Start your response with { and end with }`;
+
+      const result = await callOpenRouter(apiKey, currentPrompt, {
+        maxTokens: 500,
+        temperature: 0.7
+      });
+
+      // Parse JSON response using robust extractor
+      let data;
+      try {
+        data = extractJSON(result.text);
+      } catch (parseError) {
+        logger.error('Failed to parse explanation JSON', { parseError: parseError.message, attempt });
+        throw new Error('Invalid response format from AI');
+      }
+
+      // Validate schema
+      try {
+        validateExplanationSchema(data);
+      } catch (validationError) {
+        logger.error('Explanation schema validation failed', { error: validationError.message, attempt });
+        throw validationError;
+      }
+
+      logger.debug('Structured explanation generated successfully', { attempt });
+
       return {
-        rightAnswerExplanation: '',
-        wrongAnswerExplanation: ''
+        rightAnswerExplanation: data.rightAnswerExplanation,
+        wrongAnswerExplanation: data.wrongAnswerExplanation
       };
+
+    } catch (error) {
+      lastError = error;
+
+      // Check if we should retry (only for parse/validation errors, not API errors)
+      if (attempt < maxAttempts && isParseOrValidationError(error)) {
+        logger.warn('Explanation parse/validation failed, retrying with stricter prompt', {
+          attempt,
+          error: error.message
+        });
+        continue;
+      }
+
+      // Don't retry API errors or if we've exhausted attempts
+      break;
     }
-
-    logger.debug('Structured explanation generated successfully');
-
-    return {
-      rightAnswerExplanation: data.rightAnswerExplanation || '',
-      wrongAnswerExplanation: data.wrongAnswerExplanation || ''
-    };
-
-  } catch (error) {
-    logger.error('Explanation generation failed', { error: error.message });
-    throw error;
   }
+
+  // All attempts failed
+  logger.error('Explanation generation failed after all attempts', { error: lastError.message });
+  throw lastError;
 }
 
 /**
