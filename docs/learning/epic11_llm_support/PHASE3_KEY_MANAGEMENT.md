@@ -13,6 +13,46 @@ Implement API key storage, validation, and management. Include hybrid validation
 
 ---
 
+## Branch & Commit Strategy
+
+### Branch Naming
+
+```
+feature/epic11-phase3-key-management
+```
+
+### Implementation Order
+
+```
+main (with Phase 2 merged)
+  │
+  └── feature/epic11-phase3-key-management
+        ├── commit: feat(llm): add api-keys-service with storage and format validation
+        ├── commit: feat(llm): add async key validation
+        ├── commit: feat(llm): add OpenRouter key migration
+        ├── commit: test(llm): add unit tests for api-keys-service
+        ├── commit: test(llm): add E2E tests for key management
+        ├── commit: test(llm): add Maestro tests for key management
+        └── PR → merge to main
+```
+
+### Commit Message Format
+
+```
+feat(llm): add api-keys-service with storage and format validation
+
+- Implement saveProviderKey with format check
+- Add KEY_STATUS enum (NOT_SET, VALIDATING, VALID, INVALID)
+- Store keys in IndexedDB with llm_key_ prefix
+- Add masked key display utility
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+---
+
 ## Tasks
 
 ### 3.1 Create API Keys Service
@@ -536,6 +576,119 @@ appId: com.saberloop.app
 - Validation is async to avoid blocking UI
 - Status updates via polling or event system (decide in Phase 4)
 - Test requests use minimal tokens to reduce cost
+
+---
+
+## Local Testing
+
+### 1. Run Unit Tests
+
+```bash
+# Run all unit tests
+npm test
+
+# Run specific key management tests
+npm test -- api-keys-service
+```
+
+### 2. Test with Dev Server
+
+```bash
+# Start development server
+npm run dev
+
+# Enable feature flag in browser console
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+
+# Test key operations via browser console:
+# - Import and call saveProviderKey()
+# - Verify key is stored in IndexedDB
+# - Check status changes (validating → valid/invalid)
+```
+
+### 3. Test Migration
+
+```bash
+# If you have an existing OpenRouter OAuth token, test migration:
+# 1. Clear IndexedDB
+# 2. Add OpenRouter token to localStorage (as done currently)
+# 3. Run migration
+# 4. Verify key appears in IndexedDB with status
+```
+
+---
+
+## Deployment Workflow
+
+### Step 1: Local Testing (Required)
+
+Complete all local testing steps above. Verify:
+- [ ] Unit tests pass
+- [ ] Key storage works in IndexedDB
+- [ ] Format validation rejects invalid keys
+- [ ] Async validation updates status
+- [ ] Migration works for existing OpenRouter keys
+
+### Step 2: Deploy to Staging
+
+```bash
+npm run build:staging && npm run deploy:staging
+```
+
+### Step 3: Test Staging with Feature Flag ENABLED
+
+```bash
+# Visit https://saberloop.com/app-staging/
+# Enable feature flag in console:
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+```
+
+**Staging Verification Checklist:**
+- [ ] Key storage works correctly
+- [ ] Validation updates status
+- [ ] Migration works if OpenRouter token exists
+- [ ] No errors in console
+
+### Step 4: Run E2E and Maestro Tests on Staging
+
+```bash
+# E2E tests
+PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
+
+# Maestro tests (on device/emulator)
+maestro test tests/maestro/key_management.yaml
+```
+
+### Step 5: Deploy to Production (keep SETTINGS_ONLY)
+
+```bash
+npm run build && npm run deploy
+```
+
+**Production Verification:**
+- [ ] Feature flag remains `SETTINGS_ONLY`
+- [ ] No user-visible changes yet
+- [ ] Background services ready for Phase 4 UI
+
+---
+
+## Related Documentation
+
+### Developer Guides
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Staging workflow reference
+- [E2E Testing](../../developer-guide/E2E_TESTING.md) - Playwright testing patterns
+- [Unit Testing](../../developer-guide/UNIT_TESTING.md) - Vitest testing patterns
+- [Maestro Testing](../../developer-guide/MAESTRO_TESTING.md) - Mobile testing patterns
+
+### Architecture
+- [Database Schema](../../architecture/DATABASE_SCHEMA.md) - IndexedDB structure
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - Historical context
+
+### Epic 11 Documents
+- [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md) - Main plan overview
+- [PHASE2_FRONTEND_ROUTER.md](./PHASE2_FRONTEND_ROUTER.md) - Provider router (prerequisite)
 
 ---
 

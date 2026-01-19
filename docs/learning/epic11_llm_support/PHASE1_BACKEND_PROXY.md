@@ -1329,7 +1329,133 @@ test.describe('LLM Proxy Integration @manual', () => {
 });
 ```
 
-### Add to CI Pipeline
+---
+
+## Local Testing with Docker
+
+Before deploying to production, test the LLM proxy locally using Docker.
+
+### 1. Update Docker Compose
+
+The LLM proxy uses the same PHP container as Party Mode. The `php-api/llm/` directory is already mounted via the volume configuration.
+
+### 2. Start Local Stack
+
+```bash
+# Start PHP + MySQL containers
+docker-compose -f docker-compose.php.yml up -d php-api mysql
+
+# Verify containers are running
+docker-compose -f docker-compose.php.yml ps
+```
+
+### 3. Test Health Check Locally
+
+```bash
+# Test health endpoint
+curl http://localhost:8080/llm/health.php
+
+# Expected response:
+# {"status":"healthy","service":"llm-proxy","timestamp":"...","version":"1.0.0","providers":["openai","anthropic","google","xai"]}
+```
+
+### 4. Test Completion Endpoint Locally
+
+```bash
+# Test with a real API key (replace with your key)
+curl -X POST http://localhost:8080/llm/completion.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai",
+    "api_key": "sk-your-test-key",
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Say hello"}],
+    "options": {"max_tokens": 20}
+  }'
+```
+
+### 5. Test Error Handling
+
+```bash
+# Test invalid provider
+curl -X POST http://localhost:8080/llm/completion.php \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "invalid", "api_key": "test", "model": "test", "messages": []}'
+
+# Expected: {"error":"Internal server error"} with 500 status
+
+# Test missing fields
+curl -X POST http://localhost:8080/llm/completion.php \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "openai"}'
+
+# Expected: {"error":"Internal server error"} with 500 status
+```
+
+### 6. View PHP Logs
+
+```bash
+# Check for errors
+docker-compose -f docker-compose.php.yml logs -f php-api
+```
+
+---
+
+## Deployment Workflow
+
+### Step 1: Local Testing (Required)
+
+Complete all local testing steps above. Verify:
+- [ ] Health check returns expected response
+- [ ] Completion endpoint works with at least one provider
+- [ ] Error handling returns appropriate responses
+- [ ] No PHP errors in logs
+
+### Step 2: Deploy to Production
+
+```bash
+# Deploy LLM proxy to saberloop.com/llm/
+npm run deploy:llm
+```
+
+### Step 3: Verify Production Deployment
+
+```bash
+# Test production health check
+curl https://saberloop.com/llm/health.php
+
+# Test production completion (with real key)
+curl -X POST https://saberloop.com/llm/completion.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai",
+    "api_key": "sk-your-test-key",
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Say test successful"}],
+    "options": {"max_tokens": 20}
+  }'
+```
+
+### Step 4: Run E2E Tests Against Production
+
+```bash
+# Run backend E2E tests
+npx playwright test tests/e2e/llm-proxy.spec.js
+
+# Run integration tests (requires TEST_OPENAI_KEY env var)
+TEST_OPENAI_KEY=sk-your-key npx playwright test tests/e2e/llm-proxy.spec.js --grep @manual
+```
+
+### Rollback (if needed)
+
+If issues are found in production:
+1. The `/llm/` endpoint is independent of the main app
+2. Simply fix the issue locally and redeploy
+3. No user-facing impact until Phase 2 integrates the frontend
+
+---
+
+## Add to CI Pipeline
 
 **Update `.github/workflows/test.yml`:**
 
@@ -1394,6 +1520,25 @@ e2e-tests:
   - BOM characters
   - Reasoning model outputs
 - Telemetry is fire-and-forget (non-blocking)
+
+---
+
+## Related Documentation
+
+### Developer Guides
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Deployment workflow reference
+- [E2E Testing](../../developer-guide/E2E_TESTING.md) - Playwright testing patterns
+- [Unit Testing](../../developer-guide/UNIT_TESTING.md) - Vitest testing patterns
+- [Configuration](../../developer-guide/CONFIGURATION.md) - Environment variables
+
+### Architecture
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - Historical context
+- [Deployment](../../architecture/DEPLOYMENT.md) - Deployment architecture
+- [API Design](../../architecture/API_DESIGN.md) - API patterns
+
+### Epic 11 Documents
+- [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md) - Main plan overview
+- [RESEARCH_PROVIDER_ANALYSIS.md](./RESEARCH_PROVIDER_ANALYSIS.md) - Provider research
 
 ---
 

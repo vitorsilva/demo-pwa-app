@@ -13,6 +13,75 @@ Create the Settings UI for managing LLM providers, including provider selection,
 
 ---
 
+## Branch & Commit Strategy
+
+### Branch Naming
+
+```
+feature/epic11-phase4-settings-ui
+```
+
+### Implementation Order
+
+```
+main (with Phase 3 merged)
+  │
+  └── feature/epic11-phase4-settings-ui
+        ├── commit: feat(llm): add LLMProvidersSettings component
+        ├── commit: feat(llm): add AddKeyModal component
+        ├── commit: feat(llm): add RemoveKeyModal component
+        ├── commit: feat(llm): add llm-providers.css styles
+        ├── commit: feat(llm): add i18n strings for LLM providers
+        ├── commit: feat(llm): integrate settings UI into SettingsView
+        ├── commit: test(llm): add E2E tests for settings UI
+        ├── commit: test(llm): add Maestro tests for settings UI
+        └── PR → merge to main
+```
+
+### Commit Message Format
+
+```
+feat(llm): add LLMProvidersSettings component
+
+- Display all providers with status indicators
+- Implement provider/model selection dropdowns
+- Show cost estimate based on selection
+- Add status polling for validation updates
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+---
+
+## Wireframes
+
+See [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md#ui-wireframes) for full UI wireframes including:
+- Settings Screen with LLM Providers section
+- Provider cards with status indicators
+- Active provider/model selectors
+- Cost estimate display
+
+---
+
+## CSS Styling Notes
+
+All CSS follows existing patterns in `src/styles/`:
+
+- **Color variables**: Use existing CSS custom properties from `src/styles/base.css`
+- **Component patterns**: Follow existing card patterns from `src/styles/components.css`
+- **Responsive**: Use existing breakpoints and media queries
+- **Dark mode**: Support existing dark mode via CSS variables
+- **Accessibility**: Use existing focus styles and ARIA patterns
+
+Reference existing components:
+- `src/styles/settings.css` - Settings page patterns
+- `src/styles/modal.css` - Modal dialog patterns
+- `src/styles/forms.css` - Form input patterns
+
+---
+
 ## Tasks
 
 ### 4.1 Create LLM Providers Settings Component
@@ -910,6 +979,132 @@ appId: com.saberloop.app
 - [ ] CSS styles applied correctly
 - [ ] E2E tests pass
 - [ ] Maestro tests pass
+
+---
+
+## Local Testing
+
+### 1. Run Unit Tests
+
+```bash
+npm test
+```
+
+### 2. Test with Dev Server
+
+```bash
+npm run dev
+
+# Enable feature flag in console:
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'SETTINGS_ONLY');
+location.reload();
+
+# Navigate to Settings → LLM Providers section should be visible
+```
+
+**Manual UI Verification:**
+- [ ] Provider cards display correctly
+- [ ] Status indicators show (✅ Valid, 🔄 Validating, etc.)
+- [ ] Add key modal opens and validates input
+- [ ] Remove key modal shows confirmation
+- [ ] Provider selection persists after refresh
+- [ ] Model selection updates cost estimate
+- [ ] Dark mode works correctly
+- [ ] Responsive on mobile viewport
+
+### 3. Test with Backend
+
+```bash
+# Start Docker containers
+docker-compose -f docker-compose.php.yml up -d php-api mysql
+
+# Test with real API key:
+# 1. Add OpenAI key via UI
+# 2. Verify status updates to "Valid" or "Invalid"
+# 3. Select OpenAI as active provider
+# 4. Generate a quiz to test routing
+```
+
+---
+
+## Deployment Workflow
+
+### Step 1: Local Testing (Required)
+
+Complete all local testing steps above. Verify:
+- [ ] All UI components render correctly
+- [ ] Key management works end-to-end
+- [ ] Provider selection persists
+- [ ] No console errors
+
+### Step 2: Deploy to Staging
+
+```bash
+npm run build:staging && npm run deploy:staging
+```
+
+### Step 3: Test Staging with Feature Flag SETTINGS_ONLY
+
+```bash
+# Visit https://saberloop.com/app-staging/
+# Enable feature flag:
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'SETTINGS_ONLY');
+location.reload();
+```
+
+**Staging Verification Checklist:**
+- [ ] Settings UI visible and functional
+- [ ] Can add/remove API keys
+- [ ] Provider selection works
+- [ ] Status indicators update
+
+### Step 4: Run E2E and Maestro Tests
+
+```bash
+# E2E tests
+PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
+
+# Maestro tests
+maestro test tests/maestro/llm_providers_settings.yaml
+```
+
+### Step 5: Deploy to Production (keep SETTINGS_ONLY)
+
+```bash
+npm run build && npm run deploy
+```
+
+**Production Verification:**
+- [ ] Feature flag remains `SETTINGS_ONLY`
+- [ ] Settings UI visible (users can configure)
+- [ ] Quiz generation still uses OpenRouter (flag not ENABLED)
+- [ ] No errors in telemetry
+
+---
+
+## Notes
+
+- Feature flag stays at `SETTINGS_ONLY` until Phase 5 complete
+- Users can configure providers but won't use them until ENABLED
+- Status polling uses 30-second interval to avoid excessive requests
+- Modal uses existing modal patterns for consistency
+
+---
+
+## Related Documentation
+
+### Developer Guides
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Staging workflow reference
+- [E2E Testing](../../developer-guide/E2E_TESTING.md) - Playwright testing patterns
+- [Maestro Testing](../../developer-guide/MAESTRO_TESTING.md) - Mobile testing patterns
+- [I18N](../../developer-guide/I18N.md) - Internationalization patterns
+
+### Architecture
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - Historical context
+
+### Epic 11 Documents
+- [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md) - Main plan with wireframes
+- [PHASE3_KEY_MANAGEMENT.md](./PHASE3_KEY_MANAGEMENT.md) - Key management (prerequisite)
 
 ---
 

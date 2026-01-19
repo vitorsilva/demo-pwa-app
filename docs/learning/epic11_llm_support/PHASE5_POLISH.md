@@ -9,7 +9,49 @@
 
 ## Goal
 
-Final polish including comprehensive error handling, edge case management, status indicators in quiz view, and user-facing documentation.
+Final polish including comprehensive error handling, edge case management, status indicators in quiz view, and user-facing documentation. **This phase also enables the feature flag to `ENABLED`.**
+
+---
+
+## Branch & Commit Strategy
+
+### Branch Naming
+
+```
+feature/epic11-phase5-polish
+```
+
+### Implementation Order
+
+```
+main (with Phase 4 merged)
+  │
+  └── feature/epic11-phase5-polish
+        ├── commit: feat(llm): add llm-error-handler with retry logic
+        ├── commit: feat(llm): add provider indicator component
+        ├── commit: feat(llm): add provider edge case handling
+        ├── commit: feat(llm): add i18n error messages
+        ├── commit: feat(llm): add cost tracker with usage summary
+        ├── commit: test(llm): add unit tests for error handler
+        ├── commit: test(llm): add E2E tests for error handling
+        ├── commit: feat(llm): enable MULTI_PROVIDER_LLM feature flag
+        └── PR → merge to main
+```
+
+### Commit Message Format
+
+```
+feat(llm): add llm-error-handler with retry logic
+
+- Centralized error parsing with HTTP status codes
+- User-friendly error messages for all providers
+- Exponential backoff retry for transient errors
+- Telemetry logging with actual HTTP codes
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
 
 ---
 
@@ -54,12 +96,14 @@ export const LLM_ERROR_CODES = {
 
 /**
  * Parse error from provider response
+ * Returns httpStatus for telemetry (preserves actual HTTP code for debugging)
  */
 export function parseProviderError(providerId, error, response) {
   // Handle network errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
     return {
       code: LLM_ERROR_CODES.NETWORK_ERROR,
+      httpStatus: null, // No HTTP status for network errors
       message: i18n.t('errors.providerNetworkError'),
       retryable: true
     };
@@ -72,6 +116,7 @@ export function parseProviderError(providerId, error, response) {
     if (status === 401) {
       return {
         code: LLM_ERROR_CODES.INVALID_API_KEY,
+        httpStatus: 401,
         message: i18n.t('errors.providerInvalidKey', { provider: providerId }),
         retryable: false
       };
@@ -81,6 +126,7 @@ export function parseProviderError(providerId, error, response) {
       const retryAfter = response.headers?.get('retry-after');
       return {
         code: LLM_ERROR_CODES.RATE_LIMITED,
+        httpStatus: 429,
         message: i18n.t('errors.providerRateLimited'),
         retryable: true,
         retryAfter: retryAfter ? parseInt(retryAfter, 10) : 60
@@ -90,6 +136,7 @@ export function parseProviderError(providerId, error, response) {
     if (status === 402) {
       return {
         code: LLM_ERROR_CODES.INSUFFICIENT_CREDITS,
+        httpStatus: 402,
         message: i18n.t('errors.providerInsufficientCredits', { provider: providerId }),
         retryable: false
       };
@@ -98,16 +145,26 @@ export function parseProviderError(providerId, error, response) {
     if (status >= 500) {
       return {
         code: LLM_ERROR_CODES.PROVIDER_ERROR,
+        httpStatus: status, // Preserve actual 5xx code (500, 502, 503, etc.)
         message: i18n.t('errors.providerServerError'),
         retryable: true
       };
     }
+
+    // Other HTTP errors (400, 403, etc.)
+    return {
+      code: LLM_ERROR_CODES.PROVIDER_ERROR,
+      httpStatus: status,
+      message: i18n.t('errors.providerRequestError'),
+      retryable: false
+    };
   }
 
   // Parse error body if available
   if (error?.error?.type === 'invalid_request_error') {
     return {
       code: LLM_ERROR_CODES.PROVIDER_ERROR,
+      httpStatus: null,
       message: error.error.message || i18n.t('errors.providerRequestError'),
       retryable: false
     };
@@ -116,6 +173,7 @@ export function parseProviderError(providerId, error, response) {
   // Default unknown error
   return {
     code: LLM_ERROR_CODES.UNKNOWN,
+    httpStatus: null,
     message: i18n.t('errors.providerUnknownError'),
     retryable: false
   };
@@ -123,18 +181,22 @@ export function parseProviderError(providerId, error, response) {
 
 /**
  * Handle error with user-friendly messaging
+ * Logs to telemetry with actual HTTP status code for debugging
  */
 export function handleLLMError(error, context = {}) {
   const { providerId, operation } = context;
 
+  // Parse and return structured error
+  const parsed = parseProviderError(providerId, error, error.response);
+
+  // Log to telemetry with HTTP status code (not just error code)
   logger.error('LLM operation failed', {
     providerId,
     operation,
+    errorCode: parsed.code,
+    httpStatus: parsed.httpStatus, // Actual HTTP status for debugging (401, 429, 503, etc.)
     error: error.message || error
   });
-
-  // Parse and return structured error
-  const parsed = parseProviderError(providerId, error, error.response);
 
   return {
     ...parsed,
@@ -818,7 +880,155 @@ appId: com.saberloop.app
 - Error messages should guide users to fix issues (not just report them)
 - Provider indicator should be subtle, not distracting
 - Cost tracking pricing should be updated periodically
-- Consider adding usage statistics view in future iteration
+- `getUsageSummary()` is prepared for a future "Usage Statistics" view (not implemented in this epic)
+  - Data is collected in IndexedDB for future dashboard
+  - Could show: total cost, cost by provider, cost by operation, token usage trends
+  - Consider adding to Epic 12 or as a separate enhancement
+
+---
+
+## Local Testing
+
+### 1. Run Unit Tests
+
+```bash
+npm test
+
+# Run specific error handler tests
+npm test -- llm-error-handler
+npm test -- cost-tracker
+```
+
+### 2. Test Error Handling
+
+```bash
+npm run dev
+
+# Enable feature flag
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+
+# Test error scenarios:
+# 1. Add invalid API key → should show "Invalid key" error
+# 2. Use expired/revoked key → should show appropriate error
+# 3. Disconnect network → should show "Network error" with retry
+# 4. Generate quiz with valid key → should work normally
+```
+
+### 3. Test Provider Indicator
+
+```bash
+# Start quiz and verify:
+# - Provider indicator shows in quiz header
+# - Correct provider name displayed
+# - Indicator is subtle and not distracting
+```
+
+### 4. Test Cost Tracking
+
+```bash
+# Generate a few quizzes with different providers
+# Check IndexedDB for llmUsage records
+# Verify token counts and cost calculations
+```
+
+---
+
+## Deployment Workflow
+
+### Step 1: Local Testing (Required)
+
+Complete all local testing steps above. Verify:
+- [ ] Error handler returns appropriate messages
+- [ ] Retry logic works for transient errors
+- [ ] Provider indicator displays correctly
+- [ ] Cost tracking records usage
+
+### Step 2: Deploy to Staging
+
+```bash
+npm run build:staging && npm run deploy:staging
+```
+
+### Step 3: Test Staging with Feature Flag ENABLED
+
+```bash
+# Visit https://saberloop.com/app-staging/
+# Enable feature flag:
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+```
+
+**Staging Verification Checklist:**
+- [ ] Error handling shows user-friendly messages
+- [ ] Provider indicator shows during quiz
+- [ ] Cost tracking works (check IndexedDB)
+- [ ] All providers work correctly
+- [ ] No regressions in existing functionality
+
+### Step 4: Run Full Test Suite
+
+```bash
+# E2E tests
+PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
+
+# Maestro tests
+maestro test tests/maestro/
+```
+
+### Step 5: Enable Feature Flag in Production
+
+After all staging tests pass:
+
+**Update `src/core/features.js`:**
+```javascript
+MULTI_PROVIDER_LLM: {
+  phase: 'ENABLED',  // Changed from SETTINGS_ONLY
+  description: 'Allow users to configure and use multiple LLM providers'
+}
+```
+
+### Step 6: Deploy to Production
+
+```bash
+npm run build && npm run deploy
+```
+
+### Step 7: Production Verification
+
+- [ ] Feature flag is `ENABLED`
+- [ ] Settings UI works
+- [ ] Can generate quiz with OpenRouter (default)
+- [ ] Can switch to other provider and generate quiz
+- [ ] Error handling shows appropriate messages
+- [ ] Telemetry logs LLM requests (check Grafana)
+- [ ] No spikes in error rates
+
+### Rollback (if needed)
+
+If issues in production:
+1. Set feature flag back to `SETTINGS_ONLY` in `features.js`
+2. Rebuild and redeploy
+3. Users can still configure providers but won't use them
+4. Investigate issues and fix before re-enabling
+
+---
+
+## Related Documentation
+
+### Developer Guides
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Staging workflow reference
+- [E2E Testing](../../developer-guide/E2E_TESTING.md) - Playwright testing patterns
+- [Maestro Testing](../../developer-guide/MAESTRO_TESTING.md) - Mobile testing patterns
+- [Troubleshooting](../../developer-guide/TROUBLESHOOTING.md) - Common issues
+
+### Architecture
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - Historical context
+- [API Design](../../architecture/API_DESIGN.md) - API patterns
+
+### Epic 11 Documents
+- [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md) - Main plan overview
+- [PHASE4_SETTINGS_UI.md](./PHASE4_SETTINGS_UI.md) - Settings UI (prerequisite)
 
 ---
 

@@ -928,6 +928,125 @@ describe('MULTI_PROVIDER_LLM Feature Flag', () => {
 
 ---
 
+## Local Testing
+
+### 1. Run Unit Tests
+
+```bash
+# Run all unit tests including new provider tests
+npm test
+
+# Run specific provider tests
+npm test -- provider-router
+npm test -- providers-config
+npm test -- provider-settings-service
+npm test -- features-multi-provider
+```
+
+### 2. Test with Dev Server
+
+```bash
+# Start development server
+npm run dev
+
+# In browser console, enable feature flag for testing
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+
+# Verify:
+# - Provider router falls back to OpenRouter when flag DISABLED
+# - Provider router uses settings when flag ENABLED
+# - OpenRouter calls go directly (check Network tab)
+# - Other providers route through /llm/completion.php
+```
+
+### 3. Test with Backend Proxy
+
+```bash
+# Start Docker containers (Phase 1 must be complete)
+docker-compose -f docker-compose.php.yml up -d php-api mysql
+
+# Test routing to proxy (requires feature flag enabled)
+# Set up a non-OpenRouter provider in IndexedDB
+# Verify requests go to localhost:8080/llm/completion.php
+```
+
+---
+
+## Deployment Workflow
+
+### Step 1: Local Testing (Required)
+
+Complete all local testing steps above. Verify:
+- [ ] Unit tests pass
+- [ ] Feature flag correctly controls behavior
+- [ ] OpenRouter routing works (direct)
+- [ ] Proxy routing works (via localhost:8080/llm/)
+
+### Step 2: Deploy to Staging
+
+```bash
+# Build for staging
+npm run build:staging
+
+# Deploy to staging
+npm run deploy:staging
+```
+
+### Step 3: Test Staging with Feature Flag ENABLED
+
+```bash
+# Visit staging
+# https://saberloop.com/app-staging/
+
+# In browser console, enable feature flag
+localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
+location.reload();
+```
+
+**Staging Verification Checklist:**
+- [ ] Feature flag override works
+- [ ] OpenRouter (default) still works
+- [ ] Provider settings are stored/retrieved correctly
+- [ ] Existing quiz generation works unchanged when flag DISABLED
+
+### Step 4: Run E2E Tests on Staging
+
+```bash
+# Run E2E tests against staging
+PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
+```
+
+### Step 5: Deploy to Production (with SETTINGS_ONLY)
+
+After staging verification passes:
+
+```bash
+# Update features.js to SETTINGS_ONLY (not ENABLED yet)
+# This allows testing settings UI in production without affecting quiz generation
+
+# Build for production
+npm run build
+
+# Deploy to production
+npm run deploy
+```
+
+**Production Verification:**
+- [ ] Feature flag is `SETTINGS_ONLY`
+- [ ] Settings UI NOT visible yet (Phase 4)
+- [ ] Existing OpenRouter quiz generation works unchanged
+- [ ] No errors in telemetry
+
+### Rollback (if needed)
+
+If issues in production:
+1. Set feature flag back to `DISABLED` in `features.js`
+2. Rebuild and redeploy
+3. Existing OpenRouter behavior is preserved
+
+---
+
 ## Acceptance Criteria
 
 - [ ] Feature flag `MULTI_PROVIDER_LLM` added to `features.js`
@@ -949,6 +1068,24 @@ describe('MULTI_PROVIDER_LLM Feature Flag', () => {
 - Provider router is stateless - reads settings on each call
 - Backend proxy URL is hardcoded for now
 - OpenRouter key migration handled in Phase 3
+
+---
+
+## Related Documentation
+
+### Developer Guides
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Staging workflow reference
+- [E2E Testing](../../developer-guide/E2E_TESTING.md) - Playwright testing patterns
+- [Unit Testing](../../developer-guide/UNIT_TESTING.md) - Vitest testing patterns
+- [Configuration](../../developer-guide/CONFIGURATION.md) - Environment variables
+
+### Architecture
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - Historical context
+- [API Design](../../architecture/API_DESIGN.md) - API patterns
+
+### Epic 11 Documents
+- [EPIC11_LLM_SUPPORT_PLAN.md](./EPIC11_LLM_SUPPORT_PLAN.md) - Main plan overview
+- [PHASE1_BACKEND_PROXY.md](./PHASE1_BACKEND_PROXY.md) - Backend proxy (prerequisite)
 
 ---
 
