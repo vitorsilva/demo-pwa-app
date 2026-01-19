@@ -8,6 +8,7 @@ vi.mock('./openrouter-client.js', () => ({
 vi.mock('../utils/logger.js', () => ({
   logger: {
     debug: vi.fn(),
+    warn: vi.fn(),
     error: vi.fn(),
     perf: vi.fn()
   }
@@ -163,7 +164,7 @@ describe('generateQuestions prompt', () => {
 
     await expect(
       generateQuestions('Test Topic', 'middle school', 'fake-api-key', { questionCount: 5 })
-    ).rejects.toThrow('AI returned invalid question format');
+    ).rejects.toThrow('Expected 5 questions, got 3');
   });
 
   it('should accept response with matching questionCount', async () => {
@@ -282,5 +283,217 @@ describe('generateExplanation JSON parsing', () => {
 
     expect(result.rightAnswerExplanation).not.toContain('{');
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
+  });
+});
+
+describe('generateQuestions retry logic', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Helper to generate valid mock questions
+  function generateValidQuestions(count = 5) {
+    return Array.from({ length: count }, (_, i) => ({
+      question: `Question ${i + 1}?`,
+      options: ['A) opt1', 'B) opt2', 'C) opt3', 'D) opt4'],
+      correct: i % 4,
+      difficulty: 'easy'
+    }));
+  }
+
+  it('should succeed on first attempt when response is valid', async () => {
+    callOpenRouter.mockResolvedValueOnce({
+      text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
+      model: 'test-model',
+      usage: { promptTokens: 100, completionTokens: 200, totalTokens: 300 }
+    });
+
+    const result = await generateQuestions('Test', 'middle school', 'fake-key');
+
+    expect(result.questions).toHaveLength(5);
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should retry with stricter prompt on parse failure', async () => {
+    let callCount = 0;
+    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+      callCount++;
+      if (callCount === 1) {
+        // First call: return invalid response
+        return { text: 'This is not JSON at all' };
+      }
+      // Second call: return valid response
+      return {
+        text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
+        model: 'test-model',
+        usage: {}
+      };
+    });
+
+    const result = await generateQuestions('Test', 'middle school', 'fake-key');
+
+    expect(result.questions).toHaveLength(5);
+    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    // Second call should have stricter prompt
+    const secondCallPrompt = callOpenRouter.mock.calls[1][1];
+    expect(secondCallPrompt).toContain('CRITICAL: Respond with ONLY valid JSON');
+  });
+
+  it('should retry on schema validation failure', async () => {
+    let callCount = 0;
+    callOpenRouter.mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // First call: return JSON with missing 'correct' field
+        return {
+          text: JSON.stringify({
+            language: 'en',
+            questions: [
+              { question: 'Q?', options: ['A', 'B', 'C', 'D'] } // missing 'correct'
+            ]
+          })
+        };
+      }
+      // Second call: return valid response
+      return {
+        text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
+        model: 'test-model',
+        usage: {}
+      };
+    });
+
+    const result = await generateQuestions('Test', 'middle school', 'fake-key');
+
+    expect(result.questions).toHaveLength(5);
+    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+  });
+
+  it('should NOT retry on rate limit error', async () => {
+    callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key')
+    ).rejects.toThrow('Rate limit exceeded');
+
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should NOT retry on authentication error', async () => {
+    callOpenRouter.mockRejectedValueOnce(new Error('Invalid API key'));
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key')
+    ).rejects.toThrow('Invalid API key');
+
+    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fail after max retry attempts', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: 'Invalid JSON response'
+    });
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key')
+    ).rejects.toThrow('Invalid response format from AI');
+
+    expect(callOpenRouter).toHaveBeenCalledTimes(2); // 2 attempts max
+  });
+
+  it('should handle DeepSeek thinking tags in response', async () => {
+    callOpenRouter.mockResolvedValueOnce({
+      text: `<think>Let me create a quiz...</think>${JSON.stringify({ language: 'en', questions: generateValidQuestions(5) })}`,
+      model: 'deepseek-r1',
+      usage: {}
+    });
+
+    const result = await generateQuestions('Test', 'middle school', 'fake-key');
+
+    expect(result.questions).toHaveLength(5);
+    expect(callOpenRouter).toHaveBeenCalledTimes(1); // No retry needed
+  });
+});
+
+describe('generateQuestions schema validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should reject question missing question text', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({
+        language: 'en',
+        questions: [
+          { options: ['A', 'B', 'C', 'D'], correct: 0 } // missing 'question'
+        ]
+      })
+    });
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 })
+    ).rejects.toThrow('Question 1: missing question text');
+  });
+
+  it('should reject question with wrong number of options', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({
+        language: 'en',
+        questions: [
+          { question: 'Q?', options: ['A', 'B', 'C'], correct: 0 } // only 3 options
+        ]
+      })
+    });
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 })
+    ).rejects.toThrow('Question 1: must have exactly 4 options');
+  });
+
+  it('should reject question with invalid correct index', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({
+        language: 'en',
+        questions: [
+          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 5 } // invalid index
+        ]
+      })
+    });
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 })
+    ).rejects.toThrow('Question 1: correct must be 0-3');
+  });
+
+  it('should reject question with string correct value', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({
+        language: 'en',
+        questions: [
+          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: '0' } // string instead of number
+        ]
+      })
+    });
+
+    await expect(
+      generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 })
+    ).rejects.toThrow('Question 1: correct must be 0-3');
+  });
+
+  it('should accept valid quiz with all required fields', async () => {
+    callOpenRouter.mockResolvedValue({
+      text: JSON.stringify({
+        language: 'en',
+        questions: [
+          { question: 'What is 2+2?', options: ['A) 3', 'B) 4', 'C) 5', 'D) 6'], correct: 1, difficulty: 'easy' }
+        ]
+      }),
+      model: 'test',
+      usage: {}
+    });
+
+    const result = await generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 });
+
+    expect(result.questions).toHaveLength(1);
+    expect(result.questions[0].correct).toBe(1);
   });
 });

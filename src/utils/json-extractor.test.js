@@ -108,6 +108,78 @@ describe('JSON Extractor', () => {
       });
     });
 
+    describe('DeepSeek thinking tags', () => {
+      it('should strip <think> tags and extract JSON', () => {
+        const input = `<think>Let me create a quiz about math...</think>{"language": "en", "questions": []}`;
+        const result = extractJSON(input);
+        expect(result).toEqual({ language: 'en', questions: [] });
+      });
+
+      it('should handle multiline <think> content', () => {
+        const input = `<think>
+First, I need to consider the topic.
+Then, I'll generate questions.
+Let me think about difficulty levels.
+</think>
+{"name": "test"}`;
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should handle <think> tags with text after JSON', () => {
+        const input = `<think>Processing...</think>{"value": 42}
+
+I hope this helps!`;
+        const result = extractJSON(input);
+        expect(result).toEqual({ value: 42 });
+      });
+
+      it('should handle case-insensitive <THINK> tags', () => {
+        const input = `<THINK>Some reasoning</THINK>{"name": "test"}`;
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should handle multiple <think> blocks', () => {
+        const input = `<think>First thought</think>Some text<think>Second thought</think>{"result": true}`;
+        const result = extractJSON(input);
+        expect(result).toEqual({ result: true });
+      });
+    });
+
+    describe('JSON cleaning (trailing commas and control chars)', () => {
+      it('should handle trailing comma in object', () => {
+        const input = '{"name": "test", "value": 42,}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test', value: 42 });
+      });
+
+      it('should handle trailing comma in array', () => {
+        const input = '{"items": [1, 2, 3,]}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ items: [1, 2, 3] });
+      });
+
+      it('should handle multiple trailing commas', () => {
+        const input = '{"outer": {"inner": "value",}, "items": [1, 2,],}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ outer: { inner: 'value' }, items: [1, 2] });
+      });
+
+      it('should handle control characters in JSON', () => {
+        // Simulate control char (tab/newline in unexpected place)
+        const input = '{"name":\t"test",\n"value": 42}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test', value: 42 });
+      });
+
+      it('should handle JSON in code block with trailing comma', () => {
+        const input = '```json\n{"name": "test",}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+    });
+
     describe('real-world LLM response patterns', () => {
       it('should handle quiz generation response', () => {
         const input = `Here are the questions:
@@ -139,6 +211,29 @@ I hope these questions are helpful!`;
         const result = extractJSON(input);
         expect(result.rightAnswerExplanation).toContain('correct answer is B');
         expect(result.wrongAnswerExplanation).toContain('answer A was incorrect');
+      });
+
+      it('should handle DeepSeek R1 quiz response with thinking', () => {
+        const input = `<think>
+The user wants a quiz about photosynthesis for middle school.
+I should create 5 questions with varying difficulty.
+Let me structure the JSON properly.
+</think>
+{
+  "language": "en",
+  "questions": [
+    {
+      "question": "What gas do plants absorb during photosynthesis?",
+      "options": ["A) Oxygen", "B) Carbon dioxide", "C) Nitrogen", "D) Hydrogen"],
+      "correct": 1,
+      "difficulty": "easy"
+    }
+  ]
+}`;
+        const result = extractJSON(input);
+        expect(result.language).toBe('en');
+        expect(result.questions).toHaveLength(1);
+        expect(result.questions[0].question).toContain('photosynthesis');
       });
     });
 
