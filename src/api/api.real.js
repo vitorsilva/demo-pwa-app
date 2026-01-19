@@ -5,6 +5,82 @@
   import { getSelectedModel } from '../services/model-service.js';
   import { extractJSON } from '../utils/json-extractor.js';
 
+  /**
+   * Validate explanation schema - checks that parsed JSON has correct structure
+   * @param {Object} explanation - Parsed explanation object
+   * @throws {Error} If schema is invalid with specific field info
+   */
+  function validateExplanationSchema(explanation) {
+    if (!explanation || typeof explanation !== 'object') {
+      throw new Error('Explanation must be an object');
+    }
+    if (typeof explanation.rightAnswerExplanation !== 'string') {
+      throw new Error('Missing or invalid rightAnswerExplanation field');
+    }
+    if (typeof explanation.wrongAnswerExplanation !== 'string') {
+      throw new Error('Missing or invalid wrongAnswerExplanation field');
+    }
+    if (explanation.rightAnswerExplanation.trim() === '') {
+      throw new Error('rightAnswerExplanation cannot be empty');
+    }
+    if (explanation.wrongAnswerExplanation.trim() === '') {
+      throw new Error('wrongAnswerExplanation cannot be empty');
+    }
+  }
+
+  /**
+   * Validate quiz schema - checks that parsed JSON has correct structure
+   * @param {Object} quiz - Parsed quiz object
+   * @param {number} expectedCount - Expected number of questions
+   * @throws {Error} If schema is invalid with specific field info
+   */
+  function validateQuizSchema(quiz, expectedCount) {
+    if (!quiz.questions || !Array.isArray(quiz.questions)) {
+      throw new Error('Missing or invalid questions array');
+    }
+    if (quiz.questions.length !== expectedCount) {
+      throw new Error(`Expected ${expectedCount} questions, got ${quiz.questions.length}`);
+    }
+
+    for (let i = 0; i < quiz.questions.length; i++) {
+      const q = quiz.questions[i];
+      if (!q.question || typeof q.question !== 'string') {
+        throw new Error(`Question ${i + 1}: missing question text`);
+      }
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        throw new Error(`Question ${i + 1}: must have exactly 4 options`);
+      }
+      if (typeof q.correct !== 'number' || q.correct < 0 || q.correct > 3) {
+        throw new Error(`Question ${i + 1}: correct must be 0-3`);
+      }
+    }
+  }
+
+  /**
+   * Check if an error is a parse/validation error (should retry) vs API error (should not retry)
+   * @param {Error} error - The error to check
+   * @returns {boolean} True if this is a parse/validation error that should trigger retry
+   */
+  function isParseOrValidationError(error) {
+    const message = error.message || '';
+    // API errors that should NOT trigger retry
+    const apiErrors = [
+      'rate limit',
+      'rate_limit',
+      'insufficient_quota',
+      'invalid_api_key',
+      'invalid api key',
+      'authentication',
+      'unauthorized',
+      'network',
+      'timeout',
+      'ECONNREFUSED',
+      'ENOTFOUND'
+    ];
+    const isApiError = apiErrors.some(e => message.toLowerCase().includes(e.toLowerCase()));
+    return !isApiError;
+  }
+
   // Language code to full name mapping
   const LANGUAGE_NAMES = {
     'en': 'English',
@@ -106,48 +182,83 @@ ${exclusionSection}
   - The "language" field should be "${language}"
   - Return ONLY the JSON object, no other text before or after.`;
 
-    try {
-      // Call OpenRouter
-      const result = await callOpenRouter(apiKey, prompt, {
-        maxTokens: 2048,
-        temperature: 0.7
-      });
+    // Retry logic: attempt up to 2 times on parse/validation errors
+    const maxAttempts = 2;
+    let lastError;
+    let lastResult;
 
-      logger.debug('OpenRouter raw response received');
-
-      // Parse JSON from response using robust extractor
-      let data;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        data = extractJSON(result.text);
-      } catch (parseError) {
-        logger.error('Failed to parse questions JSON', { parseError: parseError.message });
-        throw new Error('Invalid response format from AI');
+        // On retry, add stricter JSON instruction to prompt
+        const currentPrompt = attempt === 1 ? prompt : `${prompt}
+
+CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown. Start your response with { and end with }`;
+
+        // Call OpenRouter
+        const result = await callOpenRouter(apiKey, currentPrompt, {
+          maxTokens: 2048,
+          temperature: 0.7
+        });
+        lastResult = result;
+
+        logger.debug('OpenRouter raw response received', { attempt });
+
+        // Parse JSON from response using robust extractor
+        let data;
+        try {
+          data = extractJSON(result.text);
+        } catch (parseError) {
+          logger.error('Failed to parse questions JSON', { parseError: parseError.message, attempt });
+          throw new Error('Invalid response format from AI');
+        }
+
+        // Validate schema with detailed error messages
+        try {
+          validateQuizSchema(data, questionCount);
+        } catch (validationError) {
+          logger.error('Quiz schema validation failed', { error: validationError.message, attempt });
+          throw validationError;
+        }
+
+        const duration = Math.round(performance.now() - startTime);
+        logger.debug('Questions generated successfully', {
+          language: data.language,
+          count: data.questions.length,
+          model: result.model,
+          attempt
+        });
+        logger.perf('quiz_generation', { value: duration, status: 'success', topic, model: result.model });
+
+        return {
+          language: data.language || 'EN-US',
+          questions: data.questions,
+          model: result.model,
+          usage: result.usage
+        };
+
+      } catch (error) {
+        lastError = error;
+
+        // Check if we should retry (only for parse/validation errors, not API errors)
+        if (attempt < maxAttempts && isParseOrValidationError(error)) {
+          logger.warn('Parse/validation failed, retrying with stricter prompt', {
+            attempt,
+            error: error.message
+          });
+          continue;
+        }
+
+        // Don't retry API errors or if we've exhausted attempts
+        break;
       }
-
-      // Validate structure
-      if (!data.questions || !Array.isArray(data.questions) || data.questions.length !== questionCount) {
-        logger.error('Invalid questions structure', { expected: questionCount, received: data.questions?.length });
-        throw new Error('AI returned invalid question format');
-      }
-
-      const duration = Math.round(performance.now() - startTime);
-      logger.debug('Questions generated successfully', { language: data.language, count: data.questions.length, model: result.model });
-      logger.perf('quiz_generation', { value: duration, status: 'success', topic, model: result.model });
-
-      return {
-        language: data.language || 'EN-US',
-        questions: data.questions,
-        model: result.model,
-        usage: result.usage
-      };
-
-    } catch (error) {
-      const duration = Math.round(performance.now() - startTime);
-      const model = getSelectedModel(); // Get model for error tracking
-      logger.error('Question generation failed', { error: error.message, model });
-      logger.perf('quiz_generation', { value: duration, status: 'error', topic, model, error: error.message });
-      throw error;
     }
+
+    // All attempts failed
+    const duration = Math.round(performance.now() - startTime);
+    const model = lastResult?.model || getSelectedModel();
+    logger.error('Question generation failed after all attempts', { error: lastError.message, model });
+    logger.perf('quiz_generation', { value: duration, status: 'error', topic, model, error: lastError.message });
+    throw lastError;
   }
 
 /**
@@ -188,36 +299,66 @@ Requirements:
 - Write in ${languageName} (${language})
 - Return ONLY the JSON object, no other text`;
 
-  try {
-    const result = await callOpenRouter(apiKey, prompt, {
-      maxTokens: 500,
-      temperature: 0.7
-    });
+  // Retry logic: attempt up to 2 times on parse/validation errors
+  const maxAttempts = 2;
+  let lastError;
 
-    // Parse JSON response using robust extractor
-    let data;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      data = extractJSON(result.text);
-    } catch (parseError) {
-      logger.error('Failed to parse explanation JSON', { parseError: parseError.message });
-      // Fallback: return empty explanations instead of failing
+      // On retry, add stricter JSON instruction to prompt
+      const currentPrompt = attempt === 1 ? prompt : `${prompt}
+
+CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown. Start your response with { and end with }`;
+
+      const result = await callOpenRouter(apiKey, currentPrompt, {
+        maxTokens: 500,
+        temperature: 0.7
+      });
+
+      // Parse JSON response using robust extractor
+      let data;
+      try {
+        data = extractJSON(result.text);
+      } catch (parseError) {
+        logger.error('Failed to parse explanation JSON', { parseError: parseError.message, attempt });
+        throw new Error('Invalid response format from AI');
+      }
+
+      // Validate schema
+      try {
+        validateExplanationSchema(data);
+      } catch (validationError) {
+        logger.error('Explanation schema validation failed', { error: validationError.message, attempt });
+        throw validationError;
+      }
+
+      logger.debug('Structured explanation generated successfully', { attempt });
+
       return {
-        rightAnswerExplanation: '',
-        wrongAnswerExplanation: ''
+        rightAnswerExplanation: data.rightAnswerExplanation,
+        wrongAnswerExplanation: data.wrongAnswerExplanation
       };
+
+    } catch (error) {
+      lastError = error;
+
+      // Check if we should retry (only for parse/validation errors, not API errors)
+      if (attempt < maxAttempts && isParseOrValidationError(error)) {
+        logger.warn('Explanation parse/validation failed, retrying with stricter prompt', {
+          attempt,
+          error: error.message
+        });
+        continue;
+      }
+
+      // Don't retry API errors or if we've exhausted attempts
+      break;
     }
-
-    logger.debug('Structured explanation generated successfully');
-
-    return {
-      rightAnswerExplanation: data.rightAnswerExplanation || '',
-      wrongAnswerExplanation: data.wrongAnswerExplanation || ''
-    };
-
-  } catch (error) {
-    logger.error('Explanation generation failed', { error: error.message });
-    throw error;
   }
+
+  // All attempts failed
+  logger.error('Explanation generation failed after all attempts', { error: lastError.message });
+  throw lastError;
 }
 
 /**
