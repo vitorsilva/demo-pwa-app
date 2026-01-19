@@ -107,17 +107,18 @@ async function init() {
     // Initialize ad manager (for AdSense integration)
     initAdManager();
 
-    // Check if current URL is a party join route (should bypass onboarding)
-    // Party join links are shared externally, so new users arriving via these
-    // links should go directly to the join screen, not onboarding
+    // Check if current URL should bypass onboarding
+    // These are externally shared links, so new users arriving via these
+    // should go directly to their destination, not onboarding
     const hash = window.location.hash.slice(1) || '/';
     const isPartyJoinRoute = hash.startsWith('/party/join/');
+    const isSharedQuizRoute = hash.startsWith('/quiz/') && hash.length > 6;
 
     // Redirect to welcome if needed (after router init)
-    // Skip redirect if user arrived via party join link
+    // Skip redirect if user arrived via shared link (party join or shared quiz)
     const showWelcome = await shouldShowWelcome();
-    logger.debug('Show welcome check', { showWelcome, isPartyJoinRoute });
-    if (showWelcome && !isPartyJoinRoute) {
+    logger.debug('Show welcome check', { showWelcome, isPartyJoinRoute, isSharedQuizRoute });
+    if (showWelcome && !isPartyJoinRoute && !isSharedQuizRoute) {
       window.location.hash = '#/welcome';
     }    
 
