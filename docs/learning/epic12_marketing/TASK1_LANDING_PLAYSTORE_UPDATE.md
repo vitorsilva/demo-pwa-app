@@ -16,6 +16,18 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 
 ---
 
+## Decisions Summary
+
+| Area | Decision |
+|------|----------|
+| **Hero Subtitle** | Update to mention Party Mode: "Learn solo or challenge friends in real-time Party Mode" |
+| **Feature Cards** | Keep 6 cards unchanged, add dedicated Party Mode section below |
+| **Party Mode Section** | NEW two-column section with screenshot + bullet points + CTA |
+| **Screenshots** | Party Mode screenshot **first** for maximum visibility |
+| **Play Store Description** | Option B: "AI quizzes in 5 languages. Learn solo or with friends. Free, offline, private." |
+
+---
+
 ## Gap Analysis
 
 ### Features Live But Not Marketed
@@ -111,9 +123,9 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 **CSS Consideration:** Grid changes from 6 cards (3x2) to 7 cards. Options:
 - **A)** 7 cards with adjusted grid (4-3 or 3-4 layout)
 - **B)** Replace one card (merge similar features)
-- **C)** Keep 6 cards, make Party Mode a dedicated section
+- **C)** Keep 6 cards, make Party Mode a dedicated section ✅ **SELECTED**
 
-**Recommendation:** Option A - Keep all 7 cards. Party Mode deserves feature card prominence.
+**Decision:** Option C - Keep 6 feature cards unchanged. Add a dedicated Party Mode section below for more prominence and detail.
 
 #### Wireframe: Feature Cards
 
@@ -169,7 +181,7 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**AFTER Option B (6 cards, Party Mode replaces one):**
+**AFTER Option B (6 cards, Party Mode replaces one):** *(not selected)*
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           Why Saberloop?                                    │
@@ -195,6 +207,86 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 │  Note: "All Skill Levels" merged with "Adaptive Difficulty"                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+**AFTER Option C (Dedicated Party Mode Section) - ✅ SELECTED:**
+
+Feature cards remain unchanged (6 cards, 3x2 grid). New dedicated section added below:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Why Saberloop?                                    │
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 🤖 AI-Powered   │  │ 🌍 Learn in     │  │ 📈 Adaptive     │              │
+│  │    Learning     │  │    Your Lang    │  │    Difficulty   │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 🎯 All Skill    │  │ 📴 Works        │  │ 🔒 Your Data    │              │
+│  │    Levels       │  │    Offline      │  │    Your Control │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ↓ NEW SECTION ↓
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                     🎉 Challenge Your Friends                               │
+│                                                                             │
+│  ┌───────────────────────┐  ┌─────────────────────────────────────────────┐ │
+│  │                       │  │                                             │ │
+│  │   ┌───────────────┐   │  │  Party Mode                                 │ │
+│  │   │               │   │  │                                             │ │
+│  │   │  [Screenshot] │   │  │  Turn any quiz into a multiplayer game!     │ │
+│  │   │   Party Mode  │   │  │                                             │ │
+│  │   │   Gameplay    │   │  │  • Create a room and get a shareable code   │ │
+│  │   │               │   │  │  • Friends join instantly - no signup       │ │
+│  │   │               │   │  │  • Compete in real-time with live scores    │ │
+│  │   └───────────────┘   │  │  • See the final leaderboard together       │ │
+│  │                       │  │                                             │ │
+│  └───────────────────────┘  │          [ Try Party Mode ]                 │ │
+│                             └─────────────────────────────────────────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation Notes for Option C:**
+- Place section between "Why Saberloop?" features and "See It In Action" screenshots
+- Two-column layout: screenshot on left, text + CTA on right
+- Mobile: Stack vertically (screenshot above, text below)
+- Use Party Mode purple/pink accent color to differentiate from orange theme
+- CTA button links directly to app with Party Mode pre-selected
+
+---
+
+### 2.5 NEW: Dedicated Party Mode Section
+
+**Section Title:** "Challenge Your Friends" or "Party Mode"
+
+**Content:**
+```html
+<section class="party-mode-section">
+  <h2>🎉 Challenge Your Friends</h2>
+  <div class="party-content">
+    <div class="party-screenshot">
+      <img src="images/landing-party-gameplay.png" alt="Party Mode gameplay">
+    </div>
+    <div class="party-text">
+      <h3>Party Mode</h3>
+      <p>Turn any quiz into a multiplayer game!</p>
+      <ul>
+        <li>Create a room and get a shareable code</li>
+        <li>Friends join instantly - no signup needed</li>
+        <li>Compete in real-time with live scores</li>
+        <li>See the final leaderboard together</li>
+      </ul>
+      <a href="/app/#party" class="cta-button">Try Party Mode</a>
+    </div>
+  </div>
+</section>
+```
+
+**Placement:** After "Why Saberloop?" section, before "See It In Action" screenshots
 
 ---
 
@@ -235,7 +327,7 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**AFTER (6 screenshots, Party Mode added):**
+**Option: Party Mode Last** *(not selected)*
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          See It In Action                                   │
@@ -254,7 +346,7 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Alternative: Party Mode as First Screenshot (Higher visibility):**
+**AFTER: Party Mode as First Screenshot - ✅ SELECTED:**
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          See It In Action                                   │
@@ -328,7 +420,7 @@ If analytics show high interest, consider adding a dedicated section below featu
 AI quizzes on any topic. Learn solo or challenge friends in real-time battles!
 ```
 
-**B - Feature Balance (80 chars):**
+**B - Feature Balance (80 chars) - ✅ SELECTED:**
 ```
 AI quizzes in 5 languages. Learn solo or with friends. Free, offline, private.
 ```
@@ -338,7 +430,7 @@ AI quizzes in 5 languages. Learn solo or with friends. Free, offline, private.
 Quiz with friends in real-time! AI-powered, 5 languages, works offline. Free.
 ```
 
-**Recommendation:** Option A - Leads with multiplayer as differentiator.
+**Decision:** Option B - Balanced approach that highlights key differentiators (5 languages, multiplayer, offline, privacy).
 
 ---
 
