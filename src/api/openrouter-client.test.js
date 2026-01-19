@@ -159,18 +159,32 @@
           .rejects.toThrow('Insufficient credits');
       });
 
-      it('should throw error on empty response when both content and reasoning are empty', async () => {
-        mockFetch.mockResolvedValueOnce({
+      it('should throw error on empty response after retries fail', async () => {
+        // Empty responses are now retried (up to 3 times), so mock all retries as empty
+        const emptyResponse = {
           ok: true,
           json: () => Promise.resolve({
             choices: [{ message: { content: '', reasoning: '' } }],
             model: 'test-model',
             usage: {}
           })
+        };
+        mockFetch
+          .mockResolvedValue(emptyResponse); // All calls return empty
+
+        // Start the call and immediately attach error handler to prevent unhandled rejection
+        let caughtError = null;
+        const promise = callOpenRouter('sk-test-key', 'Test').catch(e => {
+          caughtError = e;
         });
 
-        await expect(callOpenRouter('sk-test-key', 'Test'))
-          .rejects.toThrow('Empty response from OpenRouter');
+        // Run all timers and pending promises to completion
+        await vi.runAllTimersAsync();
+        await promise;
+
+        // Verify the error was thrown
+        expect(caughtError).not.toBeNull();
+        expect(caughtError.message).toBe('Empty response from OpenRouter');
       });
 
       it('should use reasoning field when content is empty and reasoning is not chain-of-thought', async () => {
@@ -189,19 +203,32 @@
         expect(result.text).toBe('A resposta correta é 32 dentes.');
       });
 
-      it('should reject chain-of-thought reasoning as answer', async () => {
+      it('should reject chain-of-thought reasoning as answer after retries', async () => {
         // Chain-of-thought should not be used as the answer
-        mockFetch.mockResolvedValueOnce({
+        // Empty responses are now retried (up to 3 times), so mock all retries
+        const chainOfThoughtResponse = {
           ok: true,
           json: () => Promise.resolve({
             choices: [{ message: { content: '', reasoning: 'Okay, let me think about this...' } }],
             model: 'deepseek-r1t2-chimera',
             usage: { total_tokens: 100 }
           })
+        };
+        mockFetch.mockResolvedValue(chainOfThoughtResponse); // All calls return chain-of-thought
+
+        // Start the call and immediately attach error handler to prevent unhandled rejection
+        let caughtError = null;
+        const promise = callOpenRouter('sk-test-key', 'Test prompt').catch(e => {
+          caughtError = e;
         });
 
-        await expect(callOpenRouter('sk-test-key', 'Test prompt'))
-          .rejects.toThrow('Empty response from OpenRouter');
+        // Run all timers and pending promises to completion
+        await vi.runAllTimersAsync();
+        await promise;
+
+        // Verify the error was thrown
+        expect(caughtError).not.toBeNull();
+        expect(caughtError.message).toBe('Empty response from OpenRouter');
       });
 
       it('should prefer content over reasoning when both are present', async () => {

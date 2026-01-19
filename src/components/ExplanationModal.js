@@ -203,20 +203,32 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
           }
         }
       } catch (error) {
-        logger.error('Failed to fetch explanation', { error: error.message });
+        logger.error('Failed to fetch explanation', { error: error.message, code: error.code });
 
         // Hide loading states
         if (rightAnswerLoadingEl) rightAnswerLoadingEl.classList.add('hidden');
         if (wrongAnswerLoadingEl) wrongAnswerLoadingEl.classList.add('hidden');
 
+        // Determine error message and action based on error code
+        let errorMessage = t('explanation.couldntLoad');
+        let actionButton = `<button id="retryBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.tryAgain')}</button>`;
+
+        if (error.code === 'RATE_LIMIT') {
+          errorMessage = t('explanation.rateLimitError');
+          actionButton = ''; // No action for rate limit - just wait
+        } else if (error.code === 'INVALID_API_KEY') {
+          errorMessage = t('explanation.invalidKeyError');
+          actionButton = `<button id="goToSettingsBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.goToSettings')}</button>`;
+        }
+
         // If we have cached explanation, only show error for personalized part
         if (cachedExplanation) {
           if (wrongAnswerSectionEl) {
             wrongAnswerSectionEl.innerHTML = `
-              <div class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+              <div class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark flex-wrap">
                 <span class="material-symbols-outlined text-base text-warning">warning</span>
-                <span>${t('explanation.couldntLoad')}</span>
-                <button id="retryBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.tryAgain')}</button>
+                <span>${errorMessage}</span>
+                ${actionButton}
               </div>
             `;
             // Re-attach retry listener
@@ -224,10 +236,36 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
             if (newRetryBtn) {
               newRetryBtn.addEventListener('click', fetchExplanation);
             }
+            // Attach Settings button listener
+            const settingsBtn = wrongAnswerSectionEl.querySelector('#goToSettingsBtn');
+            if (settingsBtn) {
+              settingsBtn.addEventListener('click', () => {
+                closeModal();
+                window.location.hash = '#/settings';
+              });
+            }
           }
         } else {
-          // No cache, show full error
+          // No cache, show full error with specific message
+          errorEl.innerHTML = `
+            <p class="text-error mb-3">${errorMessage}</p>
+            ${actionButton}
+          `;
           errorEl.classList.remove('hidden');
+
+          // Re-attach retry listener
+          const newRetryBtn = errorEl.querySelector('#retryBtn');
+          if (newRetryBtn) {
+            newRetryBtn.addEventListener('click', fetchExplanation);
+          }
+          // Attach Settings button listener
+          const settingsBtn = errorEl.querySelector('#goToSettingsBtn');
+          if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+              closeModal();
+              window.location.hash = '#/settings';
+            });
+          }
         }
       }
     };
