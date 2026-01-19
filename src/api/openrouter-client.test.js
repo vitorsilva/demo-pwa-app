@@ -172,13 +172,19 @@
         mockFetch
           .mockResolvedValue(emptyResponse); // All calls return empty
 
-        // Start the call (it will wait on retries)
-        const promise = callOpenRouter('sk-test-key', 'Test');
+        // Start the call and immediately attach error handler to prevent unhandled rejection
+        let caughtError = null;
+        const promise = callOpenRouter('sk-test-key', 'Test').catch(e => {
+          caughtError = e;
+        });
 
-        // Advance timers to complete all retries (1s + 2s + 4s delays)
-        await vi.advanceTimersByTimeAsync(10000);
+        // Run all timers and pending promises to completion
+        await vi.runAllTimersAsync();
+        await promise;
 
-        await expect(promise).rejects.toThrow('Empty response from OpenRouter');
+        // Verify the error was thrown
+        expect(caughtError).not.toBeNull();
+        expect(caughtError.message).toBe('Empty response from OpenRouter');
       });
 
       it('should use reasoning field when content is empty and reasoning is not chain-of-thought', async () => {
@@ -210,13 +216,19 @@
         };
         mockFetch.mockResolvedValue(chainOfThoughtResponse); // All calls return chain-of-thought
 
-        // Start the call (it will wait on retries)
-        const promise = callOpenRouter('sk-test-key', 'Test prompt');
+        // Start the call and immediately attach error handler to prevent unhandled rejection
+        let caughtError = null;
+        const promise = callOpenRouter('sk-test-key', 'Test prompt').catch(e => {
+          caughtError = e;
+        });
 
-        // Advance timers to complete all retries (1s + 2s + 4s delays)
-        await vi.advanceTimersByTimeAsync(10000);
+        // Run all timers and pending promises to completion
+        await vi.runAllTimersAsync();
+        await promise;
 
-        await expect(promise).rejects.toThrow('Empty response from OpenRouter');
+        // Verify the error was thrown
+        expect(caughtError).not.toBeNull();
+        expect(caughtError.message).toBe('Empty response from OpenRouter');
       });
 
       it('should prefer content over reasoning when both are present', async () => {
