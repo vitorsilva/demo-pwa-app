@@ -43,6 +43,50 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 
 **File:** `landing/index.html`
 
+#### Wireframe: Hero Section
+
+**BEFORE:**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                            🧠 SABERLOOP                                     │
+│                                                                             │
+│            AI-powered quizzes on any topic, in 5 languages,                 │
+│       with explanations that help you truly understand. Free to try,        │
+│                            works offline.                                   │
+│                                                                             │
+│                    ┌─────────────────────────┐                              │
+│                    │                         │                              │
+│                    │     [Demo Video]        │                              │
+│                    │                         │                              │
+│                    └─────────────────────────┘                              │
+│                                                                             │
+│                         [ Try It Free ]                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**AFTER:**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                            🧠 SABERLOOP                                     │
+│                                                                             │
+│            AI-powered quizzes on any topic, in 5 languages.                 │
+│     Learn solo or challenge friends in real-time Party Mode. ← NEW          │
+│                     Free to try, works offline.                             │
+│                                                                             │
+│                    ┌─────────────────────────┐                              │
+│                    │                         │                              │
+│                    │     [Demo Video]        │                              │
+│                    │                         │                              │
+│                    └─────────────────────────┘                              │
+│                                                                             │
+│                         [ Try It Free ]                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ### 2. Feature Cards (6 -> 7 Cards)
@@ -71,6 +115,87 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 
 **Recommendation:** Option A - Keep all 7 cards. Party Mode deserves feature card prominence.
 
+#### Wireframe: Feature Cards
+
+**BEFORE (6 cards, 3x2 grid):**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Why Saberloop?                                    │
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 🤖              │  │ 🌍              │  │ 📈              │              │
+│  │ AI-Powered      │  │ Learn in Your   │  │ Adaptive        │              │
+│  │ Learning        │  │ Language        │  │ Difficulty      │              │
+│  │                 │  │                 │  │                 │              │
+│  │ Questions from  │  │ 5 languages     │  │ Continue on     │              │
+│  │ Claude AI...    │  │ supported...    │  │ same topic...   │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 🎯              │  │ 📴              │  │ 🔒              │              │
+│  │ All Skill       │  │ Works           │  │ Your Data,      │              │
+│  │ Levels          │  │ Offline         │  │ Your Control    │              │
+│  │                 │  │                 │  │                 │              │
+│  │ From beginner   │  │ No internet     │  │ Privacy-first   │              │
+│  │ to expert...    │  │ required...     │  │ approach...     │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**AFTER Option A (7 cards, 4-3 grid) - RECOMMENDED:**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Why Saberloop?                                    │
+│                                                                             │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐             │
+│  │ 🤖         │  │ 🌍         │  │ 📈         │  │ 🎉 NEW     │             │
+│  │ AI-Powered │  │ Learn in   │  │ Adaptive   │  │ Party      │             │
+│  │ Learning   │  │ Your Lang  │  │ Difficulty │  │ Mode       │             │
+│  │            │  │            │  │            │  │            │             │
+│  │ Claude AI  │  │ 5 langs    │  │ Continue   │  │ Challenge  │             │
+│  │ questions  │  │ supported  │  │ on topic   │  │ friends!   │             │
+│  └────────────┘  └────────────┘  └────────────┘  └────────────┘             │
+│                                                                             │
+│       ┌────────────┐  ┌────────────┐  ┌────────────┐                        │
+│       │ 🎯         │  │ 📴         │  │ 🔒         │                        │
+│       │ All Skill  │  │ Works      │  │ Your Data  │                        │
+│       │ Levels     │  │ Offline    │  │ Your Ctrl  │                        │
+│       │            │  │            │  │            │                        │
+│       │ Beginner   │  │ No net     │  │ Privacy    │                        │
+│       │ to expert  │  │ required   │  │ first      │                        │
+│       └────────────┘  └────────────┘  └────────────┘                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**AFTER Option B (6 cards, Party Mode replaces one):**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Why Saberloop?                                    │
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 🤖              │  │ 🌍              │  │ 🎉 NEW          │              │
+│  │ AI-Powered      │  │ Learn in Your   │  │ Party           │              │
+│  │ Learning        │  │ Language        │  │ Mode            │              │
+│  │                 │  │                 │  │                 │              │
+│  │ Questions from  │  │ 5 languages     │  │ Challenge       │              │
+│  │ Claude AI...    │  │ supported...    │  │ friends live!   │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ 📈              │  │ 📴              │  │ 🔒              │              │
+│  │ Adaptive        │  │ Works           │  │ Your Data,      │              │
+│  │ Difficulty      │  │ Offline         │  │ Your Control    │              │
+│  │                 │  │                 │  │                 │              │
+│  │ Continue on     │  │ No internet     │  │ Privacy-first   │              │
+│  │ same topic...   │  │ required...     │  │ approach...     │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                             │
+│  Note: "All Skill Levels" merged with "Adaptive Difficulty"                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ### 3. Screenshots Section (5 -> 6 Screenshots)
@@ -90,6 +215,62 @@ Update both the landing page and Google Play Store listing to showcase Party Mod
 1. Copy from `docs/product-info/screenshots/party/06-party-quiz-gameplay.png`
 2. Process with `scripts/process-screenshots.cjs` using `landing` preset
 3. Save to `landing/images/`
+
+#### Wireframe: Screenshots Section
+
+**BEFORE (5 screenshots):**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          See It In Action                                   │
+│                                                                             │
+│    ┌───────┐    ┌───────┐    ┌───────┐    ┌───────┐    ┌───────┐           │
+│    │       │    │       │    │       │    │       │    │       │           │
+│    │ Quiz  │    │ Expl- │    │ Share │    │ Usage │    │ Sett- │           │
+│    │ in    │    │ anat- │    │ Resu- │    │ Cost  │    │ ings  │           │
+│    │ Action│    │ ion   │    │ lts   │    │       │    │       │           │
+│    │       │    │       │    │       │    │       │    │       │           │
+│    └───────┘    └───────┘    └───────┘    └───────┘    └───────┘           │
+│       1            2            3            4            5                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**AFTER (6 screenshots, Party Mode added):**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          See It In Action                                   │
+│                                                                             │
+│    ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐        │
+│    │       │  │       │  │       │  │       │  │       │  │ NEW   │        │
+│    │ Quiz  │  │ Expl- │  │ Share │  │ Usage │  │ Sett- │  │ Party │        │
+│    │ in    │  │ anat- │  │ Resu- │  │ Cost  │  │ ings  │  │ Mode  │        │
+│    │ Action│  │ ion   │  │ lts   │  │       │  │       │  │ Live! │        │
+│    │       │  │       │  │       │  │       │  │       │  │       │        │
+│    └───────┘  └───────┘  └───────┘  └───────┘  └───────┘  └───────┘        │
+│       1          2          3          4          5          6              │
+│                                                                             │
+│    ← ← ← ← ← ← ← ← [Carousel/Scroll] → → → → → → → →                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Alternative: Party Mode as First Screenshot (Higher visibility):**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          See It In Action                                   │
+│                                                                             │
+│    ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐        │
+│    │ NEW   │  │       │  │       │  │       │  │       │  │       │        │
+│    │ Party │  │ Quiz  │  │ Expl- │  │ Share │  │ Usage │  │ Sett- │        │
+│    │ Mode  │  │ in    │  │ anat- │  │ Resu- │  │ Cost  │  │ ings  │        │
+│    │ Live! │  │ Action│  │ ion   │  │ lts   │  │       │  │       │        │
+│    │       │  │       │  │       │  │       │  │       │  │       │        │
+│    └───────┘  └───────┘  └───────┘  └───────┘  └───────┘  └───────┘        │
+│       1          2          3          4          5          6              │
+│    ↑ Party Mode FIRST for maximum visibility                                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
