@@ -68,11 +68,23 @@ export default class TopicInputView extends BaseView {
     const topicInput = this.querySelector('#topicInput');
     const gradeLevelSelect = this.querySelector('#gradeLevelSelect');
 
-    // Check for prefilled topic from deep link
+    // Check for prefilled topic from deep link (takes priority)
     const prefilledTopic = state.get('prefilledTopic');
     if (prefilledTopic) {
       topicInput.value = prefilledTopic;
       state.set('prefilledTopic', null); // Clear after use
+    } else {
+      // Restore from currentTopic if returning from failed generation
+      const savedTopic = state.get('currentTopic');
+      if (savedTopic) {
+        topicInput.value = savedTopic;
+      }
+    }
+
+    // Restore grade level selection
+    const savedGradeLevel = state.get('currentGradeLevel');
+    if (savedGradeLevel) {
+      gradeLevelSelect.value = savedGradeLevel;
     }
 
     this.addEventListener(generateBtn, 'click', async () => {
