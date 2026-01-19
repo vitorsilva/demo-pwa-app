@@ -230,7 +230,10 @@
     "couldntLoad": "Kon gepersonaliseerde feedback niet laden",
     "failed": "Uitleg genereren mislukt.",
     "tryAgain": "Probeer opnieuw",
-    "gotIt": "Begrepen!"
+    "gotIt": "Begrepen!",
+    "rateLimitError": "Daglimiet bereikt. De gratis tier staat 50 verzoeken/dag toe. Probeer morgen opnieuw.",
+    "invalidKeyError": "Je OpenRouter-verbinding is verlopen.",
+    "goToSettings": "Opnieuw verbinden in Instellingen"
   },
   "share": {
     "button": "Resultaten Delen",

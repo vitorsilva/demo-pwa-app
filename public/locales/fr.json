@@ -230,7 +230,10 @@
     "couldntLoad": "Impossible de charger le feedback personnalisé",
     "failed": "Échec de la génération de l'explication.",
     "tryAgain": "Réessayer",
-    "gotIt": "Compris !"
+    "gotIt": "Compris !",
+    "rateLimitError": "Limite quotidienne atteinte. Le niveau gratuit permet 50 requêtes/jour. Réessaie demain.",
+    "invalidKeyError": "Ta connexion OpenRouter a expiré.",
+    "goToSettings": "Reconnecter dans Paramètres"
   },
   "share": {
     "button": "Partager les Résultats",

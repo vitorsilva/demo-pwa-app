@@ -230,7 +230,10 @@
     "couldntLoad": "No se pudo cargar la retroalimentación personalizada",
     "failed": "Error al generar explicación.",
     "tryAgain": "Intentar de nuevo",
-    "gotIt": "¡Entendido!"
+    "gotIt": "¡Entendido!",
+    "rateLimitError": "Límite diario alcanzado. El nivel gratuito permite 50 solicitudes/día. Inténtalo mañana.",
+    "invalidKeyError": "Tu conexión con OpenRouter ha expirado.",
+    "goToSettings": "Reconectar en Ajustes"
   },
   "share": {
     "button": "Compartir Resultados",

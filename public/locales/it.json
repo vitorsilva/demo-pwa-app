@@ -230,7 +230,10 @@
     "couldntLoad": "Impossibile caricare il feedback personalizzato",
     "failed": "Impossibile generare la spiegazione.",
     "tryAgain": "Riprova",
-    "gotIt": "Capito!"
+    "gotIt": "Capito!",
+    "rateLimitError": "Limite giornaliero raggiunto. Il piano gratuito consente 50 richieste/giorno. Riprova domani.",
+    "invalidKeyError": "La tua connessione OpenRouter è scaduta.",
+    "goToSettings": "Riconnetti nelle Impostazioni"
   },
   "share": {
     "button": "Condividi Risultati",

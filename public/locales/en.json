@@ -230,7 +230,10 @@
     "couldntLoad": "Couldn't load personalized feedback",
     "failed": "Failed to generate explanation.",
     "tryAgain": "Try again",
-    "gotIt": "Got it!"
+    "gotIt": "Got it!",
+    "rateLimitError": "Daily limit reached. Free tier allows 50 requests/day. Try again tomorrow.",
+    "invalidKeyError": "Your OpenRouter connection expired.",
+    "goToSettings": "Reconnect in Settings"
   },
   "share": {
     "button": "Share Results",

@@ -30,7 +30,8 @@
     logger.debug('Calling OpenRouter', { model, maxTokens, temperature });
 
     // Wrap fetch with retry logic for transient failures
-    const response = await withRetry(
+    // Empty response check is INSIDE retry so transient empty responses are automatically retried
+    const result = await withRetry(
       async () => {
         const res = await fetch(OPENROUTER_API_URL, {
           method: 'POST',
@@ -57,7 +58,36 @@
           throw error;
         }
 
-        return res;
+        logger.debug('OpenRouter response', { status: res.status });
+
+        const data = await res.json();
+
+        // Get the actual response content
+        // Note: reasoning field is chain-of-thought, only use as fallback if it looks like an actual answer
+        const message = data.choices?.[0]?.message;
+        let text = message?.content;
+
+        // For reasoning models that hit token limit, reasoning may contain partial answer
+        // Only use reasoning if content is empty AND reasoning doesn't look like chain-of-thought
+        if (!text && message?.reasoning) {
+          const reasoning = message.reasoning.trim();
+          // Chain-of-thought typically starts with "Okay", "Let me", "First", etc.
+          const isChainOfThought = /^(okay|let me|let's|first|i need|the user|alright|so,)/i.test(reasoning);
+          if (!isChainOfThought) {
+            text = reasoning;
+          }
+        }
+
+        // Empty response - treat as retryable error (transient issue)
+        if (!text) {
+          const error = /** @type {ApiError} */ (new Error('Empty response from OpenRouter'));
+          error.status = 503; // Mark as server error so it's retried
+          throw error;
+        }
+
+        logger.debug('OpenRouter response received', { length: text.length });
+
+        return { text, data };
       },
       {
         maxRetries: 3,
@@ -85,63 +115,48 @@
       throw error;
     });
 
-    logger.debug('OpenRouter response', { status: response.status });
-
-    const data = await response.json();
-
-    // Get the actual response content
-    // Note: reasoning field is chain-of-thought, only use as fallback if it looks like an actual answer
-    const message = data.choices?.[0]?.message;
-    let text = message?.content;
-
-    // For reasoning models that hit token limit, reasoning may contain partial answer
-    // Only use reasoning if content is empty AND reasoning doesn't look like chain-of-thought
-    if (!text && message?.reasoning) {
-      const reasoning = message.reasoning.trim();
-      // Chain-of-thought typically starts with "Okay", "Let me", "First", etc.
-      const isChainOfThought = /^(okay|let me|let's|first|i need|the user|alright|so,)/i.test(reasoning);
-      if (!isChainOfThought) {
-        text = reasoning;
-      }
-    }
-
-    if (!text) {
-      throw new Error('Empty response from OpenRouter');
-    }
-
-    logger.debug('OpenRouter response received', { length: text.length });
-
     return {
-      text,
-      model: data.model,
+      text: result.text,
+      model: result.data.model,
       usage: {
-        promptTokens: data.usage?.prompt_tokens || 0,
-        completionTokens: data.usage?.completion_tokens || 0,
-        totalTokens: data.usage?.total_tokens || 0,
-        costUsd: data.usage?.cost_usd || 0
+        promptTokens: result.data.usage?.prompt_tokens || 0,
+        completionTokens: result.data.usage?.completion_tokens || 0,
+        totalTokens: result.data.usage?.total_tokens || 0,
+        costUsd: result.data.usage?.cost_usd || 0
       }
     };
   }
 
   /**
-   * Handle API errors with helpful messages
+   * @typedef {Error & {code?: string, status?: number}} CodedError
+   */
+
+  /**
+   * Handle API errors with helpful messages and error codes
+   * Error codes enable UI to show specific error messages and actions
    */
   async function handleApiError(response) {
-    const error = await response.json().catch(() => ({}));
+    const errorBody = await response.json().catch(() => ({}));
 
     if (response.status === 401) {
-      throw new Error('Invalid API key. Please reconnect with OpenRouter.');
+      const error = /** @type {CodedError} */ (new Error('Invalid API key. Please reconnect with OpenRouter.'));
+      error.code = 'INVALID_API_KEY';
+      throw error;
     }
 
     if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Free tier allows 50 requests/day.');     
+      const error = /** @type {CodedError} */ (new Error('Rate limit exceeded. Free tier allows 50 requests/day.'));
+      error.code = 'RATE_LIMIT';
+      throw error;
     }
 
     if (response.status === 402) {
-      throw new Error('Insufficient credits. Add credits at openrouter.ai');
+      const error = /** @type {CodedError} */ (new Error('Insufficient credits. Add credits at openrouter.ai'));
+      error.code = 'INSUFFICIENT_CREDITS';
+      throw error;
     }
 
-    throw new Error(error.error?.message || `API error: ${response.status}`);        
+    throw new Error(errorBody.error?.message || `API error: ${response.status}`);
   }
 
   /**

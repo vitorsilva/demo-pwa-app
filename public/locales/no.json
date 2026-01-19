@@ -230,7 +230,10 @@
     "couldntLoad": "Kunne ikke laste personlig tilbakemelding",
     "failed": "Kunne ikke generere forklaring.",
     "tryAgain": "Prøv igjen",
-    "gotIt": "Forstått!"
+    "gotIt": "Forstått!",
+    "rateLimitError": "Daglig grense nådd. Gratis nivå tillater 50 forespørsler/dag. Prøv igjen i morgen.",
+    "invalidKeyError": "Din OpenRouter-tilkobling har utløpt.",
+    "goToSettings": "Koble til på nytt i Innstillinger"
   },
   "share": {
     "button": "Del resultater",

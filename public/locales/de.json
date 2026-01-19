@@ -230,7 +230,10 @@
     "couldntLoad": "Personalisiertes Feedback konnte nicht geladen werden",
     "failed": "Erklärung konnte nicht generiert werden.",
     "tryAgain": "Erneut versuchen",
-    "gotIt": "Verstanden!"
+    "gotIt": "Verstanden!",
+    "rateLimitError": "Tageslimit erreicht. Das kostenlose Niveau erlaubt 50 Anfragen/Tag. Versuche es morgen erneut.",
+    "invalidKeyError": "Deine OpenRouter-Verbindung ist abgelaufen.",
+    "goToSettings": "In Einstellungen neu verbinden"
   },
   "share": {
     "button": "Ergebnisse teilen",

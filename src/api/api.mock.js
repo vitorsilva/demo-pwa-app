@@ -124,6 +124,18 @@ import { logger } from '../utils/logger.js';
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
+    // Support error simulation for E2E testing
+    // Set window.__MOCK_EXPLANATION_ERROR__ = { message: '...', code: '...' } to simulate errors
+    if (typeof window !== 'undefined' && /** @type {*} */ (window).__MOCK_EXPLANATION_ERROR__) {
+      const errorConfig = /** @type {*} */ (window).__MOCK_EXPLANATION_ERROR__;
+      const error = /** @type {Error & {code?: string}} */ (new Error(errorConfig.message || 'Mock error'));
+      if (errorConfig.code) {
+        error.code = errorConfig.code;
+      }
+      logger.debug('Mock API simulating explanation error', { code: errorConfig.code });
+      throw error;
+    }
+
     logger.debug('Mock API generating structured explanation');
 
     const result = {
@@ -150,6 +162,17 @@ import { logger } from '../utils/logger.js';
   'middle school', _apiKey, _language = 'en') {
     // Simulate network delay (shorter since it's just partial generation)
     await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Support error simulation for E2E testing (uses same flag as generateExplanation)
+    if (typeof window !== 'undefined' && /** @type {*} */ (window).__MOCK_EXPLANATION_ERROR__) {
+      const errorConfig = /** @type {*} */ (window).__MOCK_EXPLANATION_ERROR__;
+      const error = /** @type {Error & {code?: string}} */ (new Error(errorConfig.message || 'Mock error'));
+      if (errorConfig.code) {
+        error.code = errorConfig.code;
+      }
+      logger.debug('Mock API simulating wrong answer explanation error', { code: errorConfig.code });
+      throw error;
+    }
 
     logger.debug('Mock API generating wrong answer explanation only');
 
