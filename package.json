@@ -50,9 +50,9 @@
     "docs:open": "jsdoc -c jsdoc.config.json && start docs/api/index.html",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "test:mutation": "stryker run",
-    "test:mutation:core": "stryker run --configFile stryker.core.json",
-    "test:mutation:services": "stryker run --configFile stryker.services.json",
-    "test:mutation:utils": "stryker run --configFile stryker.utils.json",
+    "test:mutation:core": "stryker run stryker.core.json",
+    "test:mutation:services": "stryker run stryker.services.json",
+    "test:mutation:utils": "stryker run stryker.utils.json",
     "screenshots:process": "node scripts/process-screenshots.cjs",
     "screenshots:process:no-frame": "node scripts/process-screenshots.cjs --no-frame"
   },
