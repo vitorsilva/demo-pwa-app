@@ -18,6 +18,12 @@ import { logger } from '../utils/logger.js';
     const delay = (typeof window !== 'undefined' && /** @type {*} */ (window).MOCK_API_DELAY_MS) || 1000;
     await new Promise(resolve => setTimeout(resolve, delay));
 
+    // Set window.__MOCK_GENERATION_ERROR__ = { message: '...' } to simulate errors
+    if (typeof window !== 'undefined' && /** @type {*} */ (window).__MOCK_GENERATION_ERROR__) {
+      const errorConfig = /** @type {*} */ (window).__MOCK_GENERATION_ERROR__;
+      throw new Error(errorConfig.message || 'Mock generation error');
+    }
+
     const { previousQuestions = [], questionCount = 5 } = options;
     logger.debug('Mock API generating questions', { topic, gradeLevel, questionCount, previousQuestionsCount: previousQuestions.length });
 
