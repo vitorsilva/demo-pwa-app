@@ -5,23 +5,6 @@
   "testRunner": "vitest",
   "coverageAnalysis": "perTest",
   "mutate": [
-    "src/core/db.js",
-    "src/core/features.js",
-    "src/core/i18n.js",
-    "src/core/settings.js",
-    "src/core/state.js",
-    "src/services/cost-service.js",
-    "src/services/data-service.js",
-    "src/services/model-service.js",
-    "src/services/p2p-service.js",
-    "src/services/party-connection-manager.js",
-    "src/services/party-connection-store.js",
-    "src/services/party-session.js",
-    "src/services/quiz-import.js",
-    "src/services/quiz-serializer.js",
-    "src/services/quiz-share.js",
-    "src/services/signaling-client.js",
-    "src/services/theme-manager.js",
     "src/utils/adManager.js",
     "src/utils/errorHandler.js",
     "src/utils/formatters.js",
@@ -42,5 +25,8 @@
     "break": null
   },
   "timeoutMS": 10000,
-  "concurrency": 4
+  "concurrency": 4,
+  "htmlReporter": {
+    "fileName": "reports/mutation/mutation-utils.html"
+  }
 }

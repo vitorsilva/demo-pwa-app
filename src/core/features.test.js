@@ -34,6 +34,18 @@
 
       describe('localStorage overrides', () => {
 
+        it('should return true when localStorage override is ENABLED', () => {
+          // Temporarily set SHOW_ADS to DISABLED to verify override works
+          const originalPhase = FEATURE_FLAGS.SHOW_ADS.phase;
+          FEATURE_FLAGS.SHOW_ADS.phase = 'DISABLED';
+
+          localStorage.setItem('__test_feature_SHOW_ADS', 'ENABLED');
+          expect(isFeatureEnabled('SHOW_ADS')).toBe(true);
+
+          // Restore
+          FEATURE_FLAGS.SHOW_ADS.phase = originalPhase;
+        });
+
         it('should return false when localStorage override is DISABLED', () => {
           localStorage.setItem('__test_feature_SHOW_ADS', 'DISABLED');
           expect(isFeatureEnabled('SHOW_ADS')).toBe(false);
@@ -83,6 +95,53 @@
         });
       });
 
+    });
+
+    describe('phase behaviors', () => {
+      let originalPhase;
+
+      beforeEach(() => {
+        originalPhase = FEATURE_FLAGS.SHOW_ADS.phase;
+      });
+
+      afterEach(() => {
+        FEATURE_FLAGS.SHOW_ADS.phase = originalPhase;
+      });
+
+      it('should return false when phase is DISABLED', () => {
+        FEATURE_FLAGS.SHOW_ADS.phase = 'DISABLED';
+
+        expect(isFeatureEnabled('SHOW_ADS', 'settings')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS', 'welcome')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS', 'home')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS')).toBe(false);
+      });
+
+      it('should return true only for settings context when phase is SETTINGS_ONLY', () => {
+        FEATURE_FLAGS.SHOW_ADS.phase = 'SETTINGS_ONLY';
+
+        expect(isFeatureEnabled('SHOW_ADS', 'settings')).toBe(true);
+        expect(isFeatureEnabled('SHOW_ADS', 'welcome')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS', 'home')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS')).toBe(false); // default context
+      });
+
+      it('should return true for all contexts when phase is ENABLED', () => {
+        FEATURE_FLAGS.SHOW_ADS.phase = 'ENABLED';
+
+        expect(isFeatureEnabled('SHOW_ADS', 'settings')).toBe(true);
+        expect(isFeatureEnabled('SHOW_ADS', 'welcome')).toBe(true);
+        expect(isFeatureEnabled('SHOW_ADS', 'home')).toBe(true);
+        expect(isFeatureEnabled('SHOW_ADS')).toBe(true);
+      });
+
+      it('should return false for unknown phase (default case)', () => {
+        FEATURE_FLAGS.SHOW_ADS.phase = 'UNKNOWN_PHASE';
+
+        expect(isFeatureEnabled('SHOW_ADS', 'settings')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS', 'welcome')).toBe(false);
+        expect(isFeatureEnabled('SHOW_ADS')).toBe(false);
+      });
     });
 
   });

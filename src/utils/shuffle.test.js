@@ -2,7 +2,7 @@
  * Unit tests for shuffle utility
  */
 import { describe, it, expect, vi } from 'vitest';
-import { shuffleQuestionOptions, shuffleAllQuestions, stripPrefix, addPrefix } from './shuffle.js';
+import { shuffleQuestionOptions, shuffleAllQuestions, shuffleOptions, stripPrefix, addPrefix } from './shuffle.js';
 
 describe('shuffleQuestionOptions', () => {
   const sampleQuestion = {
@@ -210,6 +210,123 @@ describe('shuffleAllQuestions', () => {
   it('should handle non-array input', () => {
     const notArray = { foo: 'bar' };
     expect(shuffleAllQuestions(notArray)).toBe(notArray);
+  });
+});
+
+describe('shuffleOptions', () => {
+  const sampleOptions = ['A) Paris', 'B) London', 'C) Berlin', 'D) Madrid'];
+
+  it('should return shuffled options with correct structure', () => {
+    const result = shuffleOptions(sampleOptions, 0);
+
+    expect(result).toHaveProperty('shuffledOptions');
+    expect(result).toHaveProperty('shuffleMap');
+    expect(result).toHaveProperty('newCorrectIndex');
+  });
+
+  it('should preserve all option content (just reordered)', () => {
+    const result = shuffleOptions(sampleOptions, 0);
+
+    expect(result.shuffledOptions).toHaveLength(4);
+    // Extract answer text (without labels) and compare
+    const originalContent = sampleOptions.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
+    const shuffledContent = result.shuffledOptions.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
+    expect(shuffledContent).toEqual(originalContent);
+  });
+
+  it('should have sequential A, B, C, D labels after shuffle', () => {
+    for (let i = 0; i < 10; i++) {
+      const result = shuffleOptions(sampleOptions, 0);
+
+      expect(result.shuffledOptions[0]).toMatch(/^A\)/);
+      expect(result.shuffledOptions[1]).toMatch(/^B\)/);
+      expect(result.shuffledOptions[2]).toMatch(/^C\)/);
+      expect(result.shuffledOptions[3]).toMatch(/^D\)/);
+    }
+  });
+
+  it('should track correct answer through shuffle', () => {
+    // Paris (index 0) is correct
+    const result = shuffleOptions(sampleOptions, 0);
+
+    // The new correct index should point to Paris
+    expect(result.shuffledOptions[result.newCorrectIndex]).toContain('Paris');
+  });
+
+  it('should provide valid shuffleMap', () => {
+    const result = shuffleOptions(sampleOptions, 1); // London is correct
+
+    // shuffleMap[newIndex] = originalIndex
+    expect(result.shuffleMap).toHaveLength(4);
+
+    // Verify shuffleMap maps correctly
+    result.shuffleMap.forEach((originalIndex, newIndex) => {
+      const originalContent = sampleOptions[originalIndex].replace(/^[A-D]\)\s*/, '');
+      const shuffledContent = result.shuffledOptions[newIndex].replace(/^[A-D]\)\s*/, '');
+      expect(shuffledContent).toBe(originalContent);
+    });
+  });
+
+  it('should handle empty options array', () => {
+    const result = shuffleOptions([], 0);
+
+    expect(result.shuffledOptions).toEqual([]);
+    expect(result.shuffleMap).toEqual([]);
+    expect(result.newCorrectIndex).toBe(0);
+  });
+
+  it('should handle null options', () => {
+    const result = shuffleOptions(null, 0);
+
+    expect(result.shuffledOptions).toEqual([]);
+    expect(result.shuffleMap).toEqual([]);
+    expect(result.newCorrectIndex).toBe(0);
+  });
+
+  it('should handle undefined options', () => {
+    const result = shuffleOptions(undefined, 0);
+
+    expect(result.shuffledOptions).toEqual([]);
+    expect(result.shuffleMap).toEqual([]);
+    expect(result.newCorrectIndex).toBe(0);
+  });
+
+  it('should handle options without prefixes', () => {
+    const options = ['Paris', 'London', 'Berlin', 'Madrid'];
+    const result = shuffleOptions(options, 2); // Berlin is correct
+
+    expect(result.shuffledOptions).toHaveLength(4);
+    expect(result.shuffledOptions[result.newCorrectIndex]).toContain('Berlin');
+  });
+
+  it('should handle two options', () => {
+    const options = ['True', 'False'];
+    const result = shuffleOptions(options, 0);
+
+    expect(result.shuffledOptions).toHaveLength(2);
+    expect(result.shuffledOptions[0]).toMatch(/^A\)/);
+    expect(result.shuffledOptions[1]).toMatch(/^B\)/);
+    expect(result.shuffledOptions[result.newCorrectIndex]).toContain('True');
+  });
+
+  it('should produce different orderings over multiple calls (statistical)', () => {
+    const orderings = new Set();
+
+    for (let i = 0; i < 20; i++) {
+      const result = shuffleOptions(sampleOptions, 0);
+      orderings.add(JSON.stringify(result.shuffledOptions));
+    }
+
+    // With 4 options, there are 24 possible orderings
+    // Running 20 times should produce at least 2 different orderings
+    expect(orderings.size).toBeGreaterThan(1);
+  });
+
+  it('should correctly track newCorrectIndex for last option', () => {
+    const options = ['A) Wrong1', 'B) Wrong2', 'C) Wrong3', 'D) Correct'];
+    const result = shuffleOptions(options, 3); // Last option is correct
+
+    expect(result.shuffledOptions[result.newCorrectIndex]).toContain('Correct');
   });
 });
 
