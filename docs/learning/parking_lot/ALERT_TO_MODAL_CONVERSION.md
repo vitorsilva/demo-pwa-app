@@ -4,38 +4,39 @@
 
 Replace all native browser `alert()` and `confirm()` dialogs with custom modal components that match the app's design system, providing a consistent and polished user experience.
 
-**Status:** Parked
+**Status:** Next Up
 **Priority:** Medium (UX Polish)
-**Estimated Effort:** Medium (~4-6 hours)
-**Reason Parked:** Not blocking any features, UX enhancement
+**Estimated Effort:** ~2-3 hours (simplified approach)
+**Last Verified:** January 20, 2026
 
 ---
 
 ## Current State
 
-### Native Alerts Found (9 instances)
+### Native Alerts Found (10 instances) - Verified Jan 20, 2026
 
-| File | Line | Message Key | Context |
-|------|------|-------------|---------|
-| `TopicsView.js` | 224 | `errors.cannotReplay` | Cannot replay quiz error |
-| `TopicInputView.js` | 83 | `errors.enterTopic` | Empty topic validation |
-| `PartyQuizView.js` | 96 | `party.roomNotFound` | Party room not found |
-| `PartyLobbyView.js` | 85 | `party.roomNotFound` | Party room not found |
-| `PartyLobbyView.js` | 249 | `party.hostLeft` | Host disconnected |
-| `PartyLobbyView.js` | 328 | `party.hostLeft` | Host left room |
-| `LoadingView.js` | 240 | `errors.failedToGenerate` | Quiz generation error |
-| `CreatePartyView.js` | 380 | `errors.generic` | Party creation error |
-| `CreatePartyView.js` | 518 | `errors.generic` | Party creation error |
+| File | Line | Message Key | Context | Icon |
+|------|------|-------------|---------|------|
+| `CreatePartyView.js` | 380 | `errors.generic` | Party creation error | error |
+| `CreatePartyView.js` | 518 | `errors.generic` | Party creation error | error |
+| `HomeView.js` | 199 | `errors.cannotReplay` | Cannot replay quiz error | error |
+| `LoadingView.js` | 240 | `error.message \|\| errors.failedToGenerate` | Quiz generation error | error |
+| `PartyLobbyView.js` | 85 | `party.roomNotFound` | Party room not found | error |
+| `PartyLobbyView.js` | 249 | `party.hostLeft` | Host disconnected | warning |
+| `PartyLobbyView.js` | 328 | `party.hostLeft` | Host left room | warning |
+| `PartyQuizView.js` | 96 | `party.roomNotFound` | Party room not found | error |
+| `TopicInputView.js` | 95 | `errors.enterTopic` | Empty topic validation | warning |
+| `TopicsView.js` | 224 | `errors.cannotReplay` | Cannot replay quiz error | error |
 
-### Native Confirms Found (5 instances)
+### Native Confirms Found (5 instances) - Verified Jan 20, 2026
 
-| File | Line | Message Key | Context |
-|------|------|-------------|---------|
-| `SettingsView.js` | 450 | `settings.confirmDisconnect` | Disconnect OpenRouter |
-| `QuizView.js` | 136 | `quiz.confirmLeave` | Back button during quiz |
-| `QuizView.js` | 176 | `quiz.confirmLeave` | Home button during quiz |
-| `LoadingView.js` | 249 | `loading.confirmCancel` | Cancel quiz generation |
-| `main.js` | 225 | (hardcoded) | SW update notification |
+| File | Line | Message Key | Context | Destructive |
+|------|------|-------------|---------|-------------|
+| `main.js` | 225 | (hardcoded) | SW update notification | No |
+| `LoadingView.js` | 249 | `loading.confirmCancel` | Cancel quiz generation | Yes |
+| `QuizView.js` | 136 | `quiz.confirmLeave` | Back button during quiz | Yes |
+| `QuizView.js` | 176 | `quiz.confirmLeave` | Home button during quiz | Yes |
+| `SettingsView.js` | 450 | `settings.confirmDisconnect` | Disconnect OpenRouter | Yes |
 
 ### Existing Modal Components (6)
 
@@ -393,17 +394,18 @@ Ensure these keys exist and are properly translated:
 
 ### Modified Files
 1. `src/core/i18n.js` - Add new translation keys
-2. `src/views/TopicsView.js` - Replace 1 alert
-3. `src/views/TopicInputView.js` - Replace 1 alert
-4. `src/views/PartyQuizView.js` - Replace 1 alert
+2. `src/views/CreatePartyView.js` - Replace 2 alerts
+3. `src/views/HomeView.js` - Replace 1 alert
+4. `src/views/LoadingView.js` - Replace 1 alert + 1 confirm
 5. `src/views/PartyLobbyView.js` - Replace 3 alerts
-6. `src/views/LoadingView.js` - Replace 1 alert + 1 confirm
-7. `src/views/CreatePartyView.js` - Replace 2 alerts
-8. `src/views/SettingsView.js` - Replace 1 confirm
-9. `src/views/QuizView.js` - Replace 2 confirms
-10. `src/main.js` - Replace 1 confirm (SW update)
+6. `src/views/PartyQuizView.js` - Replace 1 alert
+7. `src/views/TopicInputView.js` - Replace 1 alert
+8. `src/views/TopicsView.js` - Replace 1 alert
+9. `src/views/SettingsView.js` - Replace 1 confirm
+10. `src/views/QuizView.js` - Replace 2 confirms
+11. `src/main.js` - Replace 1 confirm (SW update)
 
-**Total:** 7 new files + 10 modified files
+**Total:** 7 new files + 11 modified files (15 replacements)
 
 ---
 
@@ -479,5 +481,6 @@ If issues arise:
 
 ---
 
-**Last Updated:** 2026-01-19
+**Last Updated:** 2026-01-20
 **Author:** Claude Code Audit
+**Next Session:** Implement simplified approach (skip Maestro tests, reuse DeleteQuizModal pattern)
