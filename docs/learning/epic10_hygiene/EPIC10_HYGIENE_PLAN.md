@@ -22,7 +22,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Status | Document |
 |------|--------|----------|
-| (none currently) | - | - |
+| ESLint Code Quality Cleanup | Not Started | [PHASE4_ESLINT_CLEANUP.md](./PHASE4_ESLINT_CLEANUP.md) |
 
 ## Completed Tasks
 
@@ -37,7 +37,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 | Task | Priority | Notes |
 |------|----------|-------|
 | Feature flag lifecycle process | Medium | Document when to remove flags |
-| Dead code detection | Low | Tooling to find unused exports |
+| ESLint complexity warnings | Low | Address ~86 warnings gradually when touching files |
 
 ### Future Flag Cleanup (When Ready)
 
@@ -214,4 +214,4 @@ A flag should be removed when ALL of these are true:
 
 ---
 
-**Last Updated:** 2026-01-15
+**Last Updated:** 2026-01-20
