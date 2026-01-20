@@ -112,7 +112,7 @@
       this.attachPreviewListeners();
     }
 
-    showError(errorMessage) {
+    showError(_errorMessage) {
       this.setHTML(`
         <div class="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
           <!-- Header -->

@@ -11,7 +11,6 @@ import {
   copyShareUrl,
   nativeShare,
   isNativeShareSupported,
-  canShareQuiz,
 } from '../services/quiz-share.js';
 import QRCode from 'qrcode';
 
@@ -54,9 +53,6 @@ export function showShareQuizModal(quiz, creatorName = null) {
       questionCount: quiz.questions.length
     });
 
-    // Check if quiz can be shared
-    const shareCheck = canShareQuiz(quiz);
-
     // Generate share URL
     const shareResult = generateShareUrl(quiz, creatorName);
 
@@ -73,7 +69,7 @@ export function showShareQuizModal(quiz, creatorName = null) {
 
     if (!shareResult.success) {
       // Show error state
-      backdrop.innerHTML = createErrorContent(quiz, shareCheck);
+      backdrop.innerHTML = createErrorContent(quiz);
     } else {
       // Show share options
       backdrop.innerHTML = createShareContent(quiz, shareResult.url, qrCodeDataUrl);
@@ -269,7 +265,7 @@ function createShareContent(quiz, url, qrCodeDataUrl) {
 /**
  * Create error content when quiz is too large
  */
-function createErrorContent(quiz, shareCheck) {
+function createErrorContent(quiz) {
   return `
     <div class="bg-card-light dark:bg-card-dark rounded-t-3xl w-full max-w-lg max-h-[85vh] overflow-y-auto transform transition-transform duration-300 translate-y-full" id="shareQuizSheet">
       <!-- Drag Handle -->

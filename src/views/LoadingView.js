@@ -158,7 +158,6 @@ export default class LoadingView extends BaseView {
   }
 
   startCountdownTimer() {
-    const config = getConfig();
     this.elapsedSeconds = 0;
     this.extendedMessagesAdded = false;
 

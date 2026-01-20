@@ -7,14 +7,6 @@
    * - ENABLED: Available everywhere
    */
 
-  /**
-   * Get current deployment environment
-   * @returns {'production' | 'staging' | 'development'}
-   */
-  function getEnvironment() {
-    return import.meta.env.VITE_DEPLOY_TARGET || 'production';
-  }
-
   export const FEATURE_FLAGS = {
     SHOW_ADS: {
       phase: 'ENABLED',  // Show AdSense ads during loading screens

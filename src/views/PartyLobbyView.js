@@ -322,9 +322,9 @@ export default class PartyLobbyView extends BaseView {
 
   /**
    * Called when host starts the quiz.
-   * @param {Object} quizData - Quiz data from host
+   * @param {Object} _quizData - Quiz data from host (unused, kept for callback signature)
    */
-  onQuizStart(quizData) {
+  onQuizStart(_quizData) {
     log.info('Quiz started', { roomCode: this.roomCode });
     this.navigateTo(`/party/quiz/${this.roomCode}`);
   }

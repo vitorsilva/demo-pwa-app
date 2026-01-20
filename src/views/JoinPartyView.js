@@ -11,10 +11,7 @@ import { createRoomCodeInput, isValidRoomCode } from '../components/RoomCodeInpu
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { joinRoom, generateParticipantId } from '../services/party-api.js';
-import {
-  PartyConnectionManager,
-  CONNECTION_MODES,
-} from '../services/party-connection-manager.js';
+import { PartyConnectionManager } from '../services/party-connection-manager.js';
 import { setConnection } from '../services/party-connection-store.js';
 
 const log = logger.child({ module: 'JoinPartyView' });

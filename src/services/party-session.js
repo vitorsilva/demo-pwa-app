@@ -602,8 +602,6 @@ export class PartySession {
    * @private
    */
   _broadcastParticipants() {
-    const participants = Array.from(this.participants.values());
-
     // Send updated session info to all peers
     for (const [peerId] of this.p2p.peers || new Map()) {
       this._sendSessionInfo(peerId);

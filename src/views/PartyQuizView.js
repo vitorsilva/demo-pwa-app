@@ -946,9 +946,9 @@ export default class PartyQuizView extends BaseView {
    * Handle quiz end.
    *
    * @private
-   * @param {Array} standings - Final standings
+   * @param {Array} _standings - Final standings (unused, kept for callback signature)
    */
-  _onQuizEnd(standings) {
+  _onQuizEnd(_standings) {
     log.info('Quiz ended, navigating to results');
 
     // Stop timer and polling

@@ -23,15 +23,6 @@
     difficulty: 'd',
   };
 
-  // Reverse mappings for deserialization
-  const QUIZ_KEY_REVERSE = Object.fromEntries(
-    Object.entries(QUIZ_KEY_MAP).map(([k, v]) => [v, k])
-  );
-
-  const QUESTION_KEY_REVERSE = Object.fromEntries(
-    Object.entries(QUESTION_KEY_MAP).map(([k, v]) => [v, k])
-  );
-
   // Maximum URL length for safe sharing
   const MAX_URL_LENGTH = 2000;
 

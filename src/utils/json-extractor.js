@@ -53,7 +53,7 @@ export function extractJSON(text) {
   // Step 4: Try direct parse first (most common case)
   try {
     return JSON.parse(cleaned);
-  } catch (directParseError) {
+  } catch {
     // Continue to fallbacks
   }
 
@@ -63,7 +63,7 @@ export function extractJSON(text) {
     const jsonFromBlock = cleanJSON(codeBlockMatch[1].trim());
     try {
       return JSON.parse(jsonFromBlock);
-    } catch (codeBlockError) {
+    } catch {
       // Continue to other fallbacks
     }
   }
@@ -75,7 +75,7 @@ export function extractJSON(text) {
     const cleanedObject = cleanJSON(objectMatch[0]);
     try {
       return JSON.parse(cleanedObject);
-    } catch (objectError) {
+    } catch {
       // Continue to array fallback
     }
   }
@@ -87,7 +87,7 @@ export function extractJSON(text) {
     const cleanedArray = cleanJSON(arrayMatch[0]);
     try {
       return JSON.parse(cleanedArray);
-    } catch (arrayError) {
+    } catch {
       // All fallbacks failed
     }
   }

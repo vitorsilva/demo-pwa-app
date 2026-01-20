@@ -1,6 +1,6 @@
   import BaseView from './BaseView.js';
   import { getSettings, saveSetting } from '../core/settings.js';
-  import { APP_VERSION, BUILD_DATE } from '../version.js';
+  import { APP_VERSION } from '../version.js';
   import { isConnected, disconnect, getApiKey, getCreditsBalance } from '../services/auth-service.js';
   import { t, changeLanguage, getCurrentLanguage, SUPPORTED_LANGUAGES } from '../core/i18n.js';
   import { getSelectedModel, getModelDisplayName, getAvailableModels, saveSelectedModel } from '../services/model-service.js';
@@ -297,7 +297,7 @@
         if (settingsEl) settingsEl.textContent = breakdown.settings;
         if (quizzesEl) quizzesEl.textContent = breakdown.quizzes;
         if (totalEl) totalEl.textContent = breakdown.total;
-      } catch (error) {
+      } catch {
         // On error, show "--" instead of "..."
         const settingsEl = this.querySelector('[data-testid="storage-settings"]');
         const quizzesEl = this.querySelector('[data-testid="storage-quizzes"]');
@@ -555,7 +555,7 @@
           const apiKey = await getApiKey();
           const models = await getAvailableModels(apiKey);
           this.renderModelSelector(models);
-        } catch (error) {
+        } catch {
           container.innerHTML = `
             <div class="text-red-500 text-sm py-2">
               ${t('settings.errorLoadingModels')}
