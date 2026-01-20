@@ -1,7 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { extractJSON } from './json-extractor.js';
 
+// Mock the logger to verify error logging
+vi.mock('./logger.js', () => ({
+  logger: {
+    error: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn()
+  }
+}));
+
 describe('JSON Extractor', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   describe('extractJSON', () => {
     describe('clean JSON input', () => {
       it('should parse clean JSON object directly', () => {
@@ -459,6 +472,143 @@ Let me structure the JSON properly.
         const input = '<Think>reasoning</Think>{"name": "test"}';
         const result = extractJSON(input);
         expect(result).toEqual({ name: 'test' });
+      });
+    });
+
+    describe('mutation testing coverage', () => {
+      it('should use direct parse for clean JSON (not fallback)', async () => {
+        // This tests that the direct JSON.parse path works
+        // If mutated to skip direct parse, this would fail or use different path
+        const input = '{"direct": "parse"}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ direct: 'parse' });
+        // Clean JSON should NOT trigger error logging
+        const { logger } = await import('./logger.js');
+        expect(logger.error).not.toHaveBeenCalled();
+      });
+
+      it('should handle code block without json language specifier', () => {
+        // Tests the optional (json)? part of the regex
+        // Input: ``` without json
+        const input = 'text```\n{"noLang": true}\n```more';
+        const result = extractJSON(input);
+        expect(result).toEqual({ noLang: true });
+      });
+
+      it('should handle code block with immediate content (no whitespace after ```)', () => {
+        // Tests \s* (zero or more whitespace) - should work with zero whitespace
+        const input = '```{"immediate": true}```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ immediate: true });
+      });
+
+      it('should handle code block content that needs trimming', () => {
+        // Tests the .trim() call on codeBlockMatch[1]
+        const input = '```json\n   {"needsTrim": true}   \n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ needsTrim: true });
+      });
+
+      it('should trim leading whitespace in code block content', () => {
+        // Critical: Without trim(), JSON.parse would fail on leading spaces
+        // This specifically tests that trim() is called before parse
+        const input = '```json\n\n\n   {"leadingSpaces": true}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ leadingSpaces: true });
+      });
+
+      it('should trim trailing whitespace in code block content', () => {
+        // Tests trim() removes trailing whitespace
+        const input = '```json\n{"trailingSpaces": true}   \n\n\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ trailingSpaces: true });
+      });
+
+      it('should log error with correct message when extraction fails', async () => {
+        const { logger } = await import('./logger.js');
+
+        const input = 'not valid json at all';
+        expect(() => extractJSON(input)).toThrow('Failed to extract valid JSON from response');
+
+        // Verify logger.error was called with the correct message
+        expect(logger.error).toHaveBeenCalledWith(
+          'JSON extraction failed',
+          expect.any(Object)
+        );
+      });
+
+      it('should log error with rawText and textLength context', async () => {
+        const { logger } = await import('./logger.js');
+
+        const input = 'invalid json content here';
+        expect(() => extractJSON(input)).toThrow();
+
+        // Verify logger.error was called with context containing rawText and textLength
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            rawText: expect.any(String),
+            textLength: expect.any(Number)
+          })
+        );
+      });
+
+      it('should truncate rawText to 500 chars in error log for long input', async () => {
+        const { logger } = await import('./logger.js');
+
+        // Create input longer than 500 characters
+        const longInput = 'x'.repeat(1000);
+        expect(() => extractJSON(longInput)).toThrow();
+
+        // Verify rawText is truncated to 500 characters
+        const errorCall = logger.error.mock.calls[0];
+        const context = errorCall[1];
+        expect(context.rawText.length).toBe(500);
+        expect(context.textLength).toBe(1000);
+      });
+
+      it('should include full text length in error context', async () => {
+        const { logger } = await import('./logger.js');
+
+        const input = 'short invalid';
+        expect(() => extractJSON(input)).toThrow();
+
+        const errorCall = logger.error.mock.calls[0];
+        expect(errorCall[1].textLength).toBe(input.length);
+      });
+
+      it('should pass rawText as substring not full text for long input', async () => {
+        const { logger } = await import('./logger.js');
+
+        // Input that's exactly 600 chars
+        const longInput = 'a'.repeat(600);
+        expect(() => extractJSON(longInput)).toThrow();
+
+        const errorCall = logger.error.mock.calls[0];
+        // rawText should be substring(0, 500), not the full text
+        expect(errorCall[1].rawText).toBe('a'.repeat(500));
+        expect(errorCall[1].rawText.length).toBeLessThan(longInput.length);
+      });
+
+      it('should use code block path when direct parse fails', () => {
+        // Input that fails direct parse but succeeds via code block
+        const input = 'Some preamble text\n```json\n{"viaCodeBlock": true}\n```\nPostamble';
+        const result = extractJSON(input);
+        expect(result).toEqual({ viaCodeBlock: true });
+      });
+
+      it('should use object extraction path when code block fails', () => {
+        // Input that fails both direct parse and code block, but has extractable object
+        const input = 'Here is the data: {"viaObjectMatch": true} and more text';
+        const result = extractJSON(input);
+        expect(result).toEqual({ viaObjectMatch: true });
+      });
+
+      it('should use array extraction path when object extraction fails', () => {
+        // Input that only has an array, no object
+        const input = 'The array is: [1, 2, 3] here';
+        const result = extractJSON(input);
+        expect(result).toEqual([1, 2, 3]);
       });
     });
   });
