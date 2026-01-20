@@ -57,6 +57,8 @@
     "screenshots:process:no-frame": "node scripts/process-screenshots.cjs --no-frame"
   },
   "devDependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@playwright/test": "^1.56.1",
     "@stryker-mutator/core": "^9.4.0",
     "@stryker-mutator/vitest-runner": "^9.4.0",
@@ -66,6 +68,7 @@
     "dependency-cruiser": "^17.3.5",
     "dotenv": "^17.2.3",
     "fake-indexeddb": "^6.2.4",
+    "ffmpeg-static": "^5.3.0",
     "ftp-deploy": "^2.4.7",
     "jsdom": "^27.0.1",
     "knip": "^5.76.1",
