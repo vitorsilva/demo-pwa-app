@@ -17,6 +17,7 @@ This is a learning-focused Progressive Web App (PWA) project that has evolved th
 - **Epic 09: Telemetry Analysis** - Analytics, performance insights, and reporting
 - **Epic 10: Project Hygiene** - Ongoing maintenance, technical debt cleanup ♻️ **Ongoing**
 - **Epic 11: Multi-Provider LLM Support** - Direct API keys for OpenAI, Anthropic, Google, xAI
+- **Epic 13: Miscellaneous Improvements** - Standalone one-off improvement phases ♻️ **Ongoing**
 
 The project follows a guided, incremental learning methodology with detailed documentation in `docs/learning/epic0X_*/` directories.
 
@@ -234,6 +235,7 @@ When the user asks **"what's next"** or similar phrases (e.g., "what should I do
    - **Epic 09 (Telemetry Analysis)**: Read `docs/learning/epic09_telemetry_analysis/EPIC9_TELEMETRY_ANALYSIS_PLAN.md` and related phase files
    - **Epic 10 (Project Hygiene)**: Read `docs/learning/epic10_hygiene/EPIC10_HYGIENE_PLAN.md` and task files ♻️ Ongoing
    - **Epic 11 (Multi-Provider LLM)**: Read `docs/learning/epic11_llm_support/EPIC11_LLM_SUPPORT_PLAN.md` and related phase files
+   - **Epic 13 (Miscellaneous)**: Read `docs/learning/epic13_misc/EPIC13_PLAN.md` and phase files ♻️ Ongoing
 2. Identify the current phase and next steps in the learning progression
 3. Guide the user through the next appropriate task or learning objective
 
@@ -253,6 +255,7 @@ When the user says **"that's a wrap"**, **"let's call it a day"**, **"let's paus
    - **Epic 09**: `docs/learning/epic09_telemetry_analysis/PHASE*_LEARNING_NOTES.md`
    - **Epic 10**: `docs/learning/epic10_hygiene/*_LEARNING_NOTES.md` ♻️ Ongoing
    - **Epic 11**: `docs/learning/epic11_llm_support/PHASE*_LEARNING_NOTES.md`
+   - **Epic 13**: `docs/learning/epic13_misc/*_LEARNING_NOTES.md` ♻️ Ongoing
 2. Follow the structure in "Learning Notes: What to Capture" section - include progress, difficulties, errors, fixes, and learnings
 3. Ensure all recent work is properly documented so progress can be easily resumed
 
@@ -341,6 +344,7 @@ demo-pwa-app/
 │   │   ├── epic07_monetization/ # Revenue streams (AdSense, donations, premium)
 │   │   ├── epic08_ios/        # iOS App Store publishing
 │   │   ├── epic09_telemetry_analysis/ # Analytics and reporting
+│   │   ├── epic13_misc/       # Standalone one-off improvements
 │   │   └── parking_lot/       # Optional/deferred phases
 │   └── product-info/          # Product assets (mockups, logos)
 ├── src/
