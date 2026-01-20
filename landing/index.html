@@ -290,10 +290,92 @@
             font-size: 0.95rem;
         }
 
+        /* Party Mode Section */
+        .party-section {
+            padding: 100px 0;
+            background: var(--background-light);
+        }
+
+        .party-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .party-screenshot img,
+        .party-screenshot video {
+            max-width: 280px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .party-text h3 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .party-text > p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .party-text ul {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .party-text li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .party-text li::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .btn-party {
+            background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+            color: white;
+        }
+
+        .btn-party:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .party-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .party-screenshot {
+                order: -1;
+            }
+
+            .party-text ul {
+                text-align: left;
+                max-width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
         /* How it works */
         .how-it-works {
             padding: 100px 0;
-            background: var(--background-light);
         }
 
         .steps {
@@ -342,9 +424,12 @@
         }
 
         .screenshots-grid img {
-            max-width: 280px;
+            width: 280px;
+            height: 540px;
+            object-fit: contain;
             border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            background: var(--background-light);
         }
 
         /* Share Section */
@@ -546,7 +631,8 @@
             }
 
             .screenshots-grid img {
-                max-width: 200px;
+                width: 200px;
+                height: 385px;
             }
 
             .cta-columns {
@@ -623,11 +709,6 @@
                     <p>Quizzes in English, Portuguese, Spanish, French, or German.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📈</div>
-                    <h3>Adaptive Difficulty</h3>
-                    <p>Continue on any topic with increasing difficulty. Master subjects step by step.</p>
-                </div>
-                <div class="feature-card">
                     <div class="feature-icon">🎓</div>
                     <h3>All Skill Levels</h3>
                     <p>From elementary to college level — questions adapted to your knowledge.</p>
@@ -646,6 +727,32 @@
                     <div class="feature-icon">🎉</div>
                     <h3>Party Mode</h3>
                     <p>Challenge friends in real-time quiz battles. Create a room, share the code, compete live!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Party Mode Section -->
+    <section class="party-section">
+        <div class="container">
+            <h2 class="section-title">Challenge Your Friends</h2>
+            <div class="party-content">
+                <div class="party-screenshot">
+                    <video autoplay muted loop playsinline width="280" height="560" poster="images/landing-party-gameplay.png">
+                        <source src="images/party-demo.webm" type="video/webm">
+                        <img src="images/landing-party-gameplay.png" alt="Party Mode - compete with friends in real-time quiz battles" width="280" height="560" loading="lazy">
+                    </video>
+                </div>
+                <div class="party-text">
+                    <h3>Party Mode</h3>
+                    <p>Turn any quiz into a multiplayer game!</p>
+                    <ul>
+                        <li>Create a room and get a shareable code</li>
+                        <li>Friends join instantly - no signup needed</li>
+                        <li>Compete in real-time with live scores</li>
+                        <li>See the final leaderboard together</li>
+                    </ul>
+                    <a href="/app/#party" class="btn btn-party" data-track="party_mode_cta">Try Party Mode</a>
                 </div>
             </div>
         </div>
@@ -685,12 +792,12 @@
         <div class="container">
             <h2 class="section-title">See It In Action</h2>
             <div class="screenshots-grid">
+                <img src="images/landing-party-gameplay.png" alt="Party Mode - compete with friends in real-time" width="304" height="584" loading="lazy">
                 <img src="images/landing-02-quiz-started.png" alt="Quiz in progress with multiple choice options" width="304" height="584" loading="lazy">
                 <img src="images/landing-explanation-modal.png" alt="AI explanation for wrong answers" width="304" height="584" loading="lazy">
                 <img src="images/landing-share-results.png" alt="Share your quiz results with friends" width="304" height="584" loading="lazy">
-                <img src="images/landing-usage-cost.png" alt="Track your AI usage costs" width="304" height="584" loading="lazy">
+                <img src="images/landing-party-results.png" alt="Party Mode leaderboard with final standings" width="304" height="584" loading="lazy">
                 <img src="images/landing-06-settings-page.png" alt="Settings screen with language and level options" width="304" height="584" loading="lazy">
-                <img src="images/landing-party-gameplay.png" alt="Party Mode - compete with friends in real-time" width="304" height="584" loading="lazy">
             </div>
         </div>
     </section>
