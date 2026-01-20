@@ -1,7 +1,7 @@
 # Play Store Listing Update - Ready to Copy
 
-**Date:** January 4, 2026
-**Phase:** 53
+**Date:** January 20, 2026
+**Phase:** Epic 12 - Task 1 (Party Mode Update)
 
 Use this file to copy-paste content into Google Play Console.
 
@@ -9,19 +9,9 @@ Use this file to copy-paste content into Google Play Console.
 
 ## Short Description (80 char max)
 
-**Option A - Language Focus (79 chars):** ✅ Recommended
+**Selected Option (80 chars):**
 ```
-Learn any topic in 5 languages with AI quizzes. Free, offline, privacy-first.
-```
-
-**Option B - Learning Focus (80 chars):**
-```
-AI quizzes on any topic with explanations. 5 languages, works offline, free.
-```
-
-**Option C - Feature Rich (78 chars):**
-```
-AI quizzes in 5 languages. Explanations, progress tracking, works offline.
+AI quizzes in 5 languages. Learn solo or with friends. Free, offline, private.
 ```
 
 ---
@@ -36,6 +26,9 @@ Generate quizzes in English, Portuguese, Spanish, French, or German. Questions a
 
 📚 LEARN ANY TOPIC
 From history and science to coding and languages — just type what you want to learn and get instant AI-generated questions tailored to your level.
+
+🎉 PARTY MODE
+Challenge friends in real-time quiz battles! Create a room, share the code, and compete with live scores. No accounts needed - just share and play.
 
 📈 ADAPTIVE LEARNING
 Don't just take one quiz — continue on the same topic with increasing difficulty. Build true mastery through progressive challenges that avoid repeating questions.
@@ -57,6 +50,7 @@ All data stays on your device. No accounts required, no tracking, no ads. Your l
 
 ✨ KEY FEATURES
 • AI-powered question generation (multiple AI models available)
+• 🆕 Party Mode - real-time multiplayer quiz battles
 • 5 languages: English, Portuguese, Spanish, French, German
 • Adaptive difficulty with "Continue on Topic" feature
 • Detailed explanations for wrong answers
@@ -69,6 +63,7 @@ All data stays on your device. No accounts required, no tracking, no ads. Your l
 🎯 PERFECT FOR
 • Students preparing for exams
 • Language learners practicing vocabulary
+• 🆕 Friends competing in quiz nights
 • Parents helping kids learn
 • Lifelong learners exploring new topics
 • Anyone wanting to test and expand their knowledge
@@ -78,26 +73,47 @@ Built with privacy in mind. Powered by AI. Free forever.
 Download now and start your learning journey!
 ```
 
-**Character count:** ~1,850 characters (well within 4,000 limit)
+**Character count:** ~1,950 characters (well within 4,000 limit)
+
+---
+
+## What's New Text
+
+```
+🎉 NEW: Party Mode!
+Challenge friends in real-time quiz battles:
+• Create a room and share the code
+• Compete with live scores
+• See final leaderboard
+• No accounts needed!
+
+Also: Bug fixes and performance improvements.
+```
 
 ---
 
 ## Screenshots
 
-Upload in this order (priority):
+Upload in this order (Party Mode first for visibility):
 
 | Order | File | Screen |
 |-------|------|--------|
-| 1 | `01-quiz-question.png` | Quiz in action |
-| 2 | `02-explanation-modal.png` | AI explanation |
-| 3 | `03-results-continue.png` | Results + Continue |
-| 4 | `04-settings.png` | Settings (language/model) |
-| 5 | `05-home-history.png` | Home with history |
+| 1 | `party-quiz-gameplay.png` | **Party Mode gameplay** (NEW) |
+| 2 | `01-quiz-question.png` | Quiz in action |
+| 3 | `02-explanation-modal.png` | AI explanation |
+| 4 | `party-lobby.png` | **Party lobby with room code** (NEW) |
+| 5 | `03-results-continue.png` | Results + Continue |
 | 6 | `06-share-results.png` | Share results |
-| 7 | `07-topic-input.png` | Topic input |
-| 8 | `08-portuguese-quiz.png` | Multi-language |
+| 7 | `04-settings.png` | Settings (language/model) |
+| 8 | `home-party-toggle.png` | **Home with Party Mode toggle** (NEW) |
 
-**Location:** `docs/product-info/screenshots/playstore/processed/`
+**Source screenshots:**
+- Party screenshots: `docs/product-info/screenshots/party/`
+  - `06-party-quiz-gameplay.png` → Use for Party gameplay
+  - `05-party-lobby-participants.png` → Use for Party lobby
+  - `02-home-party-mode.png` → Use for Home with Party toggle
+
+**Processing:** Run `scripts/process-screenshots.cjs --preset playstore` after copying source files.
 
 ---
 
@@ -127,17 +143,30 @@ Upload in this order (priority):
 8. Find **"Descrição completa"** / **"Full description"** field - paste full description
 9. Scroll to **"Capturas de ecrã do telemóvel"** / **"Phone screenshots"** section
 10. Delete old screenshots (click X on each)
-11. Upload 8 new screenshots from `processed/` folder (in order 01-08)
-12. Click **"Guardar"** / **"Save"**
-13. Changes typically go live within hours (no full review needed)
+11. Upload 8 new screenshots (Party Mode screenshots first)
+12. Go to **"Novidades"** / **"What's new"** section - paste What's New text
+13. Click **"Guardar"** / **"Save"**
+14. Changes typically go live within hours (no full review needed)
 
 ---
 
 ## Verification Checklist
 
 - [ ] Short description updated (80 chars max)
-- [ ] Full description updated
+- [ ] Full description updated with Party Mode section
+- [ ] KEY FEATURES section has Party Mode marked as 🆕
+- [ ] PERFECT FOR section has "Friends competing in quiz nights" marked as 🆕
 - [ ] Old screenshots deleted
-- [ ] 8 new screenshots uploaded in correct order
+- [ ] 8 new screenshots uploaded (Party Mode first)
+- [ ] What's New text updated
 - [ ] Preview looks correct
 - [ ] Changes saved
+
+---
+
+## History
+
+| Date | Update |
+|------|--------|
+| January 4, 2026 | Initial Play Store listing (Phase 53) |
+| January 20, 2026 | Party Mode update (Epic 12 Task 1) |
