@@ -102,6 +102,11 @@ test.describe('Capture Party Mode Demo', () => {
       await quizItem.click();
       await page.waitForTimeout(500);
 
+      // Fill in host name
+      const nameInput = page.locator('input[placeholder="Enter your name"]');
+      await nameInput.fill('Player');
+      await page.waitForTimeout(500);
+
       // Click Create Party button
       const createBtn = page.locator('#createRoomBtn');
       await createBtn.click();
