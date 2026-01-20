@@ -23,8 +23,8 @@ jobs:
     - name: Install dependencies
       run: npm install --no-save vite@^7.1.12 vitest@^4.0.1 @vitest/coverage-v8@^4.0.1 @playwright/test@^1.56.1 fake-indexeddb@^6.2.4 idb@^8.0.3 jsdom@^27.0 dependency-cruiser@^17.3.5 typescript@^5.9.3
 
-    - name: Check for dead code (warning)
-      run: npm run lint:dead-code || true
+    - name: Check for dead code
+      run: npx knip --reporter github-actions
 
     - name: Check architecture rules (warning)
       run: npm run arch:test || true
