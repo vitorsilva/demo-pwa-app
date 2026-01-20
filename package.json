@@ -57,8 +57,6 @@
     "screenshots:process:no-frame": "node scripts/process-screenshots.cjs --no-frame"
   },
   "devDependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/util": "^0.12.2",
     "@playwright/test": "^1.56.1",
     "@stryker-mutator/core": "^9.4.0",
     "@stryker-mutator/vitest-runner": "^9.4.0",

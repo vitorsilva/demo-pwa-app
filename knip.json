@@ -10,7 +10,11 @@
     "**/*.test.js",
     "**/*.spec.js",
     "src/api/api.mock.js",
-    "src/api/api.real.js"
+    "src/api/api.real.js",
+    "src/types.js"
+],
+"ignoreDependencies": [
+    "ffmpeg-static"
 ],
 "ignoreBinaries": [
     "docker-compose",
