@@ -43,7 +43,7 @@ This epic consolidates all marketing-related tasks for Saberloop. It serves as a
 | Channel | URL | Last Updated |
 |---------|-----|--------------|
 | Landing Page | https://saberloop.com | January 20, 2026 |
-| Google Play Store | [Play Console](https://play.google.com/console) | January 4, 2026 (copy ready) |
+| Google Play Store | [Play Console](https://play.google.com/console) | January 20, 2026 |
 | iOS App Store | Not published | - |
 
 ---

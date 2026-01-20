@@ -74,12 +74,20 @@ Updated `docs/product-info/playstore-listing-update.md` with:
 - `tests/e2e/capture-party-demo.spec.js` - Fixed name input
 - `docs/product-info/playstore-listing-update.md` - Updated copy
 
-## Next Steps
+## Play Store Manual Updates (Completed)
 
-- [ ] Manually update Play Store listing in Google Play Console
-- [ ] Upload new screenshots to Play Store
-- [ ] Update "What's New" text in Play Store
+All manual updates completed in Google Play Console:
+
+1. **Short Description** - Updated to highlight Party Mode
+2. **Full Description** - Added Party Mode section with all features
+3. **What's New / Release Notes** - Added Party Mode announcement in Closed Testing Alpha track
+4. **Screenshots** - Uploaded 8 new screenshots with Party Mode first
+
+### Navigation Path Used
+- Fichas da loja (Store listings) → Default store listing → Edit
+- Testar → Testes fechados → Gerir faixa → Gerir lançamento → Editar detalhes da versão
 
 ---
 
 **Last Updated:** January 20, 2026
+**Completed:** January 20, 2026
