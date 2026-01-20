@@ -26,7 +26,7 @@ This epic consolidates all marketing-related tasks for Saberloop. It serves as a
 
 | Task | Description | Status | Document |
 |------|-------------|--------|----------|
-| Task 1 | Landing Page & Play Store Party Mode Update | Planning | [TASK1_LANDING_PLAYSTORE_UPDATE.md](./TASK1_LANDING_PLAYSTORE_UPDATE.md) |
+| Task 1 | Landing Page & Play Store Party Mode Update | ✅ Complete | [TASK1_LANDING_PLAYSTORE_UPDATE.md](./TASK1_LANDING_PLAYSTORE_UPDATE.md) |
 
 ### Future Tasks (Backlog)
 
@@ -42,8 +42,8 @@ This epic consolidates all marketing-related tasks for Saberloop. It serves as a
 
 | Channel | URL | Last Updated |
 |---------|-----|--------------|
-| Landing Page | https://saberloop.com | January 4, 2026 |
-| Google Play Store | [Play Console](https://play.google.com/console) | January 4, 2026 |
+| Landing Page | https://saberloop.com | January 20, 2026 |
+| Google Play Store | [Play Console](https://play.google.com/console) | January 4, 2026 (copy ready) |
 | iOS App Store | Not published | - |
 
 ---
@@ -122,4 +122,4 @@ When a new feature ships:
 
 ---
 
-**Last Updated:** January 19, 2026
+**Last Updated:** January 20, 2026

@@ -1,7 +1,7 @@
 # Task 1: Landing Page & Play Store Update for Party Mode
 
 **Created:** January 19, 2026
-**Status:** Planning
+**Status:** Complete (Landing Page Deployed, Play Store Copy Ready)
 **Priority:** High
 **Depends on:** Party Mode live in production (Epic 6 Complete)
 
@@ -524,24 +524,26 @@ Also: Bug fixes and performance improvements.
 
 ### Phase 1: Asset Preparation
 
-- [ ] Process Party Mode screenshot for landing page (304x584)
+- [x] Process Party Mode screenshot for landing page (304x584) - Already exists
 - [ ] Process 3 Party Mode screenshots for Play Store (1080x1920)
-- [ ] Verify all images display correctly locally
+- [x] Verify all images display correctly locally
 
 ### Phase 2: Landing Page Updates
 
-- [ ] Update hero subtitle to mention Party Mode
-- [ ] Add Party Mode feature card
-- [ ] Adjust CSS grid for 7 cards
-- [ ] Add Party Mode screenshot to gallery
-- [ ] Update meta description
-- [ ] Update OG description
-- [ ] Update Twitter description
+- [x] Update hero subtitle to mention Party Mode (already done previously)
+- [x] Add Party Mode feature card (already done previously)
+- [x] Adjust CSS grid for 7 cards (already done previously)
+- [x] Add Party Mode screenshot to gallery
+- [x] Update meta description (already done previously)
+- [x] Update OG description (already done previously)
+- [x] Update Twitter description (already done previously)
+- [x] **NEW: Add dedicated Party Mode section** (January 20, 2026)
+- [x] **NEW: Move Party Mode screenshot to first position** (January 20, 2026)
 
 ### Phase 3: Testing Landing Page
 
-- [ ] Test responsive layout (mobile, tablet, desktop)
-- [ ] Verify all images load correctly
+- [x] Test responsive layout (mobile, tablet, desktop)
+- [x] Verify all images load correctly
 - [ ] Run Lighthouse for performance check
 - [ ] Deploy to staging and verify
 
@@ -562,7 +564,7 @@ Also: Bug fixes and performance improvements.
 - [ ] Submit Play Store changes
 - [ ] Verify live landing page
 - [ ] Verify Play Store listing (may take hours)
-- [ ] Update `docs/product-info/playstore-listing-update.md` with new copy
+- [x] Update `docs/product-info/playstore-listing-update.md` with new copy
 
 ---
 
