@@ -1,6 +1,6 @@
 # Phase 4: ESLint Code Quality Cleanup
 
-**Status:** Not Started
+**Status:** In Progress
 **Priority:** Medium
 **Created:** 2026-01-20
 
@@ -14,119 +14,96 @@ The **warnings** (complexity metrics) are informational and can be addressed gra
 
 ---
 
+## Progress
+
+### Wave 1: Unused Variables ✅ Complete (2026-01-20)
+
+Fixed 38 unused variable errors across 14 files:
+
+| File | Fix |
+|------|-----|
+| `eslint.config.js` | Configure `_` prefix pattern |
+| `features.js` | Remove `getEnvironment()` |
+| `party-session.js` | Remove dead `participants` assignment |
+| `quiz-serializer.js` | Remove `QUIZ_KEY_REVERSE`, `QUESTION_KEY_REVERSE` |
+| `json-extractor.js` | Remove 4 unused catch error params |
+| `ShareQuizModal.js` | Remove `shareCheck` + `canShareQuiz` import |
+| `HelpView.js` | Remove unused `e` event param |
+| `HomeView.js` | Remove `startAuth`, `showConnectModal` imports |
+| `ImportView.js` | Rename `errorMessage` → `_errorMessage` |
+| `JoinPartyView.js` | Remove `CONNECTION_MODES` import |
+| `PartyQuizView.js` | Rename `standings` → `_standings` |
+| `SettingsView.js` | Remove `BUILD_DATE` import + catch error params |
+| `LoadingView.js` | Remove dead `config` assignment |
+| `PartyLobbyView.js` | Rename `quizData` → `_quizData` |
+
+**Commits:**
+- `e682e61` - chore(eslint): ignore _ prefixed unused vars
+- `3216819` - refactor(hygiene): fix unused variable errors (Wave 1)
+
+---
+
 ## Current State
 
 ### Summary
 
-| Category | Count | Priority |
-|----------|-------|----------|
-| **Errors** | 59 | Fix in this phase |
-| **Warnings** | 86 | Address gradually |
+| Category | Original | Current | Change |
+|----------|----------|---------|--------|
+| **Errors** | 59 | 21 | -38 |
+| **Warnings** | 86 | 91 | +5 |
 
-### Error Categories
+### Remaining Errors (21)
 
-| Category | Count | Examples | Fix Strategy |
-|----------|-------|----------|--------------|
-| Unused variables/imports | ~15 | `BUILD_DATE`, `standings`, `quizData` | Remove or use |
-| Dead stores | ~5 | Useless assignments | Remove assignment |
-| Nested ternaries | ~8 | Hard-to-read conditionals | Refactor to if/else |
-| Empty catch blocks | ~4 | Silent error swallowing | Add error handling/logging |
-| Logic bugs | ~2 | Duplicated branches, missing braces | Fix logic |
-
-### Warning Categories (For Reference)
-
-| Category | Count | Threshold |
-|----------|-------|-----------|
-| Functions over 50 lines | ~20 | Consider splitting when touching |
-| Cyclomatic complexity > 10 | ~15 | Simplify when refactoring |
-| Cognitive complexity > 15 | ~25 | Improve readability when touching |
-| Too many parameters (> 4) | ~10 | Use options object pattern |
+| Category | Count | Files | Rule |
+|----------|-------|-------|------|
+| Nested ternaries | 10 | ExplanationModal, LiveScoreboard, JoinPartyView, QuizView, ResultsView | `sonarjs/no-nested-conditional` |
+| Slow regex (ReDoS risk) | 3 | json-extractor.js | `sonarjs/slow-regex` |
+| Control chars in regex | 3 | json-extractor.js | `no-control-regex` |
+| Dead store | 1 | TopicInputView.js | `sonarjs/no-dead-store` |
+| Duplicated branches | 1 | openrouter-client.js | `sonarjs/no-all-duplicated-branches` |
+| Unenclosed multiline | 1 | app.js | `sonarjs/no-unenclosed-multiline-block` |
+| Async promise executor | 1 | ShareQuizModal.js | `no-async-promise-executor` |
+| Nested assignment | 1 | adManager.js | `sonarjs/no-nested-assignment` |
+| hasOwnProperty | 1 | adManager.js | `no-prototype-builtins` |
 
 ---
 
-## Implementation Plan
+## Remaining Waves
 
-### Wave 1: Unused Variables/Imports (Quick Wins)
+### Wave 2: Nested Ternaries (10 errors)
 
-These are safe to remove with no behavior change.
-
-```bash
-npm run lint 2>&1 | grep "no-unused-vars\|@typescript-eslint/no-unused-vars"
-```
-
-**Approach:**
-1. Run lint to get list
-2. Remove each unused variable/import
-3. Run tests after each file
-4. Commit per file or logical group
-
-### Wave 2: Dead Stores
-
-Variables assigned but never used after assignment.
+Refactor to if/else for readability:
 
 ```bash
-npm run lint 2>&1 | grep "sonarjs/no-useless-assignment"
+npx eslint src/ 2>&1 | grep "sonarjs/no-nested-conditional"
 ```
 
-**Approach:**
-1. Identify assignment
-2. Determine if it's truly dead or a bug (missing usage)
-3. Remove if dead, fix if bug
-4. Test after each fix
+### Wave 3: Regex Issues (6 errors)
 
-### Wave 3: Nested Ternaries
-
-Hard-to-read conditional expressions.
+Fix control characters and ReDoS vulnerabilities in `json-extractor.js`:
 
 ```bash
-npm run lint 2>&1 | grep "no-nested-ternary"
+npx eslint src/ 2>&1 | grep "regex"
 ```
 
-**Approach:**
-1. Refactor to if/else or early returns
-2. Maintain exact same logic
-3. Test thoroughly (these are logic changes)
+### Wave 4: Logic/Style Issues (5 errors)
 
-### Wave 4: Empty Catch Blocks
-
-Silent error swallowing can hide bugs.
-
-```bash
-npm run lint 2>&1 | grep "sonarjs/no-ignored-exceptions"
-```
-
-**Approach:**
-1. Identify each empty catch
-2. Determine appropriate handling:
-   - Log error (most cases)
-   - Re-throw if unrecoverable
-   - Comment if intentionally ignored
-3. Test error paths
-
-### Wave 5: Logic Bugs
-
-Duplicated branches, missing braces, etc.
-
-```bash
-npm run lint 2>&1 | grep "sonarjs/no-duplicated-branches\|curly"
-```
-
-**Approach:**
-1. Identify the issue
-2. Understand intended behavior
-3. Fix the logic
-4. Add tests if missing
+- Dead store in TopicInputView
+- Duplicated branches in openrouter-client
+- Unenclosed multiline in app.js
+- Async promise executor in ShareQuizModal
+- Nested assignment + hasOwnProperty in adManager
 
 ---
 
 ## Validation Checklist
 
-### Per-Wave
+### Wave 1 ✅
 
-- [ ] All errors of that category resolved
-- [ ] All existing tests pass
-- [ ] No behavior changes (unless fixing bugs)
-- [ ] Committed with clear message
+- [x] All unused variable errors resolved
+- [x] All existing tests pass (1192 unit, 33 E2E)
+- [x] No behavior changes
+- [x] Committed with clear messages
 
 ### Final
 
