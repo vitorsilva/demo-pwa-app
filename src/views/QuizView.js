@@ -2,6 +2,7 @@ import BaseView from './BaseView.js';
 import state from '../core/state.js';
 import { t } from '../core/i18n.js';
 import { shuffleAllQuestions } from '../utils/shuffle.js';
+import { showConfirmModal } from '../components/ConfirmModal.js';
 
 export default class QuizView extends BaseView {
   constructor() {
@@ -132,8 +133,15 @@ export default class QuizView extends BaseView {
   attachListeners() {
     // Back button
     const backBtn = this.querySelector('#backBtn');
-    this.addEventListener(backBtn, 'click', () => {
-      if (confirm(t('quiz.confirmLeave'))) {
+    this.addEventListener(backBtn, 'click', async () => {
+      const confirmed = await showConfirmModal({
+        title: t('quiz.leaveTitle'),
+        message: t('quiz.confirmLeave'),
+        icon: 'warning',
+        confirmText: t('quiz.leave'),
+        destructive: true
+      });
+      if (confirmed) {
         this.navigateTo('/');
       }
     });
@@ -171,9 +179,16 @@ export default class QuizView extends BaseView {
     // Bottom navigation links - show confirmation before leaving quiz
     const navLinks = this.appContainer.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
-      this.addEventListener(link, 'click', (e) => {
+      this.addEventListener(link, 'click', async (e) => {
         e.preventDefault();
-        if (confirm(t('quiz.confirmLeave'))) {
+        const confirmed = await showConfirmModal({
+          title: t('quiz.leaveTitle'),
+          message: t('quiz.confirmLeave'),
+          icon: 'warning',
+          confirmText: t('quiz.leave'),
+          destructive: true
+        });
+        if (confirmed) {
           const href = /** @type {HTMLAnchorElement} */ (link).getAttribute('href');
           window.location.hash = href.replace('#', '');
         }

@@ -6,6 +6,7 @@
   import { getSelectedModel, getModelDisplayName, getAvailableModels, saveSelectedModel } from '../services/model-service.js';
   import { getStorageBreakdown } from '../utils/storage.js';
   import { showDeleteDataModal } from '../components/DeleteDataModal.js';
+  import { showConfirmModal } from '../components/ConfirmModal.js';
   import { deleteAllUserData } from '../services/data-service.js';
   import { createModeToggle } from '../components/ModeToggle.js';
 
@@ -447,7 +448,14 @@
       }
 
       async handleDisconnect() {
-        if (confirm(t('settings.confirmDisconnect'))) {
+        const confirmed = await showConfirmModal({
+          title: t('settings.disconnectTitle'),
+          message: t('settings.confirmDisconnect'),
+          icon: 'warning',
+          confirmText: t('settings.disconnect'),
+          destructive: true
+        });
+        if (confirmed) {
           await disconnect();
           // Reload the app to show WelcomeView
           window.location.href = window.location.origin + '/#/';

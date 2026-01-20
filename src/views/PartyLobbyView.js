@@ -16,6 +16,7 @@ import {
 } from '../services/party-connection-manager.js';
 import { getConnection, clearConnection } from '../services/party-connection-store.js';
 import { createConnectionModeIndicator, updateConnectionModeIndicator } from '../components/ConnectionModeIndicator.js';
+import { showAlertModal } from '../components/AlertModal.js';
 
 const log = logger.child({ module: 'PartyLobbyView' });
 
@@ -82,7 +83,11 @@ export default class PartyLobbyView extends BaseView {
     } catch (error) {
       log.error('Failed to fetch room', { error: error.message });
       // Room might not exist anymore
-      alert(t('party.roomNotFound'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('party.roomNotFound'),
+        icon: 'error'
+      });
       this.navigateTo('/');
       return;
     }
@@ -246,7 +251,11 @@ export default class PartyLobbyView extends BaseView {
       if (roomData.status === 'ended') {
         log.info('Room ended');
         this._stopPolling();
-        alert(t('party.hostLeft'));
+        await showAlertModal({
+          title: t('modal.warningTitle'),
+          message: t('party.hostLeft'),
+          icon: 'warning'
+        });
         this.navigateTo('/');
         return;
       }
@@ -323,9 +332,13 @@ export default class PartyLobbyView extends BaseView {
   /**
    * Called when host ends the party.
    */
-  onHostLeft() {
+  async onHostLeft() {
     log.info('Host left party', { roomCode: this.roomCode });
-    alert(t('party.hostLeft'));
+    await showAlertModal({
+      title: t('modal.warningTitle'),
+      message: t('party.hostLeft'),
+      icon: 'warning'
+    });
     this.navigateTo('/');
   }
 

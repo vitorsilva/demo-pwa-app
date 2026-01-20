@@ -4,6 +4,7 @@ import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
 import { isConnected, startAuth } from '../services/auth-service.js';
 import state from '../core/state.js';
 import { showConnectModal } from '../components/ConnectModal.js';
+import { showAlertModal } from '../components/AlertModal.js';
 import { t } from '../core/i18n.js';
 import { formatRelativeDate } from '../utils/formatters.js';
 import { createModeToggle } from '../components/ModeToggle.js';
@@ -196,7 +197,11 @@ export default class HomeView extends BaseView {
     const session = await getQuizSession(sessionId);
 
     if (!session || !session.questions) {
-      alert(t('errors.cannotReplay'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('errors.cannotReplay'),
+        icon: 'error'
+      });
       return;
     }
 

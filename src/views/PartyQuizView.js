@@ -16,6 +16,7 @@ import router from '../core/router.js';
 import { getRoom, submitAnswer as submitAnswerApi, advanceQuestion as advanceQuestionApi } from '../services/party-api.js';
 import { CONNECTION_MODES } from '../services/party-connection-manager.js';
 import { getConnection } from '../services/party-connection-store.js';
+import { showAlertModal } from '../components/AlertModal.js';
 
 const log = logger.child({ module: 'PartyQuizView' });
 
@@ -93,7 +94,11 @@ export default class PartyQuizView extends BaseView {
       log.info('Quiz loaded', { questions: this.quiz?.questions?.length, participants: this.participants.length });
     } catch (error) {
       log.error('Failed to load room', { error: error.message });
-      alert(t('party.roomNotFound'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('party.roomNotFound'),
+        icon: 'error'
+      });
       this.navigateTo('/');
       return;
     }

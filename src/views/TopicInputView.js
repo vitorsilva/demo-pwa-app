@@ -1,6 +1,7 @@
 import BaseView from './BaseView.js';
 import state from '../core/state.js';
 import { t } from '../core/i18n.js';
+import { showAlertModal } from '../components/AlertModal.js';
 
 export default class TopicInputView extends BaseView {
   render() {
@@ -92,7 +93,11 @@ export default class TopicInputView extends BaseView {
       const gradeLevel = gradeLevelSelect.value || 'middle school';
 
       if (!topic) {
-        alert(t('errors.enterTopic'));
+        await showAlertModal({
+          title: t('modal.warningTitle'),
+          message: t('errors.enterTopic'),
+          icon: 'warning'
+        });
         return;
       }
 

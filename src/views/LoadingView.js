@@ -6,6 +6,8 @@ import { logger } from '../utils/logger.js';
 import { t, getCurrentLanguage } from '../core/i18n.js';
 import { getSetting } from '../core/settings.js';
 import { loadAd, resetForNavigation } from '../utils/adManager.js';
+import { showAlertModal } from '../components/AlertModal.js';
+import { showConfirmModal } from '../components/ConfirmModal.js';
 
 // Default timing constants (can be overridden via window.LOADING_VIEW_CONFIG for testing)
 const getConfig = () => {
@@ -237,7 +239,11 @@ export default class LoadingView extends BaseView {
       this.cleanup();
 
       // Show specific error message to help user diagnose the issue
-      alert(error.message || t('errors.failedToGenerate'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: error.message || t('errors.failedToGenerate'),
+        icon: 'error'
+      });
       this.navigateTo('/topic-input');
     }
   }
@@ -245,8 +251,16 @@ export default class LoadingView extends BaseView {
   attachListeners() {
     const cancelBtn = this.querySelector('#cancelBtn');
     if (cancelBtn) {
-      this.addEventListener(cancelBtn, 'click', () => {
-        if (confirm(t('loading.confirmCancel'))) {
+      this.addEventListener(cancelBtn, 'click', async () => {
+        const confirmed = await showConfirmModal({
+          title: t('loading.cancelTitle'),
+          message: t('loading.confirmCancel'),
+          icon: 'warning',
+          confirmText: t('common.cancel'),
+          cancelText: t('common.back'),
+          destructive: true
+        });
+        if (confirmed) {
           this.cleanup();
           this.navigateTo('/topic-input');
         }

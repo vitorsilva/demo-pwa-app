@@ -28,10 +28,11 @@ import { logger } from './utils/logger.js';
 import { initErrorHandling } from './utils/errorHandler.js';
 import { initPerformanceMonitoring } from './utils/performance.js'
 import { telemetry } from './utils/telemetry.js';
-import { initI18n } from './core/i18n.js';
+import { initI18n, t } from './core/i18n.js';
 import state from './core/state.js';
 import { initAdManager } from './utils/adManager.js';
 import { initTheme } from './services/theme-manager.js';
+import { showConfirmModal } from './components/ConfirmModal.js';
 
 logger.info('Saberloop initializing');
 initErrorHandling();
@@ -220,9 +221,16 @@ init();
 // Register service worker with Vite PWA Plugin
 if ('serviceWorker' in navigator) {
   const updateSW = registerSW({
-    onNeedRefresh() {
+    async onNeedRefresh() {
       // New version available
-      if (confirm('New version available! Reload to update?')) {
+      const confirmed = await showConfirmModal({
+        title: t('app.updateAvailable'),
+        message: t('app.updateMessage'),
+        icon: 'info',
+        confirmText: t('app.reload'),
+        destructive: false
+      });
+      if (confirmed) {
         updateSW(true); // Force reload with new version
       }
     },

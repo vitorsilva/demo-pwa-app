@@ -6,6 +6,7 @@
   import { formatCost, isFreeModel } from '../services/cost-service.js';
   import { showShareQuizModal } from '../components/ShareQuizModal.js';
   import { showDeleteQuizModal } from '../components/DeleteQuizModal.js';
+  import { showAlertModal } from '../components/AlertModal.js';
   import { logger } from '../utils/logger.js';
   import { createModeToggle } from '../components/ModeToggle.js';
 
@@ -221,7 +222,11 @@
       const session = await getQuizSession(sessionId);
 
       if (!session || !session.questions) {
-        alert(t('errors.cannotReplay'));
+        await showAlertModal({
+          title: t('modal.errorTitle'),
+          message: t('errors.cannotReplay'),
+          icon: 'error'
+        });
         return;
       }
 

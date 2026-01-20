@@ -25,6 +25,7 @@ import {
   generateParticipantId,
 } from '../services/party-api.js';
 import { setConnection, clearConnection } from '../services/party-connection-store.js';
+import { showAlertModal } from '../components/AlertModal.js';
 
 const log = logger.child({ module: 'CreatePartyView' });
 
@@ -377,7 +378,11 @@ export default class CreatePartyView extends BaseView {
       log.info('Room created', { roomCode: this.roomCode, hostId: this.hostId });
     } catch (error) {
       log.error('Failed to create room', { error: error.message });
-      alert(t('errors.generic'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('errors.generic'),
+        icon: 'error'
+      });
     } finally {
       overlay?.classList.add('hidden');
     }
@@ -515,7 +520,11 @@ export default class CreatePartyView extends BaseView {
       this.navigateTo(`/party/quiz/${this.roomCode}`);
     } catch (error) {
       log.error('Failed to start quiz', { error: error.message });
-      alert(t('errors.generic'));
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('errors.generic'),
+        icon: 'error'
+      });
     }
   }
 
