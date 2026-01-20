@@ -66,6 +66,14 @@ export default [
       }
     },
     rules: {
+      // Allow unused vars prefixed with _ (common pattern for intentionally unused params)
+      'no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }],
+      // Disable SonarJS duplicate rule (ESLint's no-unused-vars handles it)
+      'sonarjs/no-unused-vars': 'off',
+
       // Complexity thresholds - review violations periodically
       'complexity': ['warn', 10],
       'max-depth': ['warn', 4],
