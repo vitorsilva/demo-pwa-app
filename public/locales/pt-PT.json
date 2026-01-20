@@ -9,7 +9,19 @@
     "close": "Fechar",
     "back": "Voltar",
     "next": "Seguinte",
-    "loading": "A carregar..."
+    "loading": "A carregar...",
+    "ok": "OK",
+    "confirm": "Confirmar"
+  },
+  "modal": {
+    "errorTitle": "Erro",
+    "warningTitle": "Aviso",
+    "infoTitle": "Informação"
+  },
+  "app": {
+    "updateAvailable": "Atualização Disponível",
+    "updateMessage": "Nova versão disponível. Recarregar para atualizar?",
+    "reload": "Recarregar"
   },
   "home": {
     "welcome": "Bem-vindo de volta!",
@@ -76,6 +88,7 @@
     "connectToGenerate": "Liga para gerar quizzes",
     "connectWithOpenRouter": "Ligar com OpenRouter",
     "confirmDisconnect": "Tens a certeza que queres desligar? Terás de te ligar novamente para gerar novos quizzes.",
+    "disconnectTitle": "Desligar?",
     "currentModel": "Modelo de IA Atual",
     "changeModel": "Alterar",
     "loadingModels": "A carregar modelos disponíveis...",
@@ -119,14 +132,17 @@
     "offlineWarning": "Estás offline. A geração de quiz requer ligação à internet.",
     "secondsRemaining": "Cerca de {{count}} segundos restantes...",
     "almostDone": "Quase pronto...",
-    "confirmCancel": "Tens a certeza que queres cancelar?"
+    "confirmCancel": "Tens a certeza que queres cancelar?",
+    "cancelTitle": "Cancelar Geração?"
   },
   "quiz": {
     "title": "Quiz de {{topic}}",
     "questionOf": "Pergunta {{current}} de {{total}}",
     "nextQuestion": "Próxima Pergunta",
     "submitAnswer": "Submeter Resposta",
-    "confirmLeave": "Tens a certeza que queres sair? O teu progresso será perdido."
+    "confirmLeave": "Tens a certeza que queres sair? O teu progresso será perdido.",
+    "leaveTitle": "Sair do Quiz?",
+    "leave": "Sair"
   },
   "results": {
     "title": "Resultados",

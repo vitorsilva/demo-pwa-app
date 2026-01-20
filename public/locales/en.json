@@ -9,7 +9,19 @@
     "close": "Close",
     "back": "Back",
     "next": "Next",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "ok": "OK",
+    "confirm": "Confirm"
+  },
+  "modal": {
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "infoTitle": "Information"
+  },
+  "app": {
+    "updateAvailable": "Update Available",
+    "updateMessage": "A new version is available. Reload to update?",
+    "reload": "Reload"
   },
   "home": {
     "welcome": "Welcome back!",
@@ -76,6 +88,7 @@
     "connectToGenerate": "Connect to generate quizzes",
     "connectWithOpenRouter": "Connect with OpenRouter",
     "confirmDisconnect": "Are you sure you want to disconnect? You will need to reconnect to generate new quizzes.",
+    "disconnectTitle": "Disconnect?",
     "currentModel": "Current AI Model",
     "changeModel": "Change",
     "loadingModels": "Loading available models...",
@@ -119,14 +132,17 @@
     "offlineWarning": "You're offline. Quiz generation requires an internet connection.",
     "secondsRemaining": "About {{count}} seconds remaining...",
     "almostDone": "Almost done...",
-    "confirmCancel": "Are you sure you want to cancel?"
+    "confirmCancel": "Are you sure you want to cancel?",
+    "cancelTitle": "Cancel Generation?"
   },
   "quiz": {
     "title": "{{topic}} Quiz",
     "questionOf": "Question {{current}} of {{total}}",
     "nextQuestion": "Next Question",
     "submitAnswer": "Submit Answer",
-    "confirmLeave": "Are you sure you want to leave? Your progress will be lost."
+    "confirmLeave": "Are you sure you want to leave? Your progress will be lost.",
+    "leaveTitle": "Leave Quiz?",
+    "leave": "Leave"
   },
   "results": {
     "title": "Results",
