@@ -255,6 +255,211 @@ Let me structure the JSON properly.
       it('should throw on whitespace-only input', () => {
         expect(() => extractJSON('   ')).toThrow();
       });
+
+      it('should throw on null input', () => {
+        expect(() => extractJSON(null)).toThrow('Input must be a non-empty string');
+      });
+
+      it('should throw on undefined input', () => {
+        expect(() => extractJSON(undefined)).toThrow('Input must be a non-empty string');
+      });
+
+      it('should throw on non-string input', () => {
+        expect(() => extractJSON(123)).toThrow('Input must be a non-empty string');
+        expect(() => extractJSON({})).toThrow('Input must be a non-empty string');
+        expect(() => extractJSON([])).toThrow('Input must be a non-empty string');
+      });
+
+      it('should throw specific error for failed extraction', () => {
+        const input = 'Some text without any JSON';
+        expect(() => extractJSON(input)).toThrow('Failed to extract valid JSON from response');
+      });
+    });
+
+    describe('cleanJSON function coverage', () => {
+      it('should handle trailing comma in nested object', () => {
+        const input = '{"a": {"b": 1,}}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ a: { b: 1 } });
+      });
+
+      it('should handle trailing comma in nested array', () => {
+        const input = '{"arr": [[1, 2,],]}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ arr: [[1, 2]] });
+      });
+
+      it('should handle control characters in text extraction', () => {
+        const input = 'prefix {"name": "test\u0001value"} suffix';
+        // The control char should be replaced with space in extracted JSON
+        const result = extractJSON(input);
+        expect(result.name).toContain('test');
+      });
+
+      it('should handle null bytes in JSON', () => {
+        const input = '{"name":\u0000"test"}';
+        const result = extractJSON(input);
+        expect(result.name).toBe('test');
+      });
+
+      it('should handle multiple control characters', () => {
+        const input = '{"name":\u0001\u0002\u0003"test"}';
+        const result = extractJSON(input);
+        expect(result.name).toBe('test');
+      });
+    });
+
+    describe('array extraction edge cases', () => {
+      it('should extract standalone array from text', () => {
+        const input = 'Here is an array: [1, 2, 3] and more text';
+        const result = extractJSON(input);
+        expect(result).toEqual([1, 2, 3]);
+      });
+
+      it('should extract nested array', () => {
+        const input = '[[1, 2], [3, 4]]';
+        const result = extractJSON(input);
+        expect(result).toEqual([[1, 2], [3, 4]]);
+      });
+
+      it('should extract array with objects', () => {
+        const input = '[{"a": 1}, {"b": 2}]';
+        const result = extractJSON(input);
+        expect(result).toEqual([{ a: 1 }, { b: 2 }]);
+      });
+
+      it('should prefer object over array when both present', () => {
+        const input = '[1, 2] and {"name": "test"}';
+        const result = extractJSON(input);
+        // Object should be found first due to order of matching
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should extract array when no object present', () => {
+        const input = 'text [1, 2, 3] more text';
+        const result = extractJSON(input);
+        expect(result).toEqual([1, 2, 3]);
+      });
+
+      it('should handle array with trailing comma', () => {
+        const input = '[1, 2, 3,]';
+        const result = extractJSON(input);
+        expect(result).toEqual([1, 2, 3]);
+      });
+    });
+
+    describe('object extraction edge cases', () => {
+      it('should extract object with greedy matching', () => {
+        // Greedy matching should get the entire object
+        const input = '{"outer": {"inner": "value"}} extra';
+        const result = extractJSON(input);
+        expect(result).toEqual({ outer: { inner: 'value' } });
+      });
+
+      it('should handle object with braces in string values', () => {
+        const input = '{"code": "function() { return {}; }"}';
+        const result = extractJSON(input);
+        expect(result.code).toContain('function');
+      });
+
+      it('should extract object with multiple nesting levels', () => {
+        const input = '{"a": {"b": {"c": {"d": 1}}}}';
+        const result = extractJSON(input);
+        expect(result.a.b.c.d).toBe(1);
+      });
+    });
+
+    describe('code block edge cases', () => {
+      it('should prefer code block JSON over text JSON when both valid', () => {
+        const input = '{"fallback": true}```json\n{"codeblock": true}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ codeblock: true });
+      });
+
+      it('should handle multiple code blocks', () => {
+        // First code block should be used
+        const input = '```json\n{"first": 1}\n```\n```json\n{"second": 2}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ first: 1 });
+      });
+
+      it('should handle code block with trailing comma', () => {
+        const input = '```json\n{"name": "test",}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+    });
+
+    describe('smart quotes edge cases', () => {
+      it('should convert left double smart quote', () => {
+        const input = '{\u201Cname": "test"}'; // Left quote only
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should convert right double smart quote', () => {
+        const input = '{"name\u201D: "test"}'; // Right quote only
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should convert left single smart quote', () => {
+        const input = '{"name": "it\u2018s"}'; // Left single quote
+        const result = extractJSON(input);
+        expect(result.name).toContain("it");
+      });
+
+      it('should convert right single smart quote', () => {
+        const input = '{"name": "it\u2019s"}'; // Right single quote
+        const result = extractJSON(input);
+        expect(result.name).toContain("it");
+      });
+
+      it('should handle mixed smart quotes', () => {
+        const input = '{\u201Cname\u201D: \u201Cvalue\u201D}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'value' });
+      });
+    });
+
+    describe('BOM edge cases', () => {
+      it('should handle BOM followed by object', () => {
+        const input = '\uFEFF{"name": "test"}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+
+      it('should handle BOM followed by array', () => {
+        const input = '\uFEFF[1, 2, 3]';
+        const result = extractJSON(input);
+        expect(result).toEqual([1, 2, 3]);
+      });
+
+      it('should handle BOM in code block', () => {
+        const input = '\uFEFF```json\n{"name": "test"}\n```';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
+    });
+
+    describe('DeepSeek thinking tags edge cases', () => {
+      it('should handle <think> tag with no content after', () => {
+        const input = '<think>Some thinking</think>{"result": true}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ result: true });
+      });
+
+      it('should handle nested angle brackets in think content', () => {
+        const input = '<think>I think <this> is important</think>{"value": 1}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ value: 1 });
+      });
+
+      it('should handle <Think> with mixed case', () => {
+        const input = '<Think>reasoning</Think>{"name": "test"}';
+        const result = extractJSON(input);
+        expect(result).toEqual({ name: 'test' });
+      });
     });
   });
 });
