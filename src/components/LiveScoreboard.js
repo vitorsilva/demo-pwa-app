@@ -188,14 +188,3 @@ function getStatusColor(status) {
   }
 }
 
-/**
- * Updates an existing scoreboard in place.
- *
- * @param {HTMLElement} container - Scoreboard container
- * @param {ScoreEntry[]} scores - New scores
- * @param {Object} [options] - Same options as createLiveScoreboard
- */
-export function updateLiveScoreboard(container, scores, options = {}) {
-  const newScoreboard = createLiveScoreboard(scores, options);
-  container.innerHTML = newScoreboard.innerHTML;
-}

@@ -169,14 +169,3 @@ function getStatusColor(status) {
   }
 }
 
-/**
- * Updates the participant list in place.
- * @param {HTMLElement} container - The participant list container
- * @param {Participant[]} participants - Updated participants
- * @param {Object} [options] - Same options as createParticipantList
- */
-export function updateParticipantList(container, participants, options = {}) {
-  // Replace contents with new list
-  const newList = createParticipantList(participants, options);
-  container.innerHTML = newList.innerHTML;
-}

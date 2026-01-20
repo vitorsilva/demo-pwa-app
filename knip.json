@@ -13,7 +13,8 @@
     "src/api/api.real.js"
 ],
 "ignoreBinaries": [
-    "docker-compose"
+    "docker-compose",
+    "start"
 ],
 "ignoreExportsUsedInFile": true,
 "vite": true
