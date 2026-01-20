@@ -72,24 +72,18 @@ test.describe('Quiz Leave Confirmation', () => {
     await page.locator('.quiz-item').first().click();
     await page.waitForURL('**/quiz');
 
-    // Set up dialog handler to dismiss (cancel) the confirmation
-    let dialogShown = false;
-    page.on('dialog', async dialog => {
-      dialogShown = true;
-      expect(dialog.type()).toBe('confirm');
-      expect(dialog.message()).toContain('leave');
-      await dialog.dismiss(); // Click "Cancel"
-    });
-
     // Click Home in bottom navigation
     await page.locator('a[href="#/"]').click();
 
-    // Wait a moment to ensure navigation would have happened
-    await page.waitForTimeout(500);
+    // Custom confirm modal should appear
+    const confirmModal = page.locator('[data-testid="confirm-modal"]');
+    await expect(confirmModal).toBeVisible();
+
+    // Cancel to stay on quiz
+    await page.click('[data-testid="confirm-cancel-btn"]');
 
     // Should still be on quiz page (user cancelled)
     await expect(page).toHaveURL(/.*\/quiz/);
-    expect(dialogShown).toBe(true);
   });
 
   test('should navigate away when confirming leave during quiz', async ({ page }) => {
@@ -97,13 +91,15 @@ test.describe('Quiz Leave Confirmation', () => {
     await page.locator('.quiz-item').first().click();
     await page.waitForURL('**/quiz');
 
-    // Set up dialog handler to accept the confirmation
-    page.on('dialog', async dialog => {
-      await dialog.accept(); // Click "OK"
-    });
-
     // Click Home in bottom navigation
     await page.locator('a[href="#/"]').click();
+
+    // Custom confirm modal should appear
+    const confirmModal = page.locator('[data-testid="confirm-modal"]');
+    await expect(confirmModal).toBeVisible();
+
+    // Confirm to leave
+    await page.click('[data-testid="confirm-ok-btn"]');
 
     // Should navigate to home (user confirmed)
     await expect(page).toHaveURL(/.*#\/$/);
@@ -114,22 +110,18 @@ test.describe('Quiz Leave Confirmation', () => {
     await page.locator('.quiz-item').first().click();
     await page.waitForURL('**/quiz');
 
-    // Set up dialog handler to dismiss
-    let dialogShown = false;
-    page.on('dialog', async dialog => {
-      dialogShown = true;
-      await dialog.dismiss();
-    });
-
     // Click Topics in bottom navigation
     await page.locator('a[href="#/history"]').click();
 
-    // Wait a moment to ensure navigation would have happened
-    await page.waitForTimeout(500);
+    // Custom confirm modal should appear
+    const confirmModal = page.locator('[data-testid="confirm-modal"]');
+    await expect(confirmModal).toBeVisible();
+
+    // Cancel to stay on quiz
+    await page.click('[data-testid="confirm-cancel-btn"]');
 
     // Should still be on quiz page
     await expect(page).toHaveURL(/.*\/quiz/);
-    expect(dialogShown).toBe(true);
   });
 
   test('should show confirmation when clicking Settings during quiz', async ({ page }) => {
@@ -137,21 +129,17 @@ test.describe('Quiz Leave Confirmation', () => {
     await page.locator('.quiz-item').first().click();
     await page.waitForURL('**/quiz');
 
-    // Set up dialog handler to dismiss
-    let dialogShown = false;
-    page.on('dialog', async dialog => {
-      dialogShown = true;
-      await dialog.dismiss();
-    });
-
     // Click Settings in bottom navigation
     await page.locator('a[href="#/settings"]').click();
 
-    // Wait a moment to ensure navigation would have happened
-    await page.waitForTimeout(500);
+    // Custom confirm modal should appear
+    const confirmModal = page.locator('[data-testid="confirm-modal"]');
+    await expect(confirmModal).toBeVisible();
+
+    // Cancel to stay on quiz
+    await page.click('[data-testid="confirm-cancel-btn"]');
 
     // Should still be on quiz page
     await expect(page).toHaveURL(/.*\/quiz/);
-    expect(dialogShown).toBe(true);
   });
 });
