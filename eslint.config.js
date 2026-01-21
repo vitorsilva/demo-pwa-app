@@ -75,16 +75,14 @@ export default [
       'sonarjs/no-unused-vars': 'off',
 
       // Complexity thresholds - review violations periodically
-      'complexity': ['warn', 10],
+      'complexity': ['warn', 15],                    // Industry standard 10-20; 15 catches genuinely complex code
       'max-depth': ['warn', 4],
-      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true }],  // 100 allows HTML templates
       'max-params': ['warn', 4],
 
-      // SonarJS cognitive complexity
-      'sonarjs/cognitive-complexity': ['warn', 15],
-
-      // Downgrade some rules that are too strict for this codebase
-      'sonarjs/pseudo-random': 'warn', // Math.random is fine for non-crypto uses
+      // Disable redundant/noisy SonarJS rules
+      'sonarjs/cognitive-complexity': 'off',  // Standard complexity rule is sufficient
+      'sonarjs/pseudo-random': 'off',         // Math.random is fine for non-crypto uses (shuffling, IDs)
     }
   },
   {
