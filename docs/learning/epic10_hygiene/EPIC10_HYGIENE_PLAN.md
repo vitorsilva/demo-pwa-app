@@ -20,7 +20,9 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 ## Active Tasks
 
-_No active tasks_
+| Task | Started | Document |
+|------|---------|----------|
+| ESLint Warnings Cleanup | 2026-01-21 | [PHASE5_ESLINT_WARNINGS.md](./PHASE5_ESLINT_WARNINGS.md) |
 
 ## Completed Tasks
 
@@ -36,7 +38,6 @@ _No active tasks_
 | Task | Priority | Notes |
 |------|----------|-------|
 | Feature flag lifecycle process | Medium | Document when to remove flags |
-| ESLint complexity warnings | Low | Address ~86 warnings gradually when touching files |
 
 ### Future Flag Cleanup (When Ready)
 
@@ -213,4 +214,4 @@ A flag should be removed when ALL of these are true:
 
 ---
 
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-01-21
