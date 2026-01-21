@@ -198,7 +198,7 @@ describe('generateExplanation JSON parsing', () => {
       text: JSON.stringify(validExplanation)
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -209,7 +209,7 @@ describe('generateExplanation JSON parsing', () => {
       text: '```json\n' + JSON.stringify(validExplanation) + '\n```'
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -220,7 +220,7 @@ describe('generateExplanation JSON parsing', () => {
       text: '  \n\n' + JSON.stringify(validExplanation) + '\n\n  '
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -235,7 +235,7 @@ describe('generateExplanation JSON parsing', () => {
       text: jsonWithSmartQuotes
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     // BUG: Should parse the content, not return raw JSON
     // Current behavior returns the raw JSON string as rightAnswerExplanation
@@ -251,7 +251,7 @@ describe('generateExplanation JSON parsing', () => {
       text: 'Here is the explanation:\n' + JSON.stringify(validExplanation)
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     // BUG: Should extract and parse the JSON
     expect(result.rightAnswerExplanation).not.toContain('{');
@@ -264,7 +264,7 @@ describe('generateExplanation JSON parsing', () => {
       text: JSON.stringify(validExplanation) + '\n\nI hope this helps!'
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     // BUG: Should extract and parse the JSON
     expect(result.rightAnswerExplanation).not.toContain('{');
@@ -279,7 +279,7 @@ describe('generateExplanation JSON parsing', () => {
       text: BOM + JSON.stringify(validExplanation)
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-api-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
 
     expect(result.rightAnswerExplanation).not.toContain('{');
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
@@ -513,7 +513,7 @@ describe('generateExplanation retry logic', () => {
       text: JSON.stringify(validExplanation)
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -530,7 +530,7 @@ describe('generateExplanation retry logic', () => {
       return { text: JSON.stringify(validExplanation) };
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -549,7 +549,7 @@ describe('generateExplanation retry logic', () => {
       return { text: JSON.stringify(validExplanation) };
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -559,7 +559,7 @@ describe('generateExplanation retry logic', () => {
     callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
 
     await expect(
-      generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key')
+      generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('Rate limit exceeded');
 
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
@@ -571,7 +571,7 @@ describe('generateExplanation retry logic', () => {
     });
 
     await expect(
-      generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key')
+      generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('Invalid response format from AI');
 
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -582,7 +582,7 @@ describe('generateExplanation retry logic', () => {
       text: `<think>Let me explain this...</think>${JSON.stringify(validExplanation)}`
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', 'middle school', 'fake-key');
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
@@ -600,7 +600,7 @@ describe('generateExplanation schema validation', () => {
     });
 
     await expect(
-      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+      generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('Missing or invalid rightAnswerExplanation field');
   });
 
@@ -610,7 +610,7 @@ describe('generateExplanation schema validation', () => {
     });
 
     await expect(
-      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+      generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('Missing or invalid wrongAnswerExplanation field');
   });
 
@@ -620,7 +620,7 @@ describe('generateExplanation schema validation', () => {
     });
 
     await expect(
-      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+      generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('rightAnswerExplanation cannot be empty');
   });
 
@@ -630,7 +630,7 @@ describe('generateExplanation schema validation', () => {
     });
 
     await expect(
-      generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key')
+      generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' })
     ).rejects.toThrow('wrongAnswerExplanation cannot be empty');
   });
 
@@ -644,7 +644,7 @@ describe('generateExplanation schema validation', () => {
       text: JSON.stringify(validExplanation)
     });
 
-    const result = await generateExplanation('Q?', 'A', 'B', 'middle school', 'fake-key');
+    const result = await generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);

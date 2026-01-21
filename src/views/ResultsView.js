@@ -450,6 +450,9 @@ export default class ResultsView extends BaseView {
           throw new Error('No API key available');
         }
 
+        // Settings for explanation generation
+        const settings = { gradeLevel, apiKey, language: getCurrentLanguage() };
+
         // If we have cached explanation, only fetch wrong answer explanation
         if (hasCache) {
           logger.debug('Using cached rightAnswerExplanation, fetching wrongAnswerExplanation only');
@@ -457,9 +460,7 @@ export default class ResultsView extends BaseView {
             question.question,
             userAnswer,
             correctAnswer,
-            gradeLevel,
-            apiKey,
-            getCurrentLanguage()
+            settings
           );
         }
 
@@ -469,9 +470,7 @@ export default class ResultsView extends BaseView {
           question.question,
           userAnswer,
           correctAnswer,
-          gradeLevel,
-          apiKey,
-          getCurrentLanguage()
+          settings
         );
 
         // Cache the rightAnswerExplanation for future use

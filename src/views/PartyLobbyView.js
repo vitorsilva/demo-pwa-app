@@ -43,54 +43,70 @@ export default class PartyLobbyView extends BaseView {
     this.connectionManager = null;
   }
 
-  async render() {
-    // Retrieve connection manager from store (set by JoinPartyView)
-    this.connectionManager = getConnection();
-
-    if (this.connectionManager) {
-      // Set up P2P event handlers
-      this.connectionManager.onModeChange((mode, previousMode) => {
-        log.info('Connection mode changed', { from: previousMode, to: mode });
-        this._updateConnectionStatus(mode);
-      });
-
-      this.connectionManager.onPeerJoined((peerId) => {
-        log.info('Peer joined via P2P', { peerId });
-        this._pollParticipants();
-      });
-
-      this.connectionManager.onPeerLeft((peerId) => {
-        log.info('Peer left', { peerId });
-        this._pollParticipants();
-      });
-
-      this.connectionManager.onError((error) => {
-        log.warn('P2P connection error', { error: error.message });
-      });
-
-      // Check current mode and start polling if in fallback
-      if (this.connectionManager.getMode() === CONNECTION_MODES.HTTP_FALLBACK) {
-        log.info('Starting in HTTP fallback mode');
-      }
-    } else {
+  /**
+   * Set up connection manager event handlers.
+   * @private
+   */
+  _setupConnectionHandlers() {
+    if (!this.connectionManager) {
       log.warn('No connection manager found - using HTTP polling only');
+      return;
     }
 
-    // Fetch room info from API
+    this.connectionManager.onModeChange((mode, previousMode) => {
+      log.info('Connection mode changed', { from: previousMode, to: mode });
+      this._updateConnectionStatus(mode);
+    });
+
+    this.connectionManager.onPeerJoined((peerId) => {
+      log.info('Peer joined via P2P', { peerId });
+      this._pollParticipants();
+    });
+
+    this.connectionManager.onPeerLeft((peerId) => {
+      log.info('Peer left', { peerId });
+      this._pollParticipants();
+    });
+
+    this.connectionManager.onError((error) => {
+      log.warn('P2P connection error', { error: error.message });
+    });
+
+    if (this.connectionManager.getMode() === CONNECTION_MODES.HTTP_FALLBACK) {
+      log.info('Starting in HTTP fallback mode');
+    }
+  }
+
+  /**
+   * Load room data from API.
+   * @returns {Promise<boolean>} True if successful, false if should abort render
+   * @private
+   */
+  async _loadRoomData() {
     try {
       const roomData = await getRoom(this.roomCode);
       this._updateFromRoomData(roomData);
+      return true;
     } catch (error) {
       log.error('Failed to fetch room', { error: error.message });
-      // Room might not exist anymore
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('party.roomNotFound'),
         icon: 'error'
       });
       this.navigateTo('/');
-      return;
+      return false;
     }
+  }
+
+  async render() {
+    // Get connection manager and set up handlers
+    this.connectionManager = getConnection();
+    this._setupConnectionHandlers();
+
+    // Load room data from API
+    const loaded = await this._loadRoomData();
+    if (!loaded) return;
 
     this.setHTML(`
       <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">

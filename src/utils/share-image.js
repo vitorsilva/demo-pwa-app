@@ -5,6 +5,24 @@
 
 import { logger } from './logger.js';
 
+/**
+ * Rectangle dimensions for canvas drawing.
+ * @typedef {Object} Rect
+ * @property {number} x - X position
+ * @property {number} y - Y position
+ * @property {number} width - Width
+ * @property {number} height - Height
+ * @property {number} radius - Corner radius
+ */
+
+/**
+ * Score display data.
+ * @typedef {Object} ScoreData
+ * @property {number} score - Points scored
+ * @property {number} total - Total possible points
+ * @property {number} percentage - Score as percentage
+ */
+
 /** @type {number} Canvas width for share images */
 const CANVAS_WIDTH = 600;
 
@@ -27,13 +45,10 @@ const COLORS = {
 /**
  * Draw rounded rectangle on canvas
  * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {number} x - X position
- * @param {number} y - Y position
- * @param {number} width - Rectangle width
- * @param {number} height - Rectangle height
- * @param {number} radius - Corner radius
+ * @param {Rect} rect - Rectangle dimensions
  */
-function drawRoundedRect(ctx, x, y, width, height, radius) {
+function drawRoundedRect(ctx, rect) {
+  const { x, y, width, height, radius } = rect;
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
   ctx.lineTo(x + width - radius, y);
@@ -74,7 +89,8 @@ function drawLogoBadge(ctx, centerX, y) {
 
   // Badge background
   ctx.fillStyle = COLORS.badge;
-  drawRoundedRect(ctx, x, y, badgeWidth, badgeHeight, 18);
+  const badgeRect = { x, y, width: badgeWidth, height: badgeHeight, radius: 18 };
+  drawRoundedRect(ctx, badgeRect);
   ctx.fill();
 
   // Badge text
@@ -122,13 +138,12 @@ function drawTopic(ctx, topic, centerX, y) {
 /**
  * Draw the score display
  * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {number} score - Correct answers
- * @param {number} total - Total questions
- * @param {number} percentage - Score percentage
+ * @param {ScoreData} scoreData - Score information
  * @param {number} centerX - Center X position
  * @param {number} y - Y position
  */
-function drawScore(ctx, score, total, percentage, centerX, y) {
+function drawScore(ctx, scoreData, centerX, y) {
+  const { score, total, percentage } = scoreData;
   // Main score
   ctx.fillStyle = COLORS.accent;
   ctx.font = 'bold 64px system-ui, -apple-system, sans-serif';
@@ -183,7 +198,8 @@ export async function generateShareImage({ topic, score, total, percentage }) {
   drawLogoBadge(ctx, centerX, 30);
   drawTrophy(ctx, centerX, 110);
   drawTopic(ctx, topic, centerX, 170);
-  drawScore(ctx, score, total, percentage, centerX, 260);
+  const scoreData = { score, total, percentage };
+  drawScore(ctx, scoreData, centerX, 260);
   drawChallenge(ctx, centerX, 350);
 
   logger.debug('Share image generated', { topic, score, total });

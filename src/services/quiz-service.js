@@ -6,6 +6,14 @@ import { getRecentSessions, getSession, saveSession, updateSession, deleteSessio
 import { generateQuestions as apiGenerateQuestions, generateExplanation as apiGenerateExplanation, generateWrongAnswerExplanation as apiGenerateWrongAnswerExplanation } from '../api/index.js';
 
 /**
+ * Settings for generating explanations.
+ * @typedef {Object} ExplanationSettings
+ * @property {string} [gradeLevel] - Education level for the explanation
+ * @property {string} apiKey - OpenRouter API key (required)
+ * @property {string} [language='en'] - Language code for the explanation
+ */
+
+/**
  * Get quiz history (recent sessions)
  * @param {number} limit - Maximum sessions to return
  * @returns {Promise<Array>} Recent quiz sessions
@@ -63,13 +71,11 @@ export async function generateQuestions(topic, gradeLevel, apiKey, options = {})
  * @param {string} question - The question text
  * @param {string} userAnswer - User's incorrect answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - Education level
- * @param {string} apiKey - OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {ExplanationSettings} settings - API and content settings
  * @returns {Promise<{rightAnswerExplanation: string, wrongAnswerExplanation: string}>} Structured explanation
  */
-export async function generateExplanation(question, userAnswer, correctAnswer, gradeLevel, apiKey, language = 'en') {
-  return apiGenerateExplanation(question, userAnswer, correctAnswer, gradeLevel, apiKey, language);
+export async function generateExplanation(question, userAnswer, correctAnswer, settings = {}) {
+  return apiGenerateExplanation(question, userAnswer, correctAnswer, settings);
 }
 
 /**
@@ -77,13 +83,11 @@ export async function generateExplanation(question, userAnswer, correctAnswer, g
  * @param {string} question - The question text
  * @param {string} userAnswer - User's incorrect answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - Education level
- * @param {string} apiKey - OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {ExplanationSettings} settings - API and content settings
  * @returns {Promise<string>} Wrong answer explanation text
  */
-export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, gradeLevel, apiKey, language = 'en') {
-  return apiGenerateWrongAnswerExplanation(question, userAnswer, correctAnswer, gradeLevel, apiKey, language);
+export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, settings = {}) {
+  return apiGenerateWrongAnswerExplanation(question, userAnswer, correctAnswer, settings);
 }
 
 /**

@@ -6,6 +6,14 @@
   import { extractJSON } from '../utils/json-extractor.js';
 
   /**
+   * Settings for generating explanations.
+   * @typedef {Object} ExplanationSettings
+   * @property {string} [gradeLevel='middle school'] - Education level for the explanation
+   * @property {string} apiKey - OpenRouter API key (required)
+   * @property {string} [language='en'] - Language code for the explanation (e.g., 'en', 'pt-PT')
+   */
+
+  /**
    * Validate explanation schema - checks that parsed JSON has correct structure
    * @param {Object} explanation - Parsed explanation object
    * @throws {Error} If schema is invalid with specific field info
@@ -267,13 +275,11 @@ CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown
  * @param {string} question - The question text
  * @param {string} userAnswer - The user's answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - The grade level
- * @param {string} apiKey - The OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {ExplanationSettings} settings - API and content settings
  * @returns {Promise<{rightAnswerExplanation: string, wrongAnswerExplanation: string}>} Structured explanation
  */
-export async function generateExplanation(question, userAnswer, correctAnswer, gradeLevel =
-'middle school', apiKey, language = 'en') {
+export async function generateExplanation(question, userAnswer, correctAnswer, settings = {}) {
+  const { gradeLevel = 'middle school', apiKey, language = 'en' } = settings;
   const languageName = LANGUAGE_NAMES[language] || 'English';
   logger.debug('Generating structured explanation for incorrect answer', { language });
 
@@ -366,13 +372,11 @@ CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown
  * @param {string} question - The question text
  * @param {string} userAnswer - The user's answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - The grade level
- * @param {string} apiKey - The OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {ExplanationSettings} settings - API and content settings
  * @returns {Promise<string>} Wrong answer explanation text
  */
-export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, gradeLevel =
-'middle school', apiKey, language = 'en') {
+export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, settings = {}) {
+  const { gradeLevel = 'middle school', apiKey, language = 'en' } = settings;
   const languageName = LANGUAGE_NAMES[language] || 'English';
   logger.debug('Generating wrong answer explanation only', { language });
 
