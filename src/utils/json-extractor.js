@@ -13,7 +13,8 @@ import { logger } from './logger.js';
 function cleanJSON(text) {
   return text
     .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas before } or ]
-    .replace(/[\x00-\x1F]+/g, ' '); // Replace control chars with space (except in strings)
+    // eslint-disable-next-line no-control-regex, sonarjs/no-control-regex -- Intentionally removing control chars from JSON
+    .replace(/[\u0000-\u001F]+/g, ' ');
 }
 
 /**
@@ -58,21 +59,31 @@ export function extractJSON(text) {
   }
 
   // Step 5: Try extracting from markdown code block
-  const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (codeBlockMatch) {
-    const jsonFromBlock = cleanJSON(codeBlockMatch[1].trim());
-    try {
-      return JSON.parse(jsonFromBlock);
-    } catch {
-      // Continue to other fallbacks
+  // Use indexOf instead of regex to avoid ReDoS vulnerability
+  const codeBlockStart = cleaned.indexOf('```');
+  if (codeBlockStart !== -1) {
+    const codeBlockEnd = cleaned.indexOf('```', codeBlockStart + 3);
+    if (codeBlockEnd !== -1) {
+      let blockContent = cleaned.slice(codeBlockStart + 3, codeBlockEnd);
+      // Remove optional 'json' language identifier
+      if (blockContent.startsWith('json')) {
+        blockContent = blockContent.slice(4);
+      }
+      const jsonFromBlock = cleanJSON(blockContent.trim());
+      try {
+        return JSON.parse(jsonFromBlock);
+      } catch {
+        // Continue to other fallbacks
+      }
     }
   }
 
   // Step 6: Try to find JSON object in text
-  // Match from first { to last } (greedy for nested objects)
-  const objectMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (objectMatch) {
-    const cleanedObject = cleanJSON(objectMatch[0]);
+  // Use indexOf/lastIndexOf instead of regex to avoid ReDoS vulnerability
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const cleanedObject = cleanJSON(cleaned.slice(firstBrace, lastBrace + 1));
     try {
       return JSON.parse(cleanedObject);
     } catch {
@@ -81,10 +92,11 @@ export function extractJSON(text) {
   }
 
   // Step 7: Try to find JSON array in text
-  // Match from first [ to last ] (greedy for nested arrays)
-  const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
-  if (arrayMatch) {
-    const cleanedArray = cleanJSON(arrayMatch[0]);
+  // Use indexOf/lastIndexOf instead of regex to avoid ReDoS vulnerability
+  const firstBracket = cleaned.indexOf('[');
+  const lastBracket = cleaned.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket > firstBracket) {
+    const cleanedArray = cleanJSON(cleaned.slice(firstBracket, lastBracket + 1));
     try {
       return JSON.parse(cleanedArray);
     } catch {
