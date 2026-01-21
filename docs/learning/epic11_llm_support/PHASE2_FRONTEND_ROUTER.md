@@ -15,9 +15,17 @@ Create the frontend provider router that reads the active provider from settings
 
 ## ⚠️ Context Management Reminder
 
-**At ~75% context: STOP, update progress marker in EPIC11_LLM_SUPPORT_PLAN.md, commit, then /clear**
+**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+### Progress Marker
+
+- **Status:** Not started
+- **Current task:** —
+- **Completed:** —
+- **Next action:** Begin Task 2.1 (Add Feature Flag)
+- **Blockers:** None
 
 ---
 
