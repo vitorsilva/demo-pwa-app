@@ -457,9 +457,7 @@ export default class ResultsView extends BaseView {
             question.question,
             userAnswer,
             correctAnswer,
-            gradeLevel,
-            apiKey,
-            getCurrentLanguage()
+            { gradeLevel, apiKey, language: getCurrentLanguage() }
           );
         }
 
@@ -469,9 +467,7 @@ export default class ResultsView extends BaseView {
           question.question,
           userAnswer,
           correctAnswer,
-          gradeLevel,
-          apiKey,
-          getCurrentLanguage()
+          { gradeLevel, apiKey, language: getCurrentLanguage() }
         );
 
         // Cache the rightAnswerExplanation for future use

@@ -267,13 +267,13 @@ CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown
  * @param {string} question - The question text
  * @param {string} userAnswer - The user's answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - The grade level
- * @param {string} apiKey - The OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {Object} options - Configuration options
+ * @param {string} [options.gradeLevel='middle school'] - The grade level
+ * @param {string} options.apiKey - The OpenRouter API key (required)
+ * @param {string} [options.language='en'] - Language code for the explanation
  * @returns {Promise<{rightAnswerExplanation: string, wrongAnswerExplanation: string}>} Structured explanation
  */
-export async function generateExplanation(question, userAnswer, correctAnswer, gradeLevel =
-'middle school', apiKey, language = 'en') {
+export async function generateExplanation(question, userAnswer, correctAnswer, { gradeLevel = 'middle school', apiKey, language = 'en' } = {}) {
   const languageName = LANGUAGE_NAMES[language] || 'English';
   logger.debug('Generating structured explanation for incorrect answer', { language });
 
@@ -366,13 +366,13 @@ CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown
  * @param {string} question - The question text
  * @param {string} userAnswer - The user's answer
  * @param {string} correctAnswer - The correct answer
- * @param {string} gradeLevel - The grade level
- * @param {string} apiKey - The OpenRouter API key
- * @param {string} language - Language code for the explanation (e.g., 'en', 'pt-PT')
+ * @param {Object} options - Configuration options
+ * @param {string} [options.gradeLevel='middle school'] - The grade level
+ * @param {string} options.apiKey - The OpenRouter API key (required)
+ * @param {string} [options.language='en'] - Language code for the explanation
  * @returns {Promise<string>} Wrong answer explanation text
  */
-export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, gradeLevel =
-'middle school', apiKey, language = 'en') {
+export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, { gradeLevel = 'middle school', apiKey, language = 'en' } = {}) {
   const languageName = LANGUAGE_NAMES[language] || 'English';
   logger.debug('Generating wrong answer explanation only', { language });
 

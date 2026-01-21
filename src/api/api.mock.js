@@ -120,13 +120,13 @@ import { logger } from '../utils/logger.js';
    * @param {string} _question - The question text
    * @param {string} userAnswer - The user's answer
    * @param {string} correctAnswer - The correct answer
-   * @param {string} _gradeLevel - The grade level
-   * @param {string} _apiKey - The API key (unused in mock, accepted for interface consistency)
-   * @param {string} _language - Language code (unused in mock, accepted for interface consistency)
+   * @param {Object} options - Configuration options
+   * @param {string} [options.gradeLevel='middle school'] - The grade level
+   * @param {string} [options.apiKey] - The API key (unused in mock)
+   * @param {string} [options.language='en'] - Language code (unused in mock)
    * @returns {Promise<{rightAnswerExplanation: string, wrongAnswerExplanation: string}>} Structured explanation
    */
-  export async function generateExplanation(_question, userAnswer, correctAnswer, _gradeLevel =
-  'middle school', _apiKey, _language = 'en') {
+  export async function generateExplanation(_question, userAnswer, correctAnswer, { gradeLevel: _gradeLevel = 'middle school', apiKey: _apiKey, language: _language = 'en' } = {}) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -159,13 +159,13 @@ import { logger } from '../utils/logger.js';
    * @param {string} _question - The question text
    * @param {string} userAnswer - The user's answer
    * @param {string} _correctAnswer - The correct answer
-   * @param {string} _gradeLevel - The grade level
-   * @param {string} _apiKey - The API key (unused in mock, accepted for interface consistency)
-   * @param {string} _language - Language code (unused in mock, accepted for interface consistency)
+   * @param {Object} options - Configuration options
+   * @param {string} [options.gradeLevel='middle school'] - The grade level
+   * @param {string} [options.apiKey] - The API key (unused in mock)
+   * @param {string} [options.language='en'] - Language code (unused in mock)
    * @returns {Promise<string>} Wrong answer explanation text
    */
-  export async function generateWrongAnswerExplanation(_question, userAnswer, _correctAnswer, _gradeLevel =
-  'middle school', _apiKey, _language = 'en') {
+  export async function generateWrongAnswerExplanation(_question, userAnswer, _correctAnswer, { gradeLevel: _gradeLevel = 'middle school', apiKey: _apiKey, language: _language = 'en' } = {}) {
     // Simulate network delay (shorter since it's just partial generation)
     await new Promise(resolve => setTimeout(resolve, 300));
 
