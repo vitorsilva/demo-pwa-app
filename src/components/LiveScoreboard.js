@@ -8,6 +8,29 @@
 import { t } from '../core/i18n.js';
 
 /**
+ * Gets CSS classes for rank badge background.
+ * @param {number} rank - 0-based rank
+ * @returns {string} Tailwind classes
+ */
+function getRankBadgeClasses(rank) {
+  if (rank === 0) return 'bg-yellow-500 text-white';
+  if (rank === 1) return 'bg-gray-400 text-white';
+  if (rank === 2) return 'bg-amber-700 text-white';
+  return 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
+}
+
+/**
+ * Gets medal emoji for top 3 ranks.
+ * @param {number} rank - 0-based rank
+ * @returns {string} Medal emoji
+ */
+function getMedalEmoji(rank) {
+  if (rank === 0) return '🥇';
+  if (rank === 1) return '🥈';
+  return '🥉';
+}
+
+/**
  * @typedef {Object} ScoreEntry
  * @property {string} id - Participant ID
  * @property {string} name - Participant name
@@ -87,7 +110,7 @@ function createScoreItem(entry, rank, options) {
   const rankEl = document.createElement('span');
   rankEl.className = `
     w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-    ${rank === 0 ? 'bg-yellow-500 text-white' : rank === 1 ? 'bg-gray-400 text-white' : rank === 2 ? 'bg-amber-700 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}
+    ${getRankBadgeClasses(rank)}
   `.trim();
   rankEl.textContent = String(rank + 1);
   item.appendChild(rankEl);
@@ -150,7 +173,7 @@ function createCompactScoreItem(entry, rank, options) {
   // Medal for top 3
   if (rank < 3) {
     const medal = document.createElement('span');
-    medal.textContent = rank === 0 ? '🥇' : rank === 1 ? '🥈' : '🥉';
+    medal.textContent = getMedalEmoji(rank);
     item.appendChild(medal);
   }
 

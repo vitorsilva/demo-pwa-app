@@ -54,6 +54,35 @@ export default class ResultsView extends BaseView {
     const model = state.get('quizModel');
     const usageSummary = usage ? getUsageSummary(usage, model) : null;
 
+    // Helper function to render usage cost card
+    const renderUsageCard = () => {
+      if (!usageSummary) return '';
+
+      const modelDisplay = usageSummary.isFreeModel ? t('usage.freeModel') : model;
+      const showEstimatedCost = usageSummary.isFreeModel && usageSummary.formattedEstimatedCost;
+      const estimatedCostHtml = showEstimatedCost
+        ? `<p class="mt-2 text-xs text-subtext-light dark:text-subtext-dark">
+            ${t('usage.onPaidModel', { cost: usageSummary.formattedEstimatedCost })}
+          </p>`
+        : '';
+
+      return `
+        <div data-testid="usage-cost-card" class="mt-4 p-4 rounded-xl bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+            <div class="flex-1">
+              <p class="text-sm text-text-light dark:text-text-dark font-medium">${t('usage.thisQuizUsed')}</p>
+              <ul class="mt-1 text-sm text-subtext-light dark:text-subtext-dark">
+                <li>• ${t('usage.tokens', { count: usageSummary.totalTokens })} (${usageSummary.formattedActualCost})</li>
+                <li>• ${modelDisplay}</li>
+              </ul>
+              ${estimatedCostHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
     // Generate question review HTML
     const questionReviewHTML = questions.map((question, index) => {
       const isCorrect = Number(answers[index]) === Number(question.correct);
@@ -135,25 +164,7 @@ export default class ResultsView extends BaseView {
           </div>
 
           <!-- Usage Cost Card -->
-          ${usageSummary ? `
-          <div data-testid="usage-cost-card" class="mt-4 p-4 rounded-xl bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
-              <div class="flex-1">
-                <p class="text-sm text-text-light dark:text-text-dark font-medium">${t('usage.thisQuizUsed')}</p>
-                <ul class="mt-1 text-sm text-subtext-light dark:text-subtext-dark">
-                  <li>• ${t('usage.tokens', { count: usageSummary.totalTokens })} (${usageSummary.formattedActualCost})</li>
-                  <li>• ${usageSummary.isFreeModel ? t('usage.freeModel') : model}</li>
-                </ul>
-                ${usageSummary.isFreeModel && usageSummary.formattedEstimatedCost ? `
-                <p class="mt-2 text-xs text-subtext-light dark:text-subtext-dark">
-                  ${t('usage.onPaidModel', { cost: usageSummary.formattedEstimatedCost })}
-                </p>
-                ` : ''}
-              </div>
-            </div>
-          </div>
-          ` : ''}
+          ${renderUsageCard()}
 
           <!-- Share Buttons -->
           <div class="flex justify-center gap-3 mt-4 flex-wrap">

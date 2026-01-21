@@ -25,6 +25,28 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
     const cleanUserAnswer = userAnswer.replace(/^[A-D]\)\s*/, '');
     const cleanCorrectAnswer = correctAnswer.replace(/^[A-D]\)\s*/, '');
 
+    // Helper function to render wrong answer section content
+    const getWrongAnswerContent = () => {
+      if (isOffline) {
+        return '';
+      }
+      if (hasApiKey) {
+        return `
+              <div id="wrongAnswerLoading" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+                <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                <span>${t('explanation.loadingPersonalized')}</span>
+              </div>
+              <p id="wrongAnswerText" class="text-subtext-light dark:text-subtext-dark leading-relaxed hidden"></p>
+            `;
+      }
+      return `
+            <div id="connectToAI" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
+              <span class="material-symbols-outlined text-base">cloud</span>
+              <span>${t('explanation.connectToAI')}</span>
+            </div>
+          `;
+    };
+
     backdrop.innerHTML = `
       <div class="bg-card-light dark:bg-card-dark rounded-t-3xl w-full max-w-lg max-h-[85vh] overflow-y-auto transform transition-transform duration-300 translate-y-full" id="explanationSheet">
         <!-- Drag Handle -->
@@ -94,18 +116,7 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
 
           <!-- Wrong answer explanation (personalized, loading) -->
           <div id="wrongAnswerSection" class="${isOffline ? 'hidden' : ''}">
-            ${isOffline ? '' : hasApiKey ? `
-              <div id="wrongAnswerLoading" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
-                <span class="material-symbols-outlined animate-spin">progress_activity</span>
-                <span>${t('explanation.loadingPersonalized')}</span>
-              </div>
-              <p id="wrongAnswerText" class="text-subtext-light dark:text-subtext-dark leading-relaxed hidden"></p>
-            ` : `
-              <div id="connectToAI" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
-                <span class="material-symbols-outlined text-base">cloud</span>
-                <span>${t('explanation.connectToAI')}</span>
-              </div>
-            `}
+            ${getWrongAnswerContent()}
           </div>
 
           <!-- Error state (hidden initially) -->

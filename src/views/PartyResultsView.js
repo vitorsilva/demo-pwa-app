@@ -18,6 +18,18 @@ import { quizExists, saveQuizSession } from '../services/quiz-service.js';
 
 const log = logger.child({ module: 'PartyResultsView' });
 
+/**
+ * Gets medal emoji for top 3 ranks, empty string for others.
+ * @param {number} index - 0-based position
+ * @returns {string} Medal emoji or empty string
+ */
+function getMedalEmoji(index) {
+  if (index === 0) return '🥇';
+  if (index === 1) return '🥈';
+  if (index === 2) return '🥉';
+  return '';
+}
+
 export default class PartyResultsView extends BaseView {
   /**
    * @param {Object} options
@@ -234,7 +246,7 @@ export default class PartyResultsView extends BaseView {
   _renderStandings() {
     return this.standings.map((participant, index) => {
       const isMe = participant.id === this.participantId;
-      const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+      const medal = getMedalEmoji(index);
 
       return `
         <div class="flex items-center gap-3 p-3 rounded-xl

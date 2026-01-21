@@ -249,12 +249,13 @@ export default class JoinPartyView extends BaseView {
 
       // Show error
       if (errorMsg) {
-        errorMsg.textContent =
-          error.message === 'ROOM_NOT_FOUND'
-            ? t('party.roomNotFound')
-            : error.message === 'ROOM_FULL'
-              ? t('party.roomFull')
-              : t('errors.generic');
+        let errorText = t('errors.generic');
+        if (error.message === 'ROOM_NOT_FOUND') {
+          errorText = t('party.roomNotFound');
+        } else if (error.message === 'ROOM_FULL') {
+          errorText = t('party.roomFull');
+        }
+        errorMsg.textContent = errorText;
         errorMsg.classList.remove('hidden');
       }
 
