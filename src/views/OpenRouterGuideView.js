@@ -2,6 +2,17 @@
   import { startAuth } from '../services/auth-service.js';
   import { t } from '../core/i18n.js';
 
+  /**
+   * Step card content and display options.
+   * @typedef {Object} StepCard
+   * @property {number} number - Step number (1-based)
+   * @property {string} title - Step title
+   * @property {string} description - Step description
+   * @property {string} icon - Material icon name
+   * @property {boolean} [highlighted=false] - Whether to highlight this step
+   * @property {string|null} [imageSrc=null] - Optional image URL
+   */
+
   export default class OpenRouterGuideView extends BaseView {
     constructor() {
       super();
@@ -81,21 +92,37 @@
 
             <!-- Step Cards -->
             <div class="space-y-4">
-                ${this.renderStepCard(1, t('openrouter.step1Title'),
-                t('openrouter.step1Desc'),
-                'how_to_reg', false, null)}
+                ${this.renderStepCard({
+                  number: 1,
+                  title: t('openrouter.step1Title'),
+                  description: t('openrouter.step1Desc'),
+                  icon: 'how_to_reg'
+                })}
 
-                ${this.renderStepCard(2, t('openrouter.step2Title'),
-                t('openrouter.step2Desc'),
-                'person_add', false, '/app/images/onboarding/openrouter_step2_createaccount.png')}
+                ${this.renderStepCard({
+                  number: 2,
+                  title: t('openrouter.step2Title'),
+                  description: t('openrouter.step2Desc'),
+                  icon: 'person_add',
+                  imageSrc: '/app/images/onboarding/openrouter_step2_createaccount.png'
+                })}
 
-                ${this.renderStepCard(3, t('openrouter.step3Title'),
-                t('openrouter.step3Desc'),
-                'money_off', true, '/app/images/onboarding/openrouter_step3_freeaccount.png')}
+                ${this.renderStepCard({
+                  number: 3,
+                  title: t('openrouter.step3Title'),
+                  description: t('openrouter.step3Desc'),
+                  icon: 'money_off',
+                  highlighted: true,
+                  imageSrc: '/app/images/onboarding/openrouter_step3_freeaccount.png'
+                })}
 
-                ${this.renderStepCard(4, t('openrouter.step4Title'),
-                t('openrouter.step4Desc'),
-                'verified', false, '/app/images/onboarding/openrouter_step4_authorization.png')}
+                ${this.renderStepCard({
+                  number: 4,
+                  title: t('openrouter.step4Title'),
+                  description: t('openrouter.step4Desc'),
+                  icon: 'verified',
+                  imageSrc: '/app/images/onboarding/openrouter_step4_authorization.png'
+                })}
             </div>
 
           </div>
@@ -123,8 +150,10 @@
 
     /**
      * Render a step card
+     * @param {StepCard} step - Step card data
      */
-    renderStepCard(number, title, description, icon, highlighted = false, imageSrc = null) {
+    renderStepCard(step) {
+      const { number, title, description, icon, highlighted = false, imageSrc = null } = step;
       const highlightClass = highlighted
         ? 'border-2 border-primary ring-4 ring-primary/10'
         : 'border border-border-light dark:border-border-dark';
