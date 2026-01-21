@@ -57,8 +57,7 @@
     // Generate version module
     const versionModule = `// Auto-generated - do not edit manually
   export const APP_VERSION = '${version}';
-  export const BUILD_DATE = '${now.toISOString()}';
-  `;
+`;
 
     fs.writeFileSync(VERSION_FILE, versionModule);
     console.log(`✅ Generated version: ${version}`);
