@@ -563,13 +563,13 @@ export default class PartyQuizView extends BaseView {
       // MVP mode: submit via API
       const timeMs = Date.now() - this.questionStartTime;
       try {
-        const result = await submitAnswerApi(
-          this.roomCode,
-          this.participantId,
-          this.currentQuestion,
-          originalIndex,
+        const answer = {
+          participantId: this.participantId,
+          questionIndex: this.currentQuestion,
+          answerIndex: originalIndex,
           timeMs
-        );
+        };
+        const result = await submitAnswerApi(this.roomCode, answer);
 
         // Show correct/incorrect feedback
         this._showAnswerFeedback(shuffledIndex, result.isCorrect, result.points);
@@ -699,13 +699,13 @@ export default class PartyQuizView extends BaseView {
 
       // Submit no-answer (-1) to record the miss
       try {
-        await submitAnswerApi(
-          this.roomCode,
-          this.participantId,
-          this.currentQuestion,
-          -1, // No answer
-          this.secondsPerQuestion * 1000 // Max time
-        );
+        const noAnswer = {
+          participantId: this.participantId,
+          questionIndex: this.currentQuestion,
+          answerIndex: -1,
+          timeMs: this.secondsPerQuestion * 1000
+        };
+        await submitAnswerApi(this.roomCode, noAnswer);
       } catch (error) {
         log.error('Failed to submit no-answer', { error: error.message });
       }

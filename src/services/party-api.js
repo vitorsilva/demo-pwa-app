@@ -13,6 +13,15 @@ import { getSignalingBaseUrl } from './signaling-client.js';
 const log = logger.child({ module: 'party-api' });
 
 /**
+ * A participant's answer submission.
+ * @typedef {Object} Answer
+ * @property {string} participantId - Who submitted the answer
+ * @property {number} questionIndex - Which question (0-based index)
+ * @property {number} answerIndex - Selected answer index (-1 for timeout/no answer)
+ * @property {number} timeMs - Response time in milliseconds
+ */
+
+/**
  * Generate a unique participant ID.
  *
  * @returns {string} UUID-like participant ID
@@ -237,13 +246,11 @@ export async function advanceQuestion(code, hostId) {
  * Submit an answer for the current question.
  *
  * @param {string} code - Room code
- * @param {string} participantId - Participant's unique ID
- * @param {number} questionIndex - Question index (0-based)
- * @param {number} answerIndex - Answer index (0-based, -1 for no answer)
- * @param {number} timeMs - Time taken to answer in milliseconds
+ * @param {Answer} answer - The answer submission
  * @returns {Promise<Object>} Updated participant data with score
  */
-export async function submitAnswer(code, participantId, questionIndex, answerIndex, timeMs) {
+export async function submitAnswer(code, answer) {
+  const { participantId, questionIndex, answerIndex, timeMs } = answer;
   const baseUrl = getSignalingBaseUrl();
   const url = `${baseUrl}/endpoints/rooms.php/${code.toUpperCase()}/answer`;
 
@@ -252,12 +259,7 @@ export async function submitAnswer(code, participantId, questionIndex, answerInd
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      participantId,
-      questionIndex,
-      answerIndex,
-      timeMs,
-    }),
+    body: JSON.stringify(answer),
   });
 
   if (!response.ok) {
