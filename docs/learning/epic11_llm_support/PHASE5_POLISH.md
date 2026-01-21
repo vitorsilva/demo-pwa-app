@@ -13,6 +13,14 @@ Final polish including comprehensive error handling, edge case management, statu
 
 ---
 
+## ⚠️ Context Management Reminder
+
+**At ~75% context: STOP, update progress marker in EPIC11_LLM_SUPPORT_PLAN.md, commit, then /clear**
+
+See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+---
+
 ## Branch & Commit Strategy
 
 ### Branch Naming
