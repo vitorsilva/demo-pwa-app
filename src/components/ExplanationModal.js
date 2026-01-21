@@ -2,6 +2,116 @@ import { logger } from '../utils/logger.js';
 import { t } from '../core/i18n.js';
 
 /**
+ * Collect all explanation DOM elements from the modal.
+ * @param {HTMLElement} backdrop - Modal backdrop element
+ * @returns {Object} Object containing all DOM elements
+ */
+function getExplanationElements(backdrop) {
+  return {
+    rightAnswerLoading: backdrop.querySelector('#rightAnswerLoading'),
+    rightAnswerText: backdrop.querySelector('#rightAnswerText'),
+    wrongAnswerLoading: backdrop.querySelector('#wrongAnswerLoading'),
+    wrongAnswerText: backdrop.querySelector('#wrongAnswerText'),
+    wrongAnswerSection: backdrop.querySelector('#wrongAnswerSection'),
+    separator: backdrop.querySelector('#explanationSeparator'),
+    error: backdrop.querySelector('#explanationError')
+  };
+}
+
+/**
+ * Update UI with successful explanation result.
+ * @param {Object|string} result - API response (object with both explanations, or string for wrong answer only)
+ * @param {Object} elements - DOM elements from getExplanationElements
+ */
+function updateExplanationUI(result, elements) {
+  // Handle structured response (full fetch)
+  if (typeof result === 'object' && result.rightAnswerExplanation !== undefined) {
+    // Update right answer section
+    if (elements.rightAnswerLoading) elements.rightAnswerLoading.classList.add('hidden');
+    if (elements.rightAnswerText) {
+      elements.rightAnswerText.textContent = result.rightAnswerExplanation;
+      elements.rightAnswerText.classList.remove('hidden');
+    }
+
+    // Update wrong answer section
+    if (elements.wrongAnswerLoading) elements.wrongAnswerLoading.classList.add('hidden');
+    if (elements.wrongAnswerText && result.wrongAnswerExplanation) {
+      elements.wrongAnswerText.textContent = result.wrongAnswerExplanation;
+      elements.wrongAnswerText.classList.remove('hidden');
+    } else if (elements.wrongAnswerSection && !result.wrongAnswerExplanation) {
+      elements.wrongAnswerSection.classList.add('hidden');
+      if (elements.separator) elements.separator.classList.add('hidden');
+    }
+    return;
+  }
+
+  // Handle string response (partial fetch - only wrong answer)
+  if (typeof result === 'string') {
+    if (elements.wrongAnswerLoading) elements.wrongAnswerLoading.classList.add('hidden');
+    if (elements.wrongAnswerText) {
+      elements.wrongAnswerText.textContent = result;
+      elements.wrongAnswerText.classList.remove('hidden');
+    }
+  }
+}
+
+/**
+ * Show error UI based on error type and cache state.
+ * @param {Error} error - The error that occurred
+ * @param {Object} elements - DOM elements from getExplanationElements
+ * @param {Object} options - Configuration options
+ * @param {boolean} options.hasCachedExplanation - Whether we have cached data
+ * @param {Function} options.onRetry - Callback for retry button
+ * @param {Function} options.onGoToSettings - Callback for settings button
+ */
+function showExplanationError(error, elements, options) {
+  const { hasCachedExplanation, onRetry, onGoToSettings } = options;
+
+  // Hide loading states
+  if (elements.rightAnswerLoading) elements.rightAnswerLoading.classList.add('hidden');
+  if (elements.wrongAnswerLoading) elements.wrongAnswerLoading.classList.add('hidden');
+
+  // Determine error message and action based on error code
+  let errorMessage = t('explanation.couldntLoad');
+  let actionButton = `<button id="retryBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.tryAgain')}</button>`;
+
+  if (error.code === 'RATE_LIMIT') {
+    errorMessage = t('explanation.rateLimitError');
+    actionButton = '';
+  } else if (error.code === 'INVALID_API_KEY') {
+    errorMessage = t('explanation.invalidKeyError');
+    actionButton = `<button id="goToSettingsBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.goToSettings')}</button>`;
+  }
+
+  // Choose where to show error based on cache state
+  const targetEl = hasCachedExplanation ? elements.wrongAnswerSection : elements.error;
+  if (!targetEl) return;
+
+  if (hasCachedExplanation) {
+    targetEl.innerHTML = `
+      <div class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark flex-wrap">
+        <span class="material-symbols-outlined text-base text-warning">warning</span>
+        <span>${errorMessage}</span>
+        ${actionButton}
+      </div>
+    `;
+  } else {
+    targetEl.innerHTML = `
+      <p class="text-error mb-3">${errorMessage}</p>
+      ${actionButton}
+    `;
+    targetEl.classList.remove('hidden');
+  }
+
+  // Attach event listeners
+  const retryBtn = targetEl.querySelector('#retryBtn');
+  if (retryBtn) retryBtn.addEventListener('click', onRetry);
+
+  const settingsBtn = targetEl.querySelector('#goToSettingsBtn');
+  if (settingsBtn) settingsBtn.addEventListener('click', onGoToSettings);
+}
+
+/**
  * Show a bottom sheet modal with explanation for an incorrect answer.
  * Supports progressive loading: shows cached explanation instantly while loading personalized feedback.
  * @param {Object} options - Modal options
@@ -157,127 +267,38 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
 
     // Function to fetch and display explanation
     const fetchExplanation = async () => {
-      const rightAnswerLoadingEl = backdrop.querySelector('#rightAnswerLoading');
-      const rightAnswerTextEl = backdrop.querySelector('#rightAnswerText');
-      const wrongAnswerLoadingEl = backdrop.querySelector('#wrongAnswerLoading');
-      const wrongAnswerTextEl = backdrop.querySelector('#wrongAnswerText');
-      const wrongAnswerSectionEl = backdrop.querySelector('#wrongAnswerSection');
-      const separatorEl = backdrop.querySelector('#explanationSeparator');
-      const errorEl = backdrop.querySelector('#explanationError');
+      const elements = getExplanationElements(backdrop);
 
-      // If offline and we have cache, we're done (no fetch needed)
+      // Guard: offline with cache - nothing to fetch
       if (isOffline && cachedExplanation) {
-        if (separatorEl) separatorEl.classList.add('hidden');
+        if (elements.separator) elements.separator.classList.add('hidden');
         return;
       }
 
-      // If offline and no cache, show error
+      // Guard: offline without cache - show error
       if (isOffline && !cachedExplanation) {
-        errorEl.classList.remove('hidden');
+        elements.error.classList.remove('hidden');
         return;
       }
 
-      // If no API key, we can't fetch personalized explanation
+      // Guard: no API key - can't fetch
       if (!hasApiKey) {
         return;
       }
 
       try {
         const result = await onFetchExplanation();
-
-        // Handle structured response (full fetch)
-        if (typeof result === 'object' && result.rightAnswerExplanation !== undefined) {
-          // Update right answer section
-          if (rightAnswerLoadingEl) rightAnswerLoadingEl.classList.add('hidden');
-          if (rightAnswerTextEl) {
-            rightAnswerTextEl.textContent = result.rightAnswerExplanation;
-            rightAnswerTextEl.classList.remove('hidden');
-          }
-
-          // Update wrong answer section
-          if (wrongAnswerLoadingEl) wrongAnswerLoadingEl.classList.add('hidden');
-          if (wrongAnswerTextEl && result.wrongAnswerExplanation) {
-            wrongAnswerTextEl.textContent = result.wrongAnswerExplanation;
-            wrongAnswerTextEl.classList.remove('hidden');
-          } else if (wrongAnswerSectionEl && !result.wrongAnswerExplanation) {
-            // Hide wrong answer section if no personalized feedback
-            wrongAnswerSectionEl.classList.add('hidden');
-            if (separatorEl) separatorEl.classList.add('hidden');
-          }
-        }
-        // Handle string response (partial fetch - only wrong answer)
-        else if (typeof result === 'string') {
-          if (wrongAnswerLoadingEl) wrongAnswerLoadingEl.classList.add('hidden');
-          if (wrongAnswerTextEl) {
-            wrongAnswerTextEl.textContent = result;
-            wrongAnswerTextEl.classList.remove('hidden');
-          }
-        }
+        updateExplanationUI(result, elements);
       } catch (error) {
         logger.error('Failed to fetch explanation', { error: error.message, code: error.code });
-
-        // Hide loading states
-        if (rightAnswerLoadingEl) rightAnswerLoadingEl.classList.add('hidden');
-        if (wrongAnswerLoadingEl) wrongAnswerLoadingEl.classList.add('hidden');
-
-        // Determine error message and action based on error code
-        let errorMessage = t('explanation.couldntLoad');
-        let actionButton = `<button id="retryBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.tryAgain')}</button>`;
-
-        if (error.code === 'RATE_LIMIT') {
-          errorMessage = t('explanation.rateLimitError');
-          actionButton = ''; // No action for rate limit - just wait
-        } else if (error.code === 'INVALID_API_KEY') {
-          errorMessage = t('explanation.invalidKeyError');
-          actionButton = `<button id="goToSettingsBtn" class="text-primary font-medium hover:underline ml-2">${t('explanation.goToSettings')}</button>`;
-        }
-
-        // If we have cached explanation, only show error for personalized part
-        if (cachedExplanation) {
-          if (wrongAnswerSectionEl) {
-            wrongAnswerSectionEl.innerHTML = `
-              <div class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark flex-wrap">
-                <span class="material-symbols-outlined text-base text-warning">warning</span>
-                <span>${errorMessage}</span>
-                ${actionButton}
-              </div>
-            `;
-            // Re-attach retry listener
-            const newRetryBtn = wrongAnswerSectionEl.querySelector('#retryBtn');
-            if (newRetryBtn) {
-              newRetryBtn.addEventListener('click', fetchExplanation);
-            }
-            // Attach Settings button listener
-            const settingsBtn = wrongAnswerSectionEl.querySelector('#goToSettingsBtn');
-            if (settingsBtn) {
-              settingsBtn.addEventListener('click', () => {
-                closeModal();
-                window.location.hash = '#/settings';
-              });
-            }
+        showExplanationError(error, elements, {
+          hasCachedExplanation: !!cachedExplanation,
+          onRetry: fetchExplanation,
+          onGoToSettings: () => {
+            closeModal();
+            window.location.hash = '#/settings';
           }
-        } else {
-          // No cache, show full error with specific message
-          errorEl.innerHTML = `
-            <p class="text-error mb-3">${errorMessage}</p>
-            ${actionButton}
-          `;
-          errorEl.classList.remove('hidden');
-
-          // Re-attach retry listener
-          const newRetryBtn = errorEl.querySelector('#retryBtn');
-          if (newRetryBtn) {
-            newRetryBtn.addEventListener('click', fetchExplanation);
-          }
-          // Attach Settings button listener
-          const settingsBtn = errorEl.querySelector('#goToSettingsBtn');
-          if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-              closeModal();
-              window.location.hash = '#/settings';
-            });
-          }
-        }
+        });
       }
     };
 

@@ -135,50 +135,88 @@ function generateExplanation(topic, question, answerOptions, explanationOptions)
 
 ---
 
-### Wave 2: Refactor Complex Logic (2 functions)
+### Wave 2: Separate Concerns (3 functions)
 
-**Target:** The only 2 functions with genuine complexity worth refactoring.
+**Target:** Functions that mix UI manipulation with fetch/business logic.
 
-#### 2.1: `api/api.real.js` - `generateQuestions`
+During complexity analysis, we discovered that the highest-complexity functions are not just "complex"
+but have a **design smell**: they mix concerns that should be separated.
+
+#### Complexity Analysis Results
+
+| Complexity | File | Function | Issue |
+|------------|------|----------|-------|
+| **31** | `ExplanationModal.js` | `fetchExplanation` | API fetch + DOM manipulation + error UI |
+| **25** | `PartyQuizView.js` | `render` | API fetch + validation + HTML rendering |
+| **19** | `api.real.js` | `generateQuestions` | Complex but single responsibility (OK) |
+| **17** | `TopicsView.js` | `renderQuizItem` | Pure rendering logic (OK) |
+| **16** | `PartyLobbyView.js` | `render` | P2P setup + API fetch + HTML rendering |
+| **16** | `json-extractor.js` | `extractJSON` | 1 point over threshold (OK) |
+
+**Key insight:** High complexity often indicates mixed concerns, not just "too much code".
+
+#### 2.1: `ExplanationModal.js` - `fetchExplanation` (Priority: HIGH)
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Lines | 121 | < 100 |
-| Complexity | 19 | < 15 |
+| Complexity | 31 | < 15 |
 
-**Current responsibilities:**
-- Build prompt from topic/settings
-- Call OpenRouter API
-- Parse JSON response
-- Validate quiz schema
-- Handle retries and errors
-- Track usage/costs
+**Current problems:**
+- Fetches explanation from API
+- Manipulates DOM elements for loading/error states
+- Handles different response types (object vs string)
+- Handles different error types with different UI
+- Attaches event listeners for retry/settings buttons
 
 **Refactoring strategy:**
-1. Extract prompt building to `buildQuizPrompt(topic, settings)`
-2. Extract response parsing to `parseQuizResponse(response)`
-3. Use early returns for error cases
-4. Validation already extracted (`validateQuizSchema`)
+1. Extract data fetching to pure function `fetchExplanationData(onFetchExplanation)`
+2. Extract UI updates to `updateExplanationUI(result, elements)`
+3. Extract error handling to `handleExplanationError(error, elements, callbacks)`
+4. Main function becomes orchestrator with clear flow
 
-#### 2.2: `utils/json-extractor.js` - `extractJSON`
+#### 2.2: `PartyQuizView.js` - `render` (Priority: MEDIUM)
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Lines | 58 | OK |
+| Complexity | 25 | < 15 |
+
+**Current problems:**
+- Fetches room data from API before rendering
+- Validates room state and navigates on error
+- Sets up game state
+- Renders HTML
+
+**Refactoring strategy:**
+1. Extract data loading to `loadRoomData(roomCode)`
+2. Keep render focused on HTML generation
+3. Move validation/navigation to separate method
+
+#### 2.3: `PartyLobbyView.js` - `render` (Priority: MEDIUM)
+
+| Metric | Current | Target |
+|--------|---------|--------|
 | Complexity | 16 | < 15 |
 
-**Current responsibilities:**
-- Try direct JSON.parse
-- Find JSON boundaries with bracket matching
-- Handle nested structures
-- Multiple fallback strategies
+**Current problems:**
+- Sets up P2P event handlers
+- Fetches room data from API
+- Renders HTML
 
 **Refactoring strategy:**
-1. Extract bracket-matching to helper function
-2. Use early returns for successful parses
-3. Simplify nested conditionals
+1. Extract P2P setup to `setupConnectionHandlers()`
+2. Extract room loading to `loadRoomData()`
+3. Keep render focused on HTML generation
 
-**Risk:** Medium - these are core functions. Need comprehensive tests before refactoring.
+#### Decision: Skip `generateQuestions` and `extractJSON`
+
+**`generateQuestions` (complexity 19):** While over threshold, this function has a single
+responsibility (quiz generation with retry). The complexity comes from necessary error handling
+and retry logic, not mixed concerns. Refactoring would scatter related logic without benefit.
+
+**`extractJSON` (complexity 16):** Only 1 point over threshold. The function is well-structured
+with sequential fallback strategies. Extracting helpers would make the flow harder to follow.
+
+**Risk:** Medium - these are UI components with existing tests. Behavior must remain identical.
 
 ---
 
@@ -221,10 +259,12 @@ This ensures learning value from each refactoring decision, not just the end res
 - [ ] E2E tests pass (169 passing, 3 pre-existing failures)
 - [ ] Commit with clear message
 
-### Wave 2 (Complex Logic)
-- [ ] Refactor `generateQuestions` - extract helpers
-- [ ] Refactor `extractJSON` - simplify conditionals
+### Wave 2 (Separate Concerns)
+- [ ] Refactor `ExplanationModal.fetchExplanation` - separate fetch from UI
+- [ ] Refactor `PartyQuizView.render` - extract data loading
+- [ ] Refactor `PartyLobbyView.render` - extract setup and loading
 - [ ] All unit tests pass
+- [ ] E2E tests pass
 - [ ] No behavior changes
 - [ ] Commit with clear message
 

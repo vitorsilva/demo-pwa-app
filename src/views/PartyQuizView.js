@@ -58,62 +58,34 @@ export default class PartyQuizView extends BaseView {
     // Get connection manager from store (set by JoinPartyView or CreatePartyView)
     this.connectionManager = getConnection();
 
-    // If we have a connection manager with a session, use it
+    // Use session from connection manager if available
     if (this.connectionManager) {
       const session = this.connectionManager.getSession();
       if (session && session.quiz) {
         this.session = session;
       }
     }
-    
+
     // Legacy support: if session provided, use original behavior
     if (this.session && this.session.quiz) {
       return this._renderWithSession();
     }
 
-    // New approach: fetch room data from API
-    if (!this.roomCode) {
-      log.error('No room code');
-      this.navigateTo('/');
-      return;
-    }
+    // Load room data from API
+    const loaded = await this._loadRoomData();
+    if (!loaded) return;
 
-    try {
-      const roomData = await getRoom(this.roomCode);
-      if (roomData.status !== 'playing') {
-        log.warn('Room not in playing state', { status: roomData.status });
-        this.navigateTo('/');
-        return;
-      }
-
-      this.quiz = roomData.quiz_data;
-      this.secondsPerQuestion = roomData.seconds_per_question || 30;
-      this.participants = this._mapParticipants(roomData.participants || []);
-      this.questionStartTime = Date.now();
-
-      log.info('Quiz loaded', { questions: this.quiz?.questions?.length, participants: this.participants.length });
-    } catch (error) {
-      log.error('Failed to load room', { error: error.message });
-      await showAlertModal({
-        title: t('modal.errorTitle'),
-        message: t('party.roomNotFound'),
-        icon: 'error'
-      });
-      this.navigateTo('/');
-      return;
-    }
-
+    // Validate quiz data
     if (!this.quiz || !this.quiz.questions || this.quiz.questions.length === 0) {
       log.error('No quiz data');
       this.navigateTo('/');
       return;
     }
 
+    // Prepare question data
     const question = this.quiz.questions[this.currentQuestion];
     const totalQuestions = this.quiz.questions.length;
     const questionIndex = this.currentQuestion;
-
-    // Shuffle options for this question
     this._shuffleCurrentQuestion(question);
 
     this.setHTML(`
@@ -192,42 +164,11 @@ export default class PartyQuizView extends BaseView {
       </div>
     `);
 
+    // Post-render setup
     this._renderScoreboard();
     this.attachListeners();
     this._startTimer();
-
-    // Set up connection manager event handlers
-    if (this.connectionManager) {
-      this.connectionManager.onModeChange((mode, previousMode) => {
-        log.info('Connection mode changed', { from: previousMode, to: mode });
-
-        // If we switched to HTTP fallback, start polling
-        if (mode === CONNECTION_MODES.HTTP_FALLBACK && !this.pollInterval) {
-          this._startPolling();
-        }
-      });
-
-      this.connectionManager.onError((error) => {
-        log.warn('P2P connection error', { error: error.message });
-      });
-    }    
-    
-    // Set up callbacks and polling based on connection mode
-    if (this.session) {
-      this._setupSessionCallbacks();
-
-      // Only start polling if in HTTP fallback mode
-      if (this.connectionManager) {
-        const mode = this.connectionManager.getMode();
-        if (mode === CONNECTION_MODES.HTTP_FALLBACK || mode === CONNECTION_MODES.CONNECTING) {
-          this._startPolling();
-        }
-      }
-    } else {
-      // No session - use HTTP polling only
-      this._startPolling();
-    }
-
+    this._setupConnectionAndPolling();
   }
 
   /**
@@ -245,6 +186,78 @@ export default class PartyQuizView extends BaseView {
       status: 'connected',
       hasAnsweredCurrent: p.hasAnsweredCurrent ?? false,
     }));
+  }
+
+  /**
+   * Load room data from API.
+   * @returns {Promise<boolean>} True if successful, false if should abort render
+   * @private
+   */
+  async _loadRoomData() {
+    if (!this.roomCode) {
+      log.error('No room code');
+      this.navigateTo('/');
+      return false;
+    }
+
+    try {
+      const roomData = await getRoom(this.roomCode);
+      if (roomData.status !== 'playing') {
+        log.warn('Room not in playing state', { status: roomData.status });
+        this.navigateTo('/');
+        return false;
+      }
+
+      this.quiz = roomData.quiz_data;
+      this.secondsPerQuestion = roomData.seconds_per_question || 30;
+      this.participants = this._mapParticipants(roomData.participants || []);
+      this.questionStartTime = Date.now();
+
+      log.info('Quiz loaded', { questions: this.quiz?.questions?.length, participants: this.participants.length });
+      return true;
+    } catch (error) {
+      log.error('Failed to load room', { error: error.message });
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('party.roomNotFound'),
+        icon: 'error'
+      });
+      this.navigateTo('/');
+      return false;
+    }
+  }
+
+  /**
+   * Set up connection manager callbacks and start polling if needed.
+   * @private
+   */
+  _setupConnectionAndPolling() {
+    // Set up connection manager event handlers
+    if (this.connectionManager) {
+      this.connectionManager.onModeChange((mode, previousMode) => {
+        log.info('Connection mode changed', { from: previousMode, to: mode });
+        if (mode === CONNECTION_MODES.HTTP_FALLBACK && !this.pollInterval) {
+          this._startPolling();
+        }
+      });
+
+      this.connectionManager.onError((error) => {
+        log.warn('P2P connection error', { error: error.message });
+      });
+    }
+
+    // Set up callbacks and polling based on connection mode
+    if (this.session) {
+      this._setupSessionCallbacks();
+      if (this.connectionManager) {
+        const mode = this.connectionManager.getMode();
+        if (mode === CONNECTION_MODES.HTTP_FALLBACK || mode === CONNECTION_MODES.CONNECTING) {
+          this._startPolling();
+        }
+      }
+    } else {
+      this._startPolling();
+    }
   }
 
   /**
