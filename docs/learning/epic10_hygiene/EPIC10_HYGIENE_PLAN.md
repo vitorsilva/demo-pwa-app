@@ -20,14 +20,13 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 ## Active Tasks
 
-| Task | Status | Document |
-|------|--------|----------|
-| ESLint Code Quality Cleanup | Not Started | [PHASE4_ESLINT_CLEANUP.md](./PHASE4_ESLINT_CLEANUP.md) |
+_No active tasks_
 
 ## Completed Tasks
 
 | Task | Completed | Document |
 |------|-----------|----------|
+| ESLint Code Quality Cleanup | 2026-01-21 | [PHASE4_ESLINT_CLEANUP.md](./PHASE4_ESLINT_CLEANUP.md) |
 | E2E Test Separation (Tests vs Capture) | 2026-01-15 | [PHASE3_E2E_TEST_SEPARATION.md](./PHASE3_E2E_TEST_SEPARATION.md) |
 | Feature Flag Cleanup (Wave 2) | 2026-01-15 | [PHASE2_FEATURE_FLAG_CLEANUP.md](./PHASE2_FEATURE_FLAG_CLEANUP.md) |
 | Feature Flag Cleanup (Wave 1) | 2026-01-09 | [PHASE1_FEATURE_FLAG_CLEANUP.md](./PHASE1_FEATURE_FLAG_CLEANUP.md) |
