@@ -62,13 +62,14 @@ if (typeof document !== 'undefined' && document.getElementById('textInput')) {
     const statusElement = document.getElementById('status');
 
     if (!statusElement) return; // Safety check
-        if (navigator.onLine) {
-            statusElement.textContent = 'Online';
-            statusElement.className = 'status online';
-        } else {
-            statusElement.textContent = 'Offline';
-            statusElement.className = 'status offline';
-        }
+
+    if (navigator.onLine) {
+      statusElement.textContent = 'Online';
+      statusElement.className = 'status online';
+    } else {
+      statusElement.textContent = 'Offline';
+      statusElement.className = 'status offline';
+    }
   }
 
   // Register Service Worker

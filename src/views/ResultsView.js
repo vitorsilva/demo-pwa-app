@@ -38,7 +38,7 @@ export default class ResultsView extends BaseView {
     const strokeDashoffset = 100 - percentage;
 
     // Determine message based on score
-    let message = t('results.greatJob');
+    let message;
     if (percentage === 100) {
       message = t('results.perfectScore');
     } else if (percentage >= 80) {

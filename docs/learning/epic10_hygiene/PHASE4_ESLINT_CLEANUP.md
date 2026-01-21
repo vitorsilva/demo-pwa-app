@@ -41,6 +41,21 @@ Fixed 38 unused variable errors across 14 files:
 - `e682e61` - chore(eslint): ignore _ prefixed unused vars
 - `3216819` - refactor(hygiene): fix unused variable errors (Wave 1)
 
+### Wave 2: Nested Ternaries ✅ Complete (2026-01-21)
+
+Fixed 10 nested ternary errors across 5 files by extracting helper functions:
+
+| File | Fix |
+|------|-----|
+| `ExplanationModal.js` | Extract `getWrongAnswerContent()` helper |
+| `LiveScoreboard.js` | Extract `getRankBadgeClasses()` and `getMedalEmoji()` helpers |
+| `JoinPartyView.js` | Convert nested ternary to if/else for error messages |
+| `PartyResultsView.js` | Extract `getMedalEmoji()` helper |
+| `ResultsView.js` | Extract `renderUsageCard()` helper |
+
+**Commits:**
+- `f46ae9f` - refactor(hygiene): fix nested ternary errors (Wave 2)
+
 ---
 
 ## Current State
@@ -49,14 +64,13 @@ Fixed 38 unused variable errors across 14 files:
 
 | Category | Original | Current | Change |
 |----------|----------|---------|--------|
-| **Errors** | 59 | 21 | -38 |
+| **Errors** | 59 | 11 | -48 |
 | **Warnings** | 86 | 91 | +5 |
 
-### Remaining Errors (21)
+### Remaining Errors (11)
 
 | Category | Count | Files | Rule |
 |----------|-------|-------|------|
-| Nested ternaries | 10 | ExplanationModal, LiveScoreboard, JoinPartyView, QuizView, ResultsView | `sonarjs/no-nested-conditional` |
 | Slow regex (ReDoS risk) | 3 | json-extractor.js | `sonarjs/slow-regex` |
 | Control chars in regex | 3 | json-extractor.js | `no-control-regex` |
 | Dead store | 1 | TopicInputView.js | `sonarjs/no-dead-store` |
@@ -64,19 +78,10 @@ Fixed 38 unused variable errors across 14 files:
 | Unenclosed multiline | 1 | app.js | `sonarjs/no-unenclosed-multiline-block` |
 | Async promise executor | 1 | ShareQuizModal.js | `no-async-promise-executor` |
 | Nested assignment | 1 | adManager.js | `sonarjs/no-nested-assignment` |
-| hasOwnProperty | 1 | adManager.js | `no-prototype-builtins` |
 
 ---
 
 ## Remaining Waves
-
-### Wave 2: Nested Ternaries (10 errors)
-
-Refactor to if/else for readability:
-
-```bash
-npx eslint src/ 2>&1 | grep "sonarjs/no-nested-conditional"
-```
 
 ### Wave 3: Regex Issues (6 errors)
 
@@ -102,6 +107,13 @@ npx eslint src/ 2>&1 | grep "regex"
 
 - [x] All unused variable errors resolved
 - [x] All existing tests pass (1192 unit, 33 E2E)
+- [x] No behavior changes
+- [x] Committed with clear messages
+
+### Wave 2 ✅
+
+- [x] All nested ternary errors resolved
+- [x] All existing tests pass (1192 unit, 169 E2E)
 - [x] No behavior changes
 - [x] Committed with clear messages
 
@@ -151,4 +163,4 @@ npx eslint --fix src/
 
 ---
 
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-01-21

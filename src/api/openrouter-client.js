@@ -214,7 +214,7 @@
 
       return {
         balance,
-        balanceFormatted: balance >= 0 ? `$${balance.toFixed(2)}` : `$${balance.toFixed(2)}`
+        balanceFormatted: `$${balance.toFixed(2)}`
       };
     } catch (error) {
       logger.debug('Error fetching credits', { error: error.message });

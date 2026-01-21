@@ -45,23 +45,23 @@ async function generateQRCode(url) {
  * @param {string} [creatorName] - Optional creator name to include
  * @returns {Promise<void>} Resolves when modal is closed
  */
-export function showShareQuizModal(quiz, creatorName = null) {
-  return new Promise(async (resolve) => {
-    telemetry.track('event', {
-      name: 'quiz_share_modal_opened',
-      topic: quiz.topic,
-      questionCount: quiz.questions.length
-    });
+export async function showShareQuizModal(quiz, creatorName = null) {
+  telemetry.track('event', {
+    name: 'quiz_share_modal_opened',
+    topic: quiz.topic,
+    questionCount: quiz.questions.length
+  });
 
-    // Generate share URL
-    const shareResult = generateShareUrl(quiz, creatorName);
+  // Generate share URL
+  const shareResult = generateShareUrl(quiz, creatorName);
 
-    // Generate QR code only if URL is short enough to be scannable
-    const MAX_QR_URL_LENGTH = 300;
-    const qrCodeDataUrl = shareResult.success && shareResult.url.length <= MAX_QR_URL_LENGTH
-      ? await generateQRCode(shareResult.url)
-      : null;    
+  // Generate QR code only if URL is short enough to be scannable
+  const MAX_QR_URL_LENGTH = 300;
+  const qrCodeDataUrl = shareResult.success && shareResult.url.length <= MAX_QR_URL_LENGTH
+    ? await generateQRCode(shareResult.url)
+    : null;
 
+  return new Promise((resolve) => {
     // Create modal backdrop
     const backdrop = document.createElement('div');
     backdrop.id = 'shareQuizModal';

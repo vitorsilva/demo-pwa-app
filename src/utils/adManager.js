@@ -172,7 +172,8 @@ export async function loadAd(containerId, slotKey) {
     container.appendChild(adElement);
 
     // Push to AdSense
-    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    window.adsbygoogle = window.adsbygoogle || [];
+    window.adsbygoogle.push({});
 
     // Mark as loaded
     loadedAds.add(containerId);
@@ -296,7 +297,7 @@ export function getPublisherId() {
  * @param {string} slotId - The slot ID from AdSense
  */
 export function setAdSlot(slotKey, slotId) {
-  if (AD_SLOTS.hasOwnProperty(slotKey)) {
+  if (Object.hasOwn(AD_SLOTS, slotKey)) {
     AD_SLOTS[slotKey] = slotId;
     logger.info(`[AdManager] Set slot ${slotKey} = ${slotId}`);
   } else {
