@@ -1,2 +1,2 @@
 // Auto-generated - do not edit manually
-  export const APP_VERSION = '20260121.439';
+  export const APP_VERSION = '20260121.441';

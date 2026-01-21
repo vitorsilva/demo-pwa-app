@@ -41,19 +41,19 @@ test.describe('Preserve Topic Input on Generation Failure', () => {
       };
     });
 
-    // Handle the alert that will appear
-    page.on('dialog', async dialog => {
-      await dialog.accept();
-    });
-
     // Click generate
     await page.click('#generateBtn');
 
     // Should navigate to loading page first
     await expect(page).toHaveURL(/#\/loading/);
 
-    // Should return to topic input after error
-    await expect(page).toHaveURL(/#\/topic-input/, { timeout: 10000 });
+    // Wait for the custom AlertModal to appear and dismiss it
+    const alertModal = page.locator('[data-testid="alert-modal"]');
+    await expect(alertModal).toBeVisible({ timeout: 10000 });
+    await page.click('[data-testid="alert-ok-btn"]');
+
+    // Should return to topic input after dismissing error modal
+    await expect(page).toHaveURL(/#\/topic-input/, { timeout: 5000 });
 
     // Topic text should be preserved
     const topicValue = await page.locator('#topicInput').inputValue();
@@ -86,13 +86,13 @@ test.describe('Preserve Topic Input on Generation Failure', () => {
     // Should be on loading page
     await expect(page).toHaveURL(/#\/loading/);
 
-    // Handle the confirm dialog
-    page.on('dialog', async dialog => {
-      await dialog.accept();
-    });
-
-    // Click cancel button
+    // Click cancel button (this triggers a ConfirmModal)
     await page.click('#cancelBtn');
+
+    // Wait for the custom ConfirmModal to appear and confirm the cancel
+    const confirmModal = page.locator('[data-testid="confirm-modal"]');
+    await expect(confirmModal).toBeVisible({ timeout: 5000 });
+    await page.click('[data-testid="confirm-ok-btn"]');
 
     // Should return to topic input
     await expect(page).toHaveURL(/#\/topic-input/, { timeout: 5000 });
@@ -141,12 +141,14 @@ test.describe('Preserve Topic Input on Generation Failure', () => {
       };
     });
 
-    page.on('dialog', async dialog => {
-      await dialog.accept();
-    });
-
     await page.click('#generateBtn');
-    await expect(page).toHaveURL(/#\/topic-input/, { timeout: 10000 });
+
+    // Wait for the custom AlertModal to appear and dismiss it
+    const alertModal = page.locator('[data-testid="alert-modal"]');
+    await expect(alertModal).toBeVisible({ timeout: 10000 });
+    await page.click('[data-testid="alert-ok-btn"]');
+
+    await expect(page).toHaveURL(/#\/topic-input/, { timeout: 5000 });
 
     // Clear the error for next test
     await page.evaluate(() => {
