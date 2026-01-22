@@ -247,6 +247,9 @@ None - all providers follow similar patterns.
   - Response: `{"text":"test successful","model":"grok-3","provider":"xai","usage":{"prompt_tokens":15,"completion_tokens":2,"total_tokens":17}}`
   - E2E test passed in 1.4s
   - Note: `grok-2-latest` and `grok-beta` deprecated, use `grok-3`
+- **OpenAI**: ✅ Tested with real API key (gpt-4o-mini)
+  - Response: `{"text":"Test successful.","model":"gpt-4o-mini-2024-07-18","provider":"openai","usage":{"prompt_tokens":16,"completion_tokens":3,"total_tokens":19}}`
+  - E2E test passed in 2.2s
 
 ---
 
