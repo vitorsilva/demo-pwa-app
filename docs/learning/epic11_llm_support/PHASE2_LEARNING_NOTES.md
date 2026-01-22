@@ -3,6 +3,7 @@
 **Epic:** 11 - Multi-Provider LLM Support
 **Phase:** 2 - Frontend Provider Router
 **Started:** January 22, 2026
+**Completed:** January 22, 2026
 
 ---
 
@@ -13,7 +14,7 @@
 | 2.1 Create Provider Configuration | ✅ Complete | January 22, 2026 |
 | 2.2 Create Provider Router | ✅ Complete | January 22, 2026 |
 | 2.3 Create Provider Settings Service | ✅ Complete | January 22, 2026 |
-| 2.4 Update api.real.js | ⬚ Pending | — |
+| 2.4 Update api.real.js | ✅ Complete | January 22, 2026 |
 
 ---
 
@@ -104,29 +105,75 @@ None significant.
 
 ## Subtask 2.4: Update api.real.js
 
-**Completed:** —
+**Completed:** January 22, 2026
 
 ### What was done
+- Replaced `callOpenRouter` import with `completion` from provider-router
+- Updated all three LLM call sites:
+  - `generateQuestions` - Quiz generation
+  - `generateExplanation` - Answer explanations
+  - `generateWrongAnswerExplanation` - Wrong answer explanations
+- Updated all tests to mock `completion` instead of `callOpenRouter`
+- Fixed mock call parameter access (prompt now at index [0] instead of [1])
+- All 1262 tests passing
 
 ### Difficulties encountered
+- Test file had extensive mocking of `callOpenRouter` that needed updating
+- Mock parameter access changed from `mock.calls[n][1]` to `mock.calls[n][0]`
 
 ### Solutions applied
+- Systematic search and replace of all `callOpenRouter` references
+- Updated parameter index references for the new function signature
 
 ### Key learnings
+- The `apiKey` parameter in generateQuestions is now ignored when feature is enabled
+- Provider router handles key retrieval internally from settings
+- Minimal changes to business logic - just swapped the API call function
 
 ---
 
 ## Phase Summary
 
-**Phase completed:** —
+**Phase completed:** January 22, 2026
 
 ### Overall learnings
+- Feature flag pattern works well for gradual rollout
+- Provider router is a thin abstraction layer that routes based on provider CORS support
+- Existing code patterns (IndexedDB settings, OpenRouter client) were easily integrated
+- Dependency between subtasks 2.2 and 2.3 was discovered during implementation
 
 ### What went well
+- All subtasks completed in a single session
+- Test suite remained stable (1262 tests passing)
+- No breaking changes to existing functionality
+- Clean separation between routing logic and business logic
 
 ### What could be improved
+- Phase document could have noted the 2.2/2.3 dependency upfront
+- Could add more E2E tests for the routing paths
 
 ### Recommendations for next phase
+- Phase 3 (Key Management) can build on the provider-settings-service
+- Settings UI will need to interact with the settings service
+- Consider adding key validation on save (async background validation)
+
+---
+
+## Files Created/Modified
+
+### New Files
+- `src/api/providers-config.js` - Provider configuration (32 tests)
+- `src/api/providers-config.test.js` - Provider config tests
+- `src/api/provider-router.js` - Provider routing (16 tests)
+- `src/api/provider-router.test.js` - Provider router tests
+- `src/services/provider-settings-service.js` - Settings service (22 tests)
+- `src/services/provider-settings-service.test.js` - Settings service tests
+- `src/core/features.js` - Added MULTI_PROVIDER_LLM flag
+- `docs/learning/epic10_hygiene/FLAG_MULTI_PROVIDER_LLM.md` - Flag documentation
+
+### Modified Files
+- `src/api/api.real.js` - Updated to use completion from provider-router
+- `src/api/api.real.test.js` - Updated mocks for completion
 
 ---
 
