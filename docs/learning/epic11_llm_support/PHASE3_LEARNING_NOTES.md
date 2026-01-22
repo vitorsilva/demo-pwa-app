@@ -13,7 +13,7 @@
 |---------|--------|--------------|
 | 3.1 Add Key Status and Validation | ✅ Complete | January 22, 2026 |
 | 3.2 Add Async Key Validation Functions | ✅ Complete | January 22, 2026 |
-| 3.3 Migrate OpenRouter Key | ⬚ Pending | — |
+| 3.3 Migrate OpenRouter Key | ✅ Complete | January 22, 2026 |
 | 3.4 Update Main Entry Point | ⬚ Pending | — |
 
 ---
@@ -75,6 +75,33 @@
 
 #### Next Steps
 - Continue with Subtask 3.3: Migrate OpenRouter Key
+
+---
+
+### Session: January 22, 2026 - Subtask 3.3
+
+#### Completed
+- Created `src/services/api-keys-migration.js` module
+- Implemented `migrateApiKeys()` function that:
+  - Checks migration flag to avoid re-running
+  - Sets `KEY_STATUS.VALID` for existing OpenRouter keys
+  - Migrates legacy keys from localStorage to IndexedDB
+  - Removes legacy localStorage keys after migration
+  - Handles errors gracefully (doesn't fail app startup)
+- Added 7 unit tests covering all migration scenarios
+- All 1301 unit tests pass (no regressions)
+
+#### Difficulties & Solutions
+- **localStorage availability**: Wrapped localStorage access in `typeof` check for SSR/test environments
+- **Error handling**: Migration errors are logged but don't throw - app startup shouldn't fail
+
+#### Learnings
+- Migration modules should be idempotent (safe to run multiple times)
+- Using a flag (`llm_keys_migrated_v1`) ensures migration only runs once
+- Existing OpenRouter keys are assumed valid (they were working before)
+
+#### Next Steps
+- Continue with Subtask 3.4: Wire migration into main.js
 
 ---
 
