@@ -34,12 +34,12 @@ After completing **ANY** subtask (3.1, 3.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Not started
+- **Last checkpoint:** Subtask 3.1 COMPLETE - Key status tracking added
 - **Current task:** —
-- **Completed:** —
-- **Next action:** Begin Subtask 3.1 (Create API Keys Service)
+- **Completed:** 3.1
+- **Next action:** Begin Subtask 3.2 (Add Async Key Validation Functions)
 - **Blockers:** None
-- **Session:** —
+- **Session:** January 22, 2026
 
 ---
 
@@ -83,7 +83,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 ## Tasks
 
-### ⬚ 3.1 Add Key Status and Validation to provider-settings-service.js
+### ✅ 3.1 Add Key Status and Validation to provider-settings-service.js
 
 **File:** `src/services/provider-settings-service.js` (EXTEND existing file from Phase 2)
 
