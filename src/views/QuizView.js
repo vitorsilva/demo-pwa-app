@@ -3,6 +3,7 @@ import state from '../core/state.js';
 import { t } from '../core/i18n.js';
 import { shuffleAllQuestions } from '../utils/shuffle.js';
 import { showConfirmModal } from '../components/ConfirmModal.js';
+import { createProviderIndicator } from '../components/ProviderIndicator.js';
 
 export default class QuizView extends BaseView {
   constructor() {
@@ -68,7 +69,10 @@ export default class QuizView extends BaseView {
 
           <!-- Progress Bar -->
           <div class="flex flex-col gap-2 p-4 pt-0">
-            <p data-testid="question-progress" class="text-base font-medium leading-normal text-text-light dark:text-text-dark">${t('quiz.questionOf', { current: this.currentQuestionIndex + 1, total: this.questions.length })}</p>
+            <div class="flex items-center justify-between">
+              <p data-testid="question-progress" class="text-base font-medium leading-normal text-text-light dark:text-text-dark">${t('quiz.questionOf', { current: this.currentQuestionIndex + 1, total: this.questions.length })}</p>
+              <div id="providerIndicator"></div>
+            </div>
             <div class="rounded-full bg-border-light dark:bg-border-dark">
               <div class="h-2 rounded-full bg-primary" style="width: ${progress}%;"></div>
             </div>
@@ -135,6 +139,13 @@ export default class QuizView extends BaseView {
   }
 
   attachListeners() {
+    // Provider indicator
+    const indicatorContainer = this.querySelector('#providerIndicator');
+    if (indicatorContainer) {
+      const indicator = createProviderIndicator();
+      indicatorContainer.appendChild(indicator);
+    }
+
     // Back button
     const backBtn = this.querySelector('#backBtn');
     this.addEventListener(backBtn, 'click', async () => {

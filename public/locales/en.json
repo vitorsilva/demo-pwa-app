@@ -187,7 +187,11 @@
     "submitAnswer": "Submit Answer",
     "confirmLeave": "Are you sure you want to leave? Your progress will be lost.",
     "leaveTitle": "Leave Quiz?",
-    "leave": "Leave"
+    "leave": "Leave",
+    "providerIndicator": {
+      "ariaLabel": "Current AI provider",
+      "poweredBy": "via {{provider}}"
+    }
   },
   "results": {
     "title": "Results",
@@ -214,7 +218,16 @@
     "cannotReplay": "This quiz cannot be replayed. The questions were not saved.",
     "enterTopic": "Please enter a topic to practice!",
     "notConnected": "Not connected to OpenRouter. Please connect in Settings.",
-    "failedToGenerate": "Failed to generate questions. Please try again."
+    "failedToGenerate": "Failed to generate questions. Please try again.",
+    "providerNetworkError": "Unable to connect. Please check your internet connection.",
+    "providerInvalidKey": "Your {{provider}} API key is invalid. Please update it in Settings.",
+    "providerRateLimited": "Too many requests. Please wait a moment and try again.",
+    "providerInsufficientCredits": "Insufficient credits on your {{provider}} account.",
+    "providerServerError": "The AI provider is temporarily unavailable. Please try again.",
+    "providerRequestError": "Unable to process your request. Please try again.",
+    "providerUnknownError": "Something went wrong. Please try again.",
+    "providerNotConfigured": "Please configure an LLM provider in Settings to generate questions.",
+    "providerKeyRequired": "Please add your {{provider}} API key in Settings."
   },
   "welcome": {
     "title": "Welcome to Saberloop",
