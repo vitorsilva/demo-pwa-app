@@ -235,6 +235,11 @@ None - all providers follow similar patterns.
 - `tests/e2e/llm-proxy.spec.js` - Playwright tests for proxy endpoints
 - Includes integration tests with real API keys (@manual tag)
 
+### Integration Test Verification
+- **Anthropic**: ✅ Tested with real API key (claude-3-haiku-20240307)
+  - Response: `{"text":"test successful","model":"claude-3-haiku-20240307","provider":"anthropic","usage":{"prompt_tokens":17,"completion_tokens":5,"total_tokens":22}}`
+  - E2E test passed in 1.2s
+
 ---
 
 ## Local Testing
