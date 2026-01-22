@@ -33,11 +33,11 @@ After completing any subtask (1.1, 1.2, etc.):
 
 ### Progress Marker
 
-- **Last checkpoint:** Not started
-- **Next action:** Begin Subtask 1.1 (Create Deployment Script)
-- **Completed subtasks:** None
+- **Last checkpoint:** Subtask 1.1 complete - Deployment script created
+- **Next action:** Begin Subtask 1.2 (Create Directory Structure)
+- **Completed subtasks:** 1.1
 - **Blockers:** None
-- **Session:** —
+- **Session:** January 22, 2026
 
 ---
 
@@ -108,7 +108,7 @@ The feature flag `MULTI_PROVIDER_LLM` will be added in **Phase 2** when frontend
 
 ## Tasks
 
-### ⬚ 1.1 Create Deployment Script
+### ✅ 1.1 Create Deployment Script
 
 Create a deployment script following the same pattern as `deploy-party.cjs` and `deploy-telemetry.cjs`.
 

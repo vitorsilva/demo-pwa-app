@@ -2,7 +2,7 @@
 
 **Epic:** 11 - Multi-Provider LLM Support
 **Phase:** 1 - Backend Proxy & Deployment
-**Started:** —
+**Started:** January 22, 2026
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Subtask | Status | Session Date |
 |---------|--------|--------------|
-| 1.1 Create Deployment Script | ⬚ Pending | — |
+| 1.1 Create Deployment Script | ✅ Complete | January 22, 2026 |
 | 1.2 Create Directory Structure | ⬚ Pending | — |
 | 1.3 Create Health Check Endpoint | ⬚ Pending | — |
 | 1.4 Create .htaccess for CORS | ⬚ Pending | — |
@@ -24,19 +24,23 @@
 
 ## Subtask 1.1: Create Deployment Script
 
-**Completed:** —
+**Completed:** January 22, 2026
 
 ### What was done
-<!-- Fill after completing subtask -->
+- Created `scripts/deploy-llm.cjs` following the existing `deploy-party.cjs` pattern
+- Added `deploy:llm` npm script to package.json
+- Script deploys `php-api/llm/` directory to `saberloop.com/llm/`
+- Includes php files, htaccess, and src subdirectories
 
 ### Difficulties encountered
-<!-- Any challenges, confusion, unexpected issues -->
+None - straightforward pattern replication from existing deploy scripts.
 
 ### Solutions applied
-<!-- How issues were resolved -->
+N/A
 
 ### Key learnings
-<!-- Insights, patterns discovered, gotchas for future -->
+- Consistent deployment pattern across party, telemetry, and llm endpoints
+- `deleteRemote: false` preserves server-side config files (config.local.php)
 
 ---
 
