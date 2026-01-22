@@ -1,13 +1,9 @@
-# Enable CORS (if mod_headers is available)
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
-</IfModule>
+# CORS headers are set in PHP files for better portability
+# This file only handles OPTIONS preflight if mod_rewrite is available
 
-# Handle OPTIONS preflight (if mod_rewrite is available)
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Handle OPTIONS preflight - return 200 immediately
     RewriteCond %{REQUEST_METHOD} OPTIONS
     RewriteRule ^(.*)$ $1 [R=200,L]
 </IfModule>
