@@ -127,7 +127,7 @@ export default class HomeView extends BaseView {
     this.attachListeners();
 
     // Sync network indicator with current state
-    updateNetworkIndicator();    
+    updateNetworkIndicator();
   }
 
   generateRecentTopicsHTML(sessions) {
@@ -144,7 +144,8 @@ export default class HomeView extends BaseView {
     }
 
     // Generate HTML for each session
-      return sessions.map(session => {
+    return sessions
+      .map((session) => {
         const hasScore = session.score !== null && session.score !== undefined;
         const percentage = hasScore
           ? Math.round((session.score / session.totalQuestions) * 100)
@@ -165,15 +166,15 @@ export default class HomeView extends BaseView {
           }
         }
 
-      // Format the date - handle unplayed quizzes (timestamp = 0)
-      let dateStr;
-      if (!session.timestamp || session.timestamp === 0) {
-        dateStr = hasScore ? formatRelativeDate(session.timestamp) : t('home.notPlayedYet');
-      } else {
-        dateStr = formatRelativeDate(session.timestamp);
-      }
+        // Format the date - handle unplayed quizzes (timestamp = 0)
+        let dateStr;
+        if (!session.timestamp || session.timestamp === 0) {
+          dateStr = hasScore ? formatRelativeDate(session.timestamp) : t('home.notPlayedYet');
+        } else {
+          dateStr = formatRelativeDate(session.timestamp);
+        }
 
-      return `
+        return `
         <div class="quiz-item flex items-center gap-4 bg-card-light dark:bg-card-dark
   rounded-xl p-4 cursor-pointer hover:opacity-80 transition-opacity"
   data-session-id="${session.id}">
@@ -189,7 +190,8 @@ export default class HomeView extends BaseView {
           <p data-testid="quiz-score" class="${colorClass.split(' ')[0]} text-lg font-bold">${scoreDisplay}</p>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   async replayQuiz(sessionId) {
@@ -199,7 +201,7 @@ export default class HomeView extends BaseView {
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('errors.cannotReplay'),
-        icon: 'error'
+        icon: 'error',
       });
       return;
     }
@@ -209,10 +211,10 @@ export default class HomeView extends BaseView {
     state.set('currentGradeLevel', session.gradeLevel || 'middle school');
     state.set('generatedQuestions', session.questions);
     state.set('currentAnswers', []);
-    state.set('replaySessionId', sessionId); 
+    state.set('replaySessionId', sessionId);
 
     this.navigateTo('/quiz');
-  }  
+  }
 
   /**
    * Update visibility of party buttons based on mode.
@@ -248,7 +250,7 @@ export default class HomeView extends BaseView {
 
     // Quiz item click handlers for replay
     const quizItems = document.querySelectorAll('.quiz-item');
-    quizItems.forEach(item => {
+    quizItems.forEach((item) => {
       this.addEventListener(item, 'click', async () => {
         const sessionId = parseInt(/** @type {HTMLElement} */ (item).dataset.sessionId);
         await this.replayQuiz(sessionId);

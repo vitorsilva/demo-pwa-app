@@ -42,7 +42,7 @@ export function getModelDisplayName(modelId) {
   // Convert kebab-case to Title Case
   return name
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 
@@ -63,9 +63,9 @@ export async function getAvailableModels(apiKey) {
 
   const response = await fetch(OPENROUTER_MODELS_URL, {
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -81,12 +81,12 @@ export async function getAvailableModels(apiKey) {
 
   // Filter for free models only (for UI selection)
   const freeModels = allModels
-    .filter(model => isFreeModel(model))
-    .map(model => ({
+    .filter((model) => isFreeModel(model))
+    .map((model) => ({
       id: model.id,
       name: model.name || getModelDisplayName(model.id),
       description: model.description || '',
-      contextLength: model.context_length || 0
+      contextLength: model.context_length || 0,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -141,10 +141,13 @@ function getCachedModels() {
  */
 function cacheModels(models) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      models,
-      timestamp: Date.now()
-    }));
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({
+        models,
+        timestamp: Date.now(),
+      })
+    );
   } catch (error) {
     logger.debug('Cache write error', { error: error.message });
   }
@@ -170,13 +173,16 @@ function cachePricing(models) {
     for (const model of models) {
       pricingMap[model.id] = {
         prompt: model.pricing?.prompt || '0',
-        completion: model.pricing?.completion || '0'
+        completion: model.pricing?.completion || '0',
       };
     }
-    localStorage.setItem(PRICING_CACHE_KEY, JSON.stringify({
-      pricing: pricingMap,
-      timestamp: Date.now()
-    }));
+    localStorage.setItem(
+      PRICING_CACHE_KEY,
+      JSON.stringify({
+        pricing: pricingMap,
+        timestamp: Date.now(),
+      })
+    );
     logger.debug('Pricing cache updated', { modelCount: Object.keys(pricingMap).length });
   } catch (error) {
     logger.debug('Pricing cache write error', { error: error.message });
@@ -254,7 +260,7 @@ export async function prefetchModelPricing() {
     const allModels = data.data || [];
 
     // Filter to only the models we need
-    const filteredModels = allModels.filter(model => modelsNeeded.has(model.id));
+    const filteredModels = allModels.filter((model) => modelsNeeded.has(model.id));
 
     cachePricing(filteredModels);
     logger.debug('Pricing prefetch complete', { modelCount: filteredModels.length });

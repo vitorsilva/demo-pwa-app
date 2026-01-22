@@ -8,15 +8,15 @@ import {
   generateShareUrl,
   generateShareText,
   shareToTwitter,
-  shareToFacebook
+  shareToFacebook,
 } from './share.js';
 
 // Mock telemetry
 vi.mock('./telemetry.js', () => ({
   telemetry: {
     trackEvent: vi.fn(),
-    track: vi.fn()
-  }
+    track: vi.fn(),
+  },
 }));
 
 describe('Share Utilities', () => {
@@ -71,13 +71,13 @@ describe('Share Utilities', () => {
       const result = await shareContent({
         title: 'Test Title',
         text: 'Test text',
-        url: 'https://example.com'
+        url: 'https://example.com',
       });
 
       expect(mockShare).toHaveBeenCalledWith({
         title: 'Test Title',
         text: 'Test text',
-        url: 'https://example.com'
+        url: 'https://example.com',
       });
       expect(result).toBe(true);
     });
@@ -116,7 +116,7 @@ describe('Share Utilities', () => {
         title: 'Test',
         text: 'Test text',
         url: 'https://example.com',
-        imageBlob
+        imageBlob,
       });
 
       expect(mockCanShare).toHaveBeenCalled();
@@ -133,13 +133,13 @@ describe('Share Utilities', () => {
         title: 'Test',
         text: 'Test text',
         url: 'https://example.com',
-        imageBlob
+        imageBlob,
       });
 
       expect(mockShare).toHaveBeenCalledWith({
         title: 'Test',
         text: 'Test text',
-        url: 'https://example.com'
+        url: 'https://example.com',
       });
       expect(result).toBe(true);
     });
@@ -154,7 +154,7 @@ describe('Share Utilities', () => {
         title: 'Test',
         text: 'Test text',
         url: 'https://example.com',
-        imageBlob
+        imageBlob,
       });
 
       // Should call share with text only (fallback)
@@ -181,7 +181,7 @@ describe('Share Utilities', () => {
 
     it('should return false when copy fails', async () => {
       global.navigator = {
-        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Copy failed')) }
+        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Copy failed')) },
       };
 
       const result = await copyToClipboard('Test text');
@@ -207,7 +207,7 @@ describe('Share Utilities', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(text).toContain('History Quiz Master');
@@ -349,7 +349,7 @@ describe('Share Utilities', () => {
 
         expect(telemetry.track).toHaveBeenCalledWith('share_failed', {
           method: 'native',
-          error: 'Network error'
+          error: 'Network error',
         });
       });
     });
@@ -365,7 +365,7 @@ describe('Share Utilities', () => {
           title: 'Test',
           text: 'Test text',
           url: 'https://example.com',
-          imageBlob
+          imageBlob,
         });
 
         const shareCall = mockShare.mock.calls[0][0];
@@ -383,7 +383,7 @@ describe('Share Utilities', () => {
           text: 'Test text',
           url: 'https://example.com',
           imageBlob,
-          fileName: 'custom-image.png'
+          fileName: 'custom-image.png',
         });
 
         const shareCall = mockShare.mock.calls[0][0];
@@ -401,10 +401,12 @@ describe('Share Utilities', () => {
           title: 'Test',
           text: 'Test text',
           url: 'https://example.com',
-          imageBlob
+          imageBlob,
         });
 
-        expect(telemetry.track).toHaveBeenCalledWith('share_completed', { method: 'native_with_image' });
+        expect(telemetry.track).toHaveBeenCalledWith('share_completed', {
+          method: 'native_with_image',
+        });
       });
 
       it('should track share_cancelled with native_with_image method on abort', async () => {
@@ -419,10 +421,12 @@ describe('Share Utilities', () => {
           title: 'Test',
           text: 'Test text',
           url: 'https://example.com',
-          imageBlob
+          imageBlob,
         });
 
-        expect(telemetry.track).toHaveBeenCalledWith('share_cancelled', { method: 'native_with_image' });
+        expect(telemetry.track).toHaveBeenCalledWith('share_cancelled', {
+          method: 'native_with_image',
+        });
       });
 
       it('should track share_failed with native_with_image method on error', async () => {
@@ -436,12 +440,12 @@ describe('Share Utilities', () => {
           title: 'Test',
           text: 'Test text',
           url: 'https://example.com',
-          imageBlob
+          imageBlob,
         });
 
         expect(telemetry.track).toHaveBeenCalledWith('share_failed', {
           method: 'native_with_image',
-          error: 'Share failed'
+          error: 'Share failed',
         });
       });
 
@@ -455,7 +459,7 @@ describe('Share Utilities', () => {
           title: 'Test',
           text: 'Test text',
           url: 'https://example.com',
-          imageBlob
+          imageBlob,
         });
 
         expect(result).toBe(false);
@@ -481,14 +485,14 @@ describe('Share Utilities', () => {
       it('should track share_failed on clipboard error', async () => {
         const { telemetry } = await import('./telemetry.js');
         global.navigator = {
-          clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Permission denied')) }
+          clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Permission denied')) },
         };
 
         await copyToClipboard('Test');
 
         expect(telemetry.track).toHaveBeenCalledWith('share_failed', {
           method: 'clipboard',
-          error: 'Permission denied'
+          error: 'Permission denied',
         });
       });
     });
@@ -516,7 +520,7 @@ describe('Share Utilities', () => {
           topic: 'Test',
           score: 1,
           total: 2,
-          percentage: 50
+          percentage: 50,
         });
         expect(text).toContain('🏆');
       });
@@ -526,7 +530,7 @@ describe('Share Utilities', () => {
           topic: 'Test',
           score: 1,
           total: 2,
-          percentage: 50
+          percentage: 50,
         });
         expect(text).toContain('Saberloop');
       });
@@ -536,7 +540,7 @@ describe('Share Utilities', () => {
           topic: 'Math',
           score: 10,
           total: 10,
-          percentage: 100
+          percentage: 100,
         });
         expect(text).toContain('10/10');
         expect(text).toContain('100%');
@@ -573,11 +577,7 @@ describe('Share Utilities', () => {
 
         shareToTwitter('Test', 'https://example.com');
 
-        expect(mockOpen).toHaveBeenCalledWith(
-          expect.any(String),
-          '_blank',
-          'width=550,height=420'
-        );
+        expect(mockOpen).toHaveBeenCalledWith(expect.any(String), '_blank', 'width=550,height=420');
       });
     });
 
@@ -598,11 +598,7 @@ describe('Share Utilities', () => {
 
         shareToFacebook('https://example.com');
 
-        expect(mockOpen).toHaveBeenCalledWith(
-          expect.any(String),
-          '_blank',
-          'width=550,height=420'
-        );
+        expect(mockOpen).toHaveBeenCalledWith(expect.any(String), '_blank', 'width=550,height=420');
       });
 
       it('should construct URL with correct base', () => {

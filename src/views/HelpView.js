@@ -64,29 +64,31 @@ dark:text-subtext-dark">open_in_new</span>
     const faqData = [
       {
         question: t('help.faq1Question'),
-        answer: t('help.faq1Answer')
+        answer: t('help.faq1Answer'),
       },
       {
         question: t('help.faq2Question'),
-        answer: t('help.faq2Answer')
+        answer: t('help.faq2Answer'),
       },
       {
         question: t('help.faq3Question'),
-        answer: t('help.faq3Answer')
+        answer: t('help.faq3Answer'),
       },
       {
         question: t('help.faq4Question'),
-        answer: t('help.faq4Answer')
+        answer: t('help.faq4Answer'),
       },
       {
         question: t('help.faq5Question'),
-        answer: t('help.faq5Answer')
-      }
+        answer: t('help.faq5Answer'),
+      },
     ];
 
     const container = this.querySelector('#faqContainer');
 
-    container.innerHTML = faqData.map((faq, index) => `
+    container.innerHTML = faqData
+      .map(
+        (faq, index) => `
       <div class="bg-card-light dark:bg-card-dark rounded-xl overflow-hidden">
         <button class="faq-toggle w-full p-4 flex items-center justify-between
 text-left" data-index="${index}">
@@ -101,13 +103,15 @@ data-index="${index}">expand_more</span>
 leading-relaxed">${faq.answer}</p>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   bindEvents() {
     const toggles = this.appContainer.querySelectorAll('.faq-toggle');
 
-    toggles.forEach(toggle => {
+    toggles.forEach((toggle) => {
       this.addEventListener(toggle, 'click', () => {
         const index = /** @type {HTMLElement} */ (toggle).dataset.index;
         const answer = this.querySelector(`.faq-answer[data-index="${index}"]`);

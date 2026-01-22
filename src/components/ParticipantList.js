@@ -28,8 +28,7 @@ export function createParticipantItem(participant, options = {}) {
   const { showStatus = false, showScore = false } = options;
 
   const item = document.createElement('li');
-  item.className =
-    'flex items-center gap-2 py-2 px-3 rounded-lg bg-card-light dark:bg-card-dark';
+  item.className = 'flex items-center gap-2 py-2 px-3 rounded-lg bg-card-light dark:bg-card-dark';
   item.setAttribute('data-testid', 'participant-item');
   item.setAttribute('data-participant-id', participant.id);
 
@@ -75,8 +74,7 @@ export function createParticipantItem(participant, options = {}) {
   // Host badge
   if (participant.isHost) {
     const badge = document.createElement('span');
-    badge.className =
-      'text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium';
+    badge.className = 'text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium';
     badge.textContent = t('party.host');
     badge.setAttribute('data-testid', 'host-badge');
     item.appendChild(badge);
@@ -111,8 +109,7 @@ export function createParticipantList(participants, options = {}) {
 
   // Header
   const header = document.createElement('h4');
-  header.className =
-    'text-subtext-light dark:text-subtext-dark text-sm font-medium';
+  header.className = 'text-subtext-light dark:text-subtext-dark text-sm font-medium';
   header.textContent = `${t('party.participants')} (${participants.length})`;
   container.appendChild(header);
 
@@ -168,4 +165,3 @@ function getStatusColor(status) {
       return 'bg-gray-500';
   }
 }
-

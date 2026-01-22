@@ -84,7 +84,7 @@ export function shuffleQuestionOptions(question) {
   }
 
   // Strip existing prefixes to get clean answer text
-  const cleanOptions = options.map(opt => stripPrefix(opt));
+  const cleanOptions = options.map((opt) => stripPrefix(opt));
 
   // Create indices array and shuffle it
   const indices = options.map((_, i) => i);
@@ -101,7 +101,7 @@ export function shuffleQuestionOptions(question) {
   return {
     ...rest,
     options: shuffledOptions,
-    correct: newCorrectIndex
+    correct: newCorrectIndex,
   };
 }
 
@@ -117,7 +117,7 @@ export function shuffleAllQuestions(questions) {
     return questions;
   }
 
-  return questions.map(q => shuffleQuestionOptions(q));
+  return questions.map((q) => shuffleQuestionOptions(q));
 }
 
 /**
@@ -133,12 +133,12 @@ export function shuffleOptions(options, correctIndex) {
     return {
       shuffledOptions: options || [],
       shuffleMap: [],
-      newCorrectIndex: correctIndex
+      newCorrectIndex: correctIndex,
     };
   }
 
   // Strip existing prefixes to get clean answer text
-  const cleanOptions = options.map(opt => stripPrefix(opt));
+  const cleanOptions = options.map((opt) => stripPrefix(opt));
 
   // Create indices array and shuffle it
   const indices = options.map((_, i) => i);
@@ -156,6 +156,6 @@ export function shuffleOptions(options, correctIndex) {
   return {
     shuffledOptions,
     shuffleMap: shuffledIndices,
-    newCorrectIndex
+    newCorrectIndex,
   };
 }

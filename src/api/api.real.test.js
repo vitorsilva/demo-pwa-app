@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the dependencies before importing the module
 vi.mock('./openrouter-client.js', () => ({
-  callOpenRouter: vi.fn()
+  callOpenRouter: vi.fn(),
 }));
 
 vi.mock('../utils/logger.js', () => ({
@@ -10,8 +10,8 @@ vi.mock('../utils/logger.js', () => ({
     debug: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-    perf: vi.fn()
-  }
+    perf: vi.fn(),
+  },
 }));
 
 import { generateQuestions, generateExplanation } from './api.real.js';
@@ -23,7 +23,7 @@ function generateMockQuestions(count) {
     question: `Q${i + 1}?`,
     options: ['A', 'B', 'C', 'D'],
     correct: i % 4,
-    difficulty: ['easy', 'medium', 'challenging'][i % 3]
+    difficulty: ['easy', 'medium', 'challenging'][i % 3],
   }));
 }
 
@@ -45,9 +45,14 @@ describe('generateQuestions prompt', () => {
             { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 1, difficulty: 'easy' },
             { question: 'Q3?', options: ['A', 'B', 'C', 'D'], correct: 2, difficulty: 'medium' },
             { question: 'Q4?', options: ['A', 'B', 'C', 'D'], correct: 3, difficulty: 'medium' },
-            { question: 'Q5?', options: ['A', 'B', 'C', 'D'], correct: 0, difficulty: 'challenging' }
-          ]
-        })
+            {
+              question: 'Q5?',
+              options: ['A', 'B', 'C', 'D'],
+              correct: 0,
+              difficulty: 'challenging',
+            },
+          ],
+        }),
       };
     });
 
@@ -73,17 +78,19 @@ describe('generateQuestions prompt', () => {
             { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 1, difficulty: 'easy' },
             { question: 'Q3?', options: ['A', 'B', 'C', 'D'], correct: 2, difficulty: 'medium' },
             { question: 'Q4?', options: ['A', 'B', 'C', 'D'], correct: 3, difficulty: 'medium' },
-            { question: 'Q5?', options: ['A', 'B', 'C', 'D'], correct: 0, difficulty: 'challenging' }
-          ]
-        })
+            {
+              question: 'Q5?',
+              options: ['A', 'B', 'C', 'D'],
+              correct: 0,
+              difficulty: 'challenging',
+            },
+          ],
+        }),
       };
     });
 
     // Act: Call with previous questions
-    const previousQuestions = [
-      'What is the capital of France?',
-      'Who wrote Romeo and Juliet?'
-    ];
+    const previousQuestions = ['What is the capital of France?', 'Who wrote Romeo and Juliet?'];
     await generateQuestions('Test Topic', 'middle school', 'fake-api-key', { previousQuestions });
 
     // Assert: Check that previous questions are included
@@ -105,9 +112,14 @@ describe('generateQuestions prompt', () => {
             { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 1, difficulty: 'easy' },
             { question: 'Q3?', options: ['A', 'B', 'C', 'D'], correct: 2, difficulty: 'medium' },
             { question: 'Q4?', options: ['A', 'B', 'C', 'D'], correct: 3, difficulty: 'medium' },
-            { question: 'Q5?', options: ['A', 'B', 'C', 'D'], correct: 0, difficulty: 'challenging' }
-          ]
-        })
+            {
+              question: 'Q5?',
+              options: ['A', 'B', 'C', 'D'],
+              correct: 0,
+              difficulty: 'challenging',
+            },
+          ],
+        }),
       };
     });
 
@@ -125,8 +137,8 @@ describe('generateQuestions prompt', () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
-          questions: generateMockQuestions(5)
-        })
+          questions: generateMockQuestions(5),
+        }),
       };
     });
 
@@ -142,8 +154,8 @@ describe('generateQuestions prompt', () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
-          questions: generateMockQuestions(10)
-        })
+          questions: generateMockQuestions(10),
+        }),
       };
     });
 
@@ -157,8 +169,8 @@ describe('generateQuestions prompt', () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
-          questions: generateMockQuestions(3) // Wrong count
-        })
+          questions: generateMockQuestions(3), // Wrong count
+        }),
       };
     });
 
@@ -172,12 +184,14 @@ describe('generateQuestions prompt', () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
-          questions: generateMockQuestions(15)
-        })
+          questions: generateMockQuestions(15),
+        }),
       };
     });
 
-    const result = await generateQuestions('Test Topic', 'middle school', 'fake-api-key', { questionCount: 15 });
+    const result = await generateQuestions('Test Topic', 'middle school', 'fake-api-key', {
+      questionCount: 15,
+    });
 
     expect(result.questions).toHaveLength(15);
   });
@@ -190,15 +204,18 @@ describe('generateExplanation JSON parsing', () => {
 
   const validExplanation = {
     rightAnswerExplanation: 'Paris is the capital of France.',
-    wrongAnswerExplanation: 'London is the capital of the UK, not France.'
+    wrongAnswerExplanation: 'London is the capital of the UK, not France.',
   };
 
   it('should parse clean JSON response', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify(validExplanation)
+      text: JSON.stringify(validExplanation),
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -206,10 +223,13 @@ describe('generateExplanation JSON parsing', () => {
 
   it('should parse JSON wrapped in markdown code block', async () => {
     callOpenRouter.mockResolvedValue({
-      text: '```json\n' + JSON.stringify(validExplanation) + '\n```'
+      text: '```json\n' + JSON.stringify(validExplanation) + '\n```',
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -217,10 +237,13 @@ describe('generateExplanation JSON parsing', () => {
 
   it('should parse JSON with leading/trailing whitespace', async () => {
     callOpenRouter.mockResolvedValue({
-      text: '  \n\n' + JSON.stringify(validExplanation) + '\n\n  '
+      text: '  \n\n' + JSON.stringify(validExplanation) + '\n\n  ',
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -229,13 +252,17 @@ describe('generateExplanation JSON parsing', () => {
   it('should parse JSON with smart quotes by normalizing them', async () => {
     // This test documents the bug - smart quotes cause JSON.parse to fail
     // The current fallback returns raw JSON as rightAnswerExplanation
-    const jsonWithSmartQuotes = '{ "rightAnswerExplanation": "Paris is correct.", "wrongAnswerExplanation": "London is wrong." }';
+    const jsonWithSmartQuotes =
+      '{ "rightAnswerExplanation": "Paris is correct.", "wrongAnswerExplanation": "London is wrong." }';
 
     callOpenRouter.mockResolvedValue({
-      text: jsonWithSmartQuotes
+      text: jsonWithSmartQuotes,
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     // BUG: Should parse the content, not return raw JSON
     // Current behavior returns the raw JSON string as rightAnswerExplanation
@@ -248,10 +275,13 @@ describe('generateExplanation JSON parsing', () => {
   it('should parse JSON with extra text before it', async () => {
     // Some LLMs add conversational text before the JSON
     callOpenRouter.mockResolvedValue({
-      text: 'Here is the explanation:\n' + JSON.stringify(validExplanation)
+      text: 'Here is the explanation:\n' + JSON.stringify(validExplanation),
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     // BUG: Should extract and parse the JSON
     expect(result.rightAnswerExplanation).not.toContain('{');
@@ -261,10 +291,13 @@ describe('generateExplanation JSON parsing', () => {
 
   it('should parse JSON with extra text after it', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify(validExplanation) + '\n\nI hope this helps!'
+      text: JSON.stringify(validExplanation) + '\n\nI hope this helps!',
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     // BUG: Should extract and parse the JSON
     expect(result.rightAnswerExplanation).not.toContain('{');
@@ -276,10 +309,13 @@ describe('generateExplanation JSON parsing', () => {
     // BOM (Byte Order Mark) can appear at the start of some text
     const BOM = '\uFEFF';
     callOpenRouter.mockResolvedValue({
-      text: BOM + JSON.stringify(validExplanation)
+      text: BOM + JSON.stringify(validExplanation),
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-api-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-api-key',
+    });
 
     expect(result.rightAnswerExplanation).not.toContain('{');
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
@@ -297,7 +333,7 @@ describe('generateQuestions retry logic', () => {
       question: `Question ${i + 1}?`,
       options: ['A) opt1', 'B) opt2', 'C) opt3', 'D) opt4'],
       correct: i % 4,
-      difficulty: 'easy'
+      difficulty: 'easy',
     }));
   }
 
@@ -305,7 +341,7 @@ describe('generateQuestions retry logic', () => {
     callOpenRouter.mockResolvedValueOnce({
       text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
       model: 'test-model',
-      usage: { promptTokens: 100, completionTokens: 200, totalTokens: 300 }
+      usage: { promptTokens: 100, completionTokens: 200, totalTokens: 300 },
     });
 
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
@@ -326,7 +362,7 @@ describe('generateQuestions retry logic', () => {
       return {
         text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
         model: 'test-model',
-        usage: {}
+        usage: {},
       };
     });
 
@@ -349,16 +385,16 @@ describe('generateQuestions retry logic', () => {
           text: JSON.stringify({
             language: 'en',
             questions: [
-              { question: 'Q?', options: ['A', 'B', 'C', 'D'] } // missing 'correct'
-            ]
-          })
+              { question: 'Q?', options: ['A', 'B', 'C', 'D'] }, // missing 'correct'
+            ],
+          }),
         };
       }
       // Second call: return valid response
       return {
         text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
         model: 'test-model',
-        usage: {}
+        usage: {},
       };
     });
 
@@ -371,9 +407,9 @@ describe('generateQuestions retry logic', () => {
   it('should NOT retry on rate limit error', async () => {
     callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
 
-    await expect(
-      generateQuestions('Test', 'middle school', 'fake-key')
-    ).rejects.toThrow('Rate limit exceeded');
+    await expect(generateQuestions('Test', 'middle school', 'fake-key')).rejects.toThrow(
+      'Rate limit exceeded'
+    );
 
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
   });
@@ -381,21 +417,21 @@ describe('generateQuestions retry logic', () => {
   it('should NOT retry on authentication error', async () => {
     callOpenRouter.mockRejectedValueOnce(new Error('Invalid API key'));
 
-    await expect(
-      generateQuestions('Test', 'middle school', 'fake-key')
-    ).rejects.toThrow('Invalid API key');
+    await expect(generateQuestions('Test', 'middle school', 'fake-key')).rejects.toThrow(
+      'Invalid API key'
+    );
 
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
   });
 
   it('should fail after max retry attempts', async () => {
     callOpenRouter.mockResolvedValue({
-      text: 'Invalid JSON response'
+      text: 'Invalid JSON response',
     });
 
-    await expect(
-      generateQuestions('Test', 'middle school', 'fake-key')
-    ).rejects.toThrow('Invalid response format from AI');
+    await expect(generateQuestions('Test', 'middle school', 'fake-key')).rejects.toThrow(
+      'Invalid response format from AI'
+    );
 
     expect(callOpenRouter).toHaveBeenCalledTimes(2); // 2 attempts max
   });
@@ -404,7 +440,7 @@ describe('generateQuestions retry logic', () => {
     callOpenRouter.mockResolvedValueOnce({
       text: `<think>Let me create a quiz...</think>${JSON.stringify({ language: 'en', questions: generateValidQuestions(5) })}`,
       model: 'deepseek-r1',
-      usage: {}
+      usage: {},
     });
 
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
@@ -424,9 +460,9 @@ describe('generateQuestions schema validation', () => {
       text: JSON.stringify({
         language: 'en',
         questions: [
-          { options: ['A', 'B', 'C', 'D'], correct: 0 } // missing 'question'
-        ]
-      })
+          { options: ['A', 'B', 'C', 'D'], correct: 0 }, // missing 'question'
+        ],
+      }),
     });
 
     await expect(
@@ -439,9 +475,9 @@ describe('generateQuestions schema validation', () => {
       text: JSON.stringify({
         language: 'en',
         questions: [
-          { question: 'Q?', options: ['A', 'B', 'C'], correct: 0 } // only 3 options
-        ]
-      })
+          { question: 'Q?', options: ['A', 'B', 'C'], correct: 0 }, // only 3 options
+        ],
+      }),
     });
 
     await expect(
@@ -454,9 +490,9 @@ describe('generateQuestions schema validation', () => {
       text: JSON.stringify({
         language: 'en',
         questions: [
-          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 5 } // invalid index
-        ]
-      })
+          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: 5 }, // invalid index
+        ],
+      }),
     });
 
     await expect(
@@ -469,9 +505,9 @@ describe('generateQuestions schema validation', () => {
       text: JSON.stringify({
         language: 'en',
         questions: [
-          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: '0' } // string instead of number
-        ]
-      })
+          { question: 'Q?', options: ['A', 'B', 'C', 'D'], correct: '0' }, // string instead of number
+        ],
+      }),
     });
 
     await expect(
@@ -484,14 +520,21 @@ describe('generateQuestions schema validation', () => {
       text: JSON.stringify({
         language: 'en',
         questions: [
-          { question: 'What is 2+2?', options: ['A) 3', 'B) 4', 'C) 5', 'D) 6'], correct: 1, difficulty: 'easy' }
-        ]
+          {
+            question: 'What is 2+2?',
+            options: ['A) 3', 'B) 4', 'C) 5', 'D) 6'],
+            correct: 1,
+            difficulty: 'easy',
+          },
+        ],
       }),
       model: 'test',
-      usage: {}
+      usage: {},
     });
 
-    const result = await generateQuestions('Test', 'middle school', 'fake-key', { questionCount: 1 });
+    const result = await generateQuestions('Test', 'middle school', 'fake-key', {
+      questionCount: 1,
+    });
 
     expect(result.questions).toHaveLength(1);
     expect(result.questions[0].correct).toBe(1);
@@ -505,15 +548,18 @@ describe('generateExplanation retry logic', () => {
 
   const validExplanation = {
     rightAnswerExplanation: 'The correct answer is B because Paris is the capital of France.',
-    wrongAnswerExplanation: 'London is the capital of the UK, not France.'
+    wrongAnswerExplanation: 'London is the capital of the UK, not France.',
   };
 
   it('should succeed on first attempt when response is valid', async () => {
     callOpenRouter.mockResolvedValueOnce({
-      text: JSON.stringify(validExplanation)
+      text: JSON.stringify(validExplanation),
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
@@ -530,7 +576,10 @@ describe('generateExplanation retry logic', () => {
       return { text: JSON.stringify(validExplanation) };
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -549,7 +598,10 @@ describe('generateExplanation retry logic', () => {
       return { text: JSON.stringify(validExplanation) };
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -559,7 +611,10 @@ describe('generateExplanation retry logic', () => {
     callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
 
     await expect(
-      generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' })
+      generateExplanation('What is the capital?', 'London', 'Paris', {
+        gradeLevel: 'middle school',
+        apiKey: 'fake-key',
+      })
     ).rejects.toThrow('Rate limit exceeded');
 
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
@@ -567,11 +622,14 @@ describe('generateExplanation retry logic', () => {
 
   it('should fail after max retry attempts', async () => {
     callOpenRouter.mockResolvedValue({
-      text: 'Invalid JSON response'
+      text: 'Invalid JSON response',
     });
 
     await expect(
-      generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' })
+      generateExplanation('What is the capital?', 'London', 'Paris', {
+        gradeLevel: 'middle school',
+        apiKey: 'fake-key',
+      })
     ).rejects.toThrow('Invalid response format from AI');
 
     expect(callOpenRouter).toHaveBeenCalledTimes(2);
@@ -579,10 +637,13 @@ describe('generateExplanation retry logic', () => {
 
   it('should handle DeepSeek thinking tags in response', async () => {
     callOpenRouter.mockResolvedValueOnce({
-      text: `<think>Let me explain this...</think>${JSON.stringify(validExplanation)}`
+      text: `<think>Let me explain this...</think>${JSON.stringify(validExplanation)}`,
     });
 
-    const result = await generateExplanation('What is the capital?', 'London', 'Paris', { gradeLevel: 'middle school', apiKey: 'fake-key' });
+    const result = await generateExplanation('What is the capital?', 'London', 'Paris', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(callOpenRouter).toHaveBeenCalledTimes(1);
@@ -596,7 +657,7 @@ describe('generateExplanation schema validation', () => {
 
   it('should reject response missing rightAnswerExplanation', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify({ wrongAnswerExplanation: 'Something' })
+      text: JSON.stringify({ wrongAnswerExplanation: 'Something' }),
     });
 
     await expect(
@@ -606,7 +667,7 @@ describe('generateExplanation schema validation', () => {
 
   it('should reject response missing wrongAnswerExplanation', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify({ rightAnswerExplanation: 'Something' })
+      text: JSON.stringify({ rightAnswerExplanation: 'Something' }),
     });
 
     await expect(
@@ -616,7 +677,7 @@ describe('generateExplanation schema validation', () => {
 
   it('should reject empty rightAnswerExplanation', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify({ rightAnswerExplanation: '', wrongAnswerExplanation: 'Something' })
+      text: JSON.stringify({ rightAnswerExplanation: '', wrongAnswerExplanation: 'Something' }),
     });
 
     await expect(
@@ -626,7 +687,7 @@ describe('generateExplanation schema validation', () => {
 
   it('should reject empty wrongAnswerExplanation', async () => {
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify({ rightAnswerExplanation: 'Something', wrongAnswerExplanation: '  ' })
+      text: JSON.stringify({ rightAnswerExplanation: 'Something', wrongAnswerExplanation: '  ' }),
     });
 
     await expect(
@@ -637,14 +698,17 @@ describe('generateExplanation schema validation', () => {
   it('should accept valid explanation with all required fields', async () => {
     const validExplanation = {
       rightAnswerExplanation: 'The answer is correct because...',
-      wrongAnswerExplanation: 'Your answer was incorrect because...'
+      wrongAnswerExplanation: 'Your answer was incorrect because...',
     };
 
     callOpenRouter.mockResolvedValue({
-      text: JSON.stringify(validExplanation)
+      text: JSON.stringify(validExplanation),
     });
 
-    const result = await generateExplanation('Q?', 'A', 'B', { gradeLevel: 'middle school', apiKey: 'fake-key' });
+    const result = await generateExplanation('Q?', 'A', 'B', {
+      gradeLevel: 'middle school',
+      apiKey: 'fake-key',
+    });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);

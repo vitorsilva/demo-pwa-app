@@ -6,7 +6,7 @@ import { t } from '../core/i18n.js';
 // Mock dependencies
 vi.mock('../services/theme-manager.js', () => ({
   getCurrentMode: vi.fn(),
-  setMode: vi.fn()
+  setMode: vi.fn(),
 }));
 
 vi.mock('../core/i18n.js', () => ({
@@ -15,10 +15,10 @@ vi.mock('../core/i18n.js', () => ({
       'mode.learn': 'Learn',
       'mode.party': 'Party',
       'mode.switchToLearn': 'Switch to Learning Mode',
-      'mode.switchToParty': 'Switch to Party Mode'
+      'mode.switchToParty': 'Switch to Party Mode',
     };
     return translations[key] || key;
-  })
+  }),
 }));
 
 describe('ModeToggle Component', () => {
@@ -237,7 +237,7 @@ describe('ModeToggle Component', () => {
       const toggle = createModeToggle();
       const buttons = toggle.querySelectorAll('button');
 
-      buttons.forEach(btn => {
+      buttons.forEach((btn) => {
         expect(btn.getAttribute('role')).toBe('tab');
       });
     });

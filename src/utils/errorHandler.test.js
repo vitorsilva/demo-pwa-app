@@ -4,15 +4,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('./logger.js', () => ({
   logger: {
     error: vi.fn(),
-    info: vi.fn()
-  }
+    info: vi.fn(),
+  },
 }));
 
 // Mock the telemetry module
 vi.mock('./telemetry.js', () => ({
   telemetry: {
-    track: vi.fn()
-  }
+    track: vi.fn(),
+  },
 }));
 
 // Import after mocks are set up
@@ -80,7 +80,7 @@ describe('Error Handler', () => {
 
       expect(logger.error).toHaveBeenCalledWith('API error', {
         message: 'Test error',
-        endpoint: '/api/test'
+        endpoint: '/api/test',
       });
     });
   });
@@ -113,7 +113,10 @@ describe('Error Handler', () => {
 
     it('should register unhandledrejection event listener', () => {
       initErrorHandling();
-      expect(window.addEventListener).toHaveBeenCalledWith('unhandledrejection', expect.any(Function));
+      expect(window.addEventListener).toHaveBeenCalledWith(
+        'unhandledrejection',
+        expect.any(Function)
+      );
     });
 
     it('should log initialization message', () => {
@@ -128,7 +131,7 @@ describe('Error Handler', () => {
         message: 'Test uncaught error',
         filename: 'test.js',
         lineno: 42,
-        colno: 10
+        colno: 10,
       };
       errorHandler(mockEvent);
 
@@ -136,7 +139,7 @@ describe('Error Handler', () => {
         message: 'Test uncaught error',
         filename: 'test.js',
         line: 42,
-        column: 10
+        column: 10,
       });
 
       expect(telemetry.track).toHaveBeenCalledWith('error', {
@@ -144,7 +147,7 @@ describe('Error Handler', () => {
         message: 'Test uncaught error',
         filename: 'test.js',
         line: 42,
-        column: 10
+        column: 10,
       });
     });
 
@@ -153,17 +156,17 @@ describe('Error Handler', () => {
 
       const mockEvent = {
         reason: new Error('Promise failed'),
-        preventDefault: vi.fn()
+        preventDefault: vi.fn(),
       };
       rejectionHandler(mockEvent);
 
       expect(logger.error).toHaveBeenCalledWith('Unhandled promise rejection', {
-        reason: 'Promise failed'
+        reason: 'Promise failed',
       });
 
       expect(telemetry.track).toHaveBeenCalledWith('error', {
         type: 'unhandledrejection',
-        reason: 'Promise failed'
+        reason: 'Promise failed',
       });
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
@@ -174,12 +177,12 @@ describe('Error Handler', () => {
 
       const mockEvent = {
         reason: 'Simple string rejection',
-        preventDefault: vi.fn()
+        preventDefault: vi.fn(),
       };
       rejectionHandler(mockEvent);
 
       expect(logger.error).toHaveBeenCalledWith('Unhandled promise rejection', {
-        reason: 'Simple string rejection'
+        reason: 'Simple string rejection',
       });
     });
 
@@ -190,7 +193,7 @@ describe('Error Handler', () => {
         message: 'Test error',
         filename: 'test.js',
         lineno: 1,
-        colno: 1
+        colno: 1,
       };
       errorHandler(mockEvent);
 
@@ -204,7 +207,7 @@ describe('Error Handler', () => {
 
       const mockEvent = {
         reason: new Error('Rejection'),
-        preventDefault: vi.fn()
+        preventDefault: vi.fn(),
       };
       rejectionHandler(mockEvent);
 
@@ -220,7 +223,7 @@ describe('Error Handler', () => {
         message: 'Test',
         filename: '',
         lineno: 0,
-        colno: 0
+        colno: 0,
       };
       const result = errorHandler(mockEvent);
 
@@ -253,7 +256,7 @@ describe('Error Handler', () => {
         message: 'Test',
         filename: '',
         lineno: 0,
-        colno: 0
+        colno: 0,
       });
 
       expect(document.getElementById('error-notification')).toBeTruthy();
@@ -270,7 +273,7 @@ describe('Error Handler', () => {
         message: 'First error',
         filename: '',
         lineno: 0,
-        colno: 0
+        colno: 0,
       };
 
       errorHandler(mockEvent);
@@ -287,7 +290,7 @@ describe('Error Handler', () => {
         message: 'Test',
         filename: '',
         lineno: 0,
-        colno: 0
+        colno: 0,
       });
 
       // Manually remove the notification (simulating user clicking close)

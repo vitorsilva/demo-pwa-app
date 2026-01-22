@@ -5,25 +5,25 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock all dependencies
 vi.mock('../core/db.js', () => ({
-  clearAllUserData: vi.fn()
+  clearAllUserData: vi.fn(),
 }));
 
 vi.mock('../features/sample-loader.js', () => ({
-  loadSamplesIfNeeded: vi.fn()
+  loadSamplesIfNeeded: vi.fn(),
 }));
 
 vi.mock('../core/state.js', () => ({
   default: {
-    clear: vi.fn()
-  }
+    clear: vi.fn(),
+  },
 }));
 
 vi.mock('../utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 import { deleteAllUserData } from './data-service.js';
@@ -46,9 +46,15 @@ describe('Data Service', () => {
     originalLocalStorage = global.localStorage;
     global.localStorage = {
       getItem: vi.fn((key) => localStorageData[key] || null),
-      setItem: vi.fn((key, value) => { localStorageData[key] = value; }),
-      removeItem: vi.fn((key) => { delete localStorageData[key]; }),
-      clear: vi.fn(() => { localStorageData = {}; })
+      setItem: vi.fn((key, value) => {
+        localStorageData[key] = value;
+      }),
+      removeItem: vi.fn((key) => {
+        delete localStorageData[key];
+      }),
+      clear: vi.fn(() => {
+        localStorageData = {};
+      }),
     };
 
     // Mock sessionStorage
@@ -56,9 +62,15 @@ describe('Data Service', () => {
     originalSessionStorage = global.sessionStorage;
     global.sessionStorage = {
       getItem: vi.fn((key) => sessionStorageData[key] || null),
-      setItem: vi.fn((key, value) => { sessionStorageData[key] = value; }),
-      removeItem: vi.fn((key) => { delete sessionStorageData[key]; }),
-      clear: vi.fn(() => { sessionStorageData = {}; })
+      setItem: vi.fn((key, value) => {
+        sessionStorageData[key] = value;
+      }),
+      removeItem: vi.fn((key) => {
+        delete sessionStorageData[key];
+      }),
+      clear: vi.fn(() => {
+        sessionStorageData = {};
+      }),
     };
   });
 
@@ -77,11 +89,11 @@ describe('Data Service', () => {
     it('should clear localStorage keys', async () => {
       // Set up localStorage with data
       localStorageData = {
-        'quizmaster_settings': '{}',
-        'openrouter_models_cache': '[]',
-        'i18nextLng': 'en',
-        'saberloop_telemetry_queue': '[]',
-        'other_key': 'should not be removed'
+        quizmaster_settings: '{}',
+        openrouter_models_cache: '[]',
+        i18nextLng: 'en',
+        saberloop_telemetry_queue: '[]',
+        other_key: 'should not be removed',
       };
 
       await deleteAllUserData();
@@ -95,7 +107,7 @@ describe('Data Service', () => {
 
     it('should clear sessionStorage keys', async () => {
       sessionStorageData = {
-        'openrouter_code_verifier': 'test-verifier'
+        openrouter_code_verifier: 'test-verifier',
       };
 
       await deleteAllUserData();
@@ -151,7 +163,7 @@ describe('Data Service', () => {
         'localStorage',
         'sessionStorage',
         'state.clear',
-        'loadSamplesIfNeeded'
+        'loadSamplesIfNeeded',
       ]);
     });
 
@@ -177,7 +189,9 @@ describe('Data Service', () => {
       clearAllUserData.mockRejectedValue(error);
 
       await expect(deleteAllUserData()).rejects.toThrow('Database error');
-      expect(logger.error).toHaveBeenCalledWith('Data deletion failed', { error: 'Database error' });
+      expect(logger.error).toHaveBeenCalledWith('Data deletion failed', {
+        error: 'Database error',
+      });
     });
 
     it('should not reload samples if clearing fails', async () => {

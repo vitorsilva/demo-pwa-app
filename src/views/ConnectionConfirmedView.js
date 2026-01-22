@@ -1,13 +1,13 @@
-  import BaseView from './BaseView.js';
-  import { t } from '../core/i18n.js';
+import BaseView from './BaseView.js';
+import { t } from '../core/i18n.js';
 
-  export default class ConnectionConfirmedView extends BaseView {
-    constructor() {
-      super();
-    }
+export default class ConnectionConfirmedView extends BaseView {
+  constructor() {
+    super();
+  }
 
-    async render() {
-      this.setHTML(`
+  async render() {
+    this.setHTML(`
         <div class="relative flex h-auto min-h-screen w-full flex-col items-center justify-center
           bg-background-light dark:bg-background-dark overflow-x-hidden px-4">
 
@@ -68,15 +68,15 @@
         </div>
       `);
 
-      this.setupEventListeners();
-    }
+    this.setupEventListeners();
+  }
 
-    setupEventListeners() {
-      const startBtn = document.getElementById('start-quiz-btn');
-      if (startBtn) {
-        startBtn.addEventListener('click', () => {
-          this.navigateTo('/');
-        });
-      }
+  setupEventListeners() {
+    const startBtn = document.getElementById('start-quiz-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        this.navigateTo('/');
+      });
     }
   }
+}

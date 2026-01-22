@@ -58,29 +58,30 @@ if (typeof document !== 'undefined' && document.getElementById('textInput')) {
   }
 }
 
-  export function updateOnlineStatus() {
-    const statusElement = document.getElementById('status');
+export function updateOnlineStatus() {
+  const statusElement = document.getElementById('status');
 
-    if (!statusElement) return; // Safety check
+  if (!statusElement) return; // Safety check
 
-    if (navigator.onLine) {
-      statusElement.textContent = 'Online';
-      statusElement.className = 'status online';
-    } else {
-      statusElement.textContent = 'Offline';
-      statusElement.className = 'status offline';
-    }
+  if (navigator.onLine) {
+    statusElement.textContent = 'Online';
+    statusElement.className = 'status online';
+  } else {
+    statusElement.textContent = 'Offline';
+    statusElement.className = 'status offline';
   }
+}
 
-  // Register Service Worker
-  if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-              .then(registration => {
-                  console.log('Service Worker registered successfully:', registration);
-              })
-              .catch(error => {
-                  console.log('Service Worker registration failed:', error);
-              });
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered successfully:', registration);
+      })
+      .catch((error) => {
+        console.log('Service Worker registration failed:', error);
       });
-  }
+  });
+}

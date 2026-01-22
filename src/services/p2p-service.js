@@ -14,8 +14,8 @@ const log = logger.child({ module: 'p2p-service' });
 
 /**
  * @typedef {Object} PeerConnection
- * @property {RTCPeerConnection} connection - The WebRTC connection   
- * @property {RTCDataChannel|null} dataChannel - The data channel     
+ * @property {RTCPeerConnection} connection - The WebRTC connection
+ * @property {RTCDataChannel|null} dataChannel - The data channel
  * @property {'new'|'connecting'|'connected'|'disconnected'|'failed'} state - Connection state
  * @property {number} reconnectAttempts - Number of reconnection attempts
  * @property {number} connectionStartTime - Timestamp when connection was initiated
@@ -181,10 +181,12 @@ export class P2PService {
     }
 
     // Set remote description (the offer)
-    await connection.setRemoteDescription(new RTCSessionDescription({     
-      type: 'offer',
-      sdp: payload.sdp,
-    }));
+    await connection.setRemoteDescription(
+      new RTCSessionDescription({
+        type: 'offer',
+        sdp: payload.sdp,
+      })
+    );
 
     // Process any ICE candidates that arrived before the offer
     await this._processPendingIceCandidates(peerId);
@@ -221,10 +223,12 @@ export class P2PService {
       return;
     }
 
-    await peerConnection.connection.setRemoteDescription(new RTCSessionDescription({
-      type: 'answer',
-      sdp: payload.sdp,
-    }));
+    await peerConnection.connection.setRemoteDescription(
+      new RTCSessionDescription({
+        type: 'answer',
+        sdp: payload.sdp,
+      })
+    );
 
     // Process any ICE candidates that arrived before the answer
     await this._processPendingIceCandidates(peerId);
@@ -262,7 +266,7 @@ export class P2PService {
   }
 
   /**
-   * Process any queued ICE candidates after remote description is set. 
+   * Process any queued ICE candidates after remote description is set.
    *
    * @private
    * @param {string} peerId - Peer ID
@@ -278,7 +282,7 @@ export class P2PService {
 
     for (const candidate of pending) {
       try {
-        await peerConnection.connection.addIceCandidate(candidate);     
+        await peerConnection.connection.addIceCandidate(candidate);
       } catch (error) {
         log.warn('Failed to add queued ICE candidate', { peerId, error: error.message });
       }
@@ -324,7 +328,7 @@ export class P2PService {
           protocol: event.candidate.protocol,
         });
 
-        this.signalingClient.sendIceCandidate(peerId, event.candidate);   
+        this.signalingClient.sendIceCandidate(peerId, event.candidate);
       }
     };
 
@@ -341,7 +345,7 @@ export class P2PService {
           // Track telemetry
           telemetry.track('p2p_connection_success', {
             peerId,
-            connectionTime: Date.now() - peerConnection.connectionStartTime,    
+            connectionTime: Date.now() - peerConnection.connectionStartTime,
             iceState: connection.iceConnectionState,
           });
 

@@ -14,7 +14,7 @@ function getExplanationElements(backdrop) {
     wrongAnswerText: backdrop.querySelector('#wrongAnswerText'),
     wrongAnswerSection: backdrop.querySelector('#wrongAnswerSection'),
     separator: backdrop.querySelector('#explanationSeparator'),
-    error: backdrop.querySelector('#explanationError')
+    error: backdrop.querySelector('#explanationError'),
   };
 }
 
@@ -124,7 +124,15 @@ function showExplanationError(error, elements, options) {
  * @param {boolean} [options.hasApiKey] - Whether user has an API key connected
  * @returns {Promise<void>} Resolves when modal is closed
  */
-export function showExplanationModal({ question, userAnswer, correctAnswer, cachedExplanation, onFetchExplanation, isOffline = false, hasApiKey = true }) {
+export function showExplanationModal({
+  question,
+  userAnswer,
+  correctAnswer,
+  cachedExplanation,
+  onFetchExplanation,
+  isOffline = false,
+  hasApiKey = true,
+}) {
   return new Promise((resolve) => {
     // Create modal backdrop
     const backdrop = document.createElement('div');
@@ -210,15 +218,19 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
 
           <!-- Right answer explanation (cached or loading) -->
           <div id="rightAnswerSection">
-            ${cachedExplanation ? `
+            ${
+              cachedExplanation
+                ? `
               <p id="rightAnswerText" class="text-subtext-light dark:text-subtext-dark leading-relaxed">${cachedExplanation}</p>
-            ` : `
+            `
+                : `
               <div id="rightAnswerLoading" class="flex items-center gap-2 text-subtext-light dark:text-subtext-dark">
                 <span class="material-symbols-outlined animate-spin">progress_activity</span>
                 <span>${t('explanation.generating')}</span>
               </div>
               <p id="rightAnswerText" class="text-subtext-light dark:text-subtext-dark leading-relaxed hidden"></p>
-            `}
+            `
+            }
           </div>
 
           <!-- Separator (shown when we have/expect both parts) -->
@@ -297,7 +309,7 @@ export function showExplanationModal({ question, userAnswer, correctAnswer, cach
           onGoToSettings: () => {
             closeModal();
             window.location.hash = '#/settings';
-          }
+          },
         });
       }
     };

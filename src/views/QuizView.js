@@ -82,7 +82,9 @@ export default class QuizView extends BaseView {
           <!-- Button Group -->
           <div class="flex justify-center">
             <div class="flex flex-1 max-w-lg flex-col items-stretch gap-4 px-4 py-3">
-              ${question.options.map((option, index) => `
+              ${question.options
+                .map(
+                  (option, index) => `
                 <button
                   class="option-btn flex min-h-[56px] cursor-pointer items-center justify-start overflow-hidden rounded-lg p-4 ${
                     this.selectedAnswer === index
@@ -92,7 +94,9 @@ export default class QuizView extends BaseView {
                   data-index="${index}">
                   <span class="text-left">${option}</span>
                 </button>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
 
@@ -139,7 +143,7 @@ export default class QuizView extends BaseView {
         message: t('quiz.confirmLeave'),
         icon: 'warning',
         confirmText: t('quiz.leave'),
-        destructive: true
+        destructive: true,
       });
       if (confirmed) {
         this.navigateTo('/');
@@ -148,7 +152,7 @@ export default class QuizView extends BaseView {
 
     // Option buttons
     const optionBtns = this.appContainer.querySelectorAll('.option-btn');
-    optionBtns.forEach(btn => {
+    optionBtns.forEach((btn) => {
       this.addEventListener(btn, 'click', () => {
         this.selectedAnswer = parseInt(/** @type {HTMLElement} */ (btn).dataset.index);
         this.renderQuestion();
@@ -178,7 +182,7 @@ export default class QuizView extends BaseView {
 
     // Bottom navigation links - show confirmation before leaving quiz
     const navLinks = this.appContainer.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
+    navLinks.forEach((link) => {
       this.addEventListener(link, 'click', async (e) => {
         e.preventDefault();
         const confirmed = await showConfirmModal({
@@ -186,7 +190,7 @@ export default class QuizView extends BaseView {
           message: t('quiz.confirmLeave'),
           icon: 'warning',
           confirmText: t('quiz.leave'),
-          destructive: true
+          destructive: true,
         });
         if (confirmed) {
           const href = /** @type {HTMLAnchorElement} */ (link).getAttribute('href');

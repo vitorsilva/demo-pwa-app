@@ -13,10 +13,7 @@ import { createParticipantList } from '../components/ParticipantList.js';
 import { getQuizHistory, getQuizSession } from '../services/quiz-service.js';
 import { shareContent } from '../utils/share.js';
 import { logger } from '../utils/logger.js';
-import {
-  PartyConnectionManager,
-  CONNECTION_MODES,
-} from '../services/party-connection-manager.js';
+import { PartyConnectionManager, CONNECTION_MODES } from '../services/party-connection-manager.js';
 import {
   createRoom,
   getRoom,
@@ -215,9 +212,7 @@ export default class CreatePartyView extends BaseView {
         item.querySelector('.quiz-check')?.classList.remove('text-transparent');
         item.querySelector('.quiz-check')?.classList.add('text-primary');
 
-        this.selectedQuizId = parseInt(
-          /** @type {HTMLElement} */ (item).dataset.quizId
-        );
+        this.selectedQuizId = parseInt(/** @type {HTMLElement} */ (item).dataset.quizId);
 
         // Update create button state
         this._updateCreateButtonState();
@@ -225,9 +220,7 @@ export default class CreatePartyView extends BaseView {
     });
 
     // Host name input
-    const hostNameInput = /** @type {HTMLInputElement} */ (
-      this.querySelector('#hostName')
-    );
+    const hostNameInput = /** @type {HTMLInputElement} */ (this.querySelector('#hostName'));
     this.addEventListener(hostNameInput, 'input', () => {
       this._updateCreateButtonState();
       const name = hostNameInput.value.trim();
@@ -352,7 +345,7 @@ export default class CreatePartyView extends BaseView {
       });
 
       // Start P2P connection
-      await this.connectionManager.connect();      
+      await this.connectionManager.connect();
 
       // Initialize participants from API response
       this.participants = this._mapParticipants(roomData.participants || []);
@@ -381,7 +374,7 @@ export default class CreatePartyView extends BaseView {
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('errors.generic'),
-        icon: 'error'
+        icon: 'error',
       });
     } finally {
       overlay?.classList.add('hidden');
@@ -459,7 +452,7 @@ export default class CreatePartyView extends BaseView {
     } catch (error) {
       log.error('Failed to fetch participants', { error: error.message });
     }
-  }  
+  }
 
   updateParticipantList() {
     const container = this.querySelector('#participantContainer');
@@ -523,7 +516,7 @@ export default class CreatePartyView extends BaseView {
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('errors.generic'),
-        icon: 'error'
+        icon: 'error',
       });
     }
   }

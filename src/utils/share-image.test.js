@@ -4,7 +4,7 @@ import { generateShareImage, getShareImageDimensions } from './share-image.js';
 // Mock canvas context
 const createMockContext = () => ({
   createLinearGradient: vi.fn(() => ({
-    addColorStop: vi.fn()
+    addColorStop: vi.fn(),
   })),
   fillRect: vi.fn(),
   fillText: vi.fn(),
@@ -17,7 +17,7 @@ const createMockContext = () => ({
   fillStyle: '',
   font: '',
   textAlign: '',
-  textBaseline: ''
+  textBaseline: '',
 });
 
 describe('Share Image Generator', () => {
@@ -35,7 +35,7 @@ describe('Share Image Generator', () => {
       width: 0,
       height: 0,
       getContext: vi.fn(() => mockContext),
-      toBlob: vi.fn((callback) => callback(mockBlob))
+      toBlob: vi.fn((callback) => callback(mockBlob)),
     };
 
     document.createElement = vi.fn((tag) => {
@@ -57,7 +57,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockCanvas.width).toBe(600);
@@ -69,7 +69,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockCanvas.getContext).toHaveBeenCalledWith('2d');
@@ -80,7 +80,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockContext.createLinearGradient).toHaveBeenCalledWith(0, 0, 600, 400);
@@ -92,7 +92,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockContext.fillText).toHaveBeenCalledWith(
@@ -107,7 +107,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockContext.fillText).toHaveBeenCalledWith(
@@ -127,7 +127,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockContext.fillText).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(mockContext.fillText).toHaveBeenCalledWith(
@@ -157,13 +157,13 @@ describe('Share Image Generator', () => {
         topic: 'This is a very long topic name that should be truncated',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       // Should call fillText with truncated topic
       const fillTextCalls = mockContext.fillText.mock.calls;
-      const topicCall = fillTextCalls.find(call =>
-        call[0].includes('Quiz Master') && call[0].includes('...')
+      const topicCall = fillTextCalls.find(
+        (call) => call[0].includes('Quiz Master') && call[0].includes('...')
       );
       expect(topicCall).toBeDefined();
     });
@@ -173,36 +173,37 @@ describe('Share Image Generator', () => {
         topic: 'History',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       expect(result).toBe(mockBlob);
-      expect(mockCanvas.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        'image/png'
-      );
+      expect(mockCanvas.toBlob).toHaveBeenCalledWith(expect.any(Function), 'image/png');
     });
 
     it('should throw error when canvas context not available', async () => {
       mockCanvas.getContext = vi.fn(() => null);
 
-      await expect(generateShareImage({
-        topic: 'History',
-        score: 4,
-        total: 5,
-        percentage: 80
-      })).rejects.toThrow('Canvas not supported');
+      await expect(
+        generateShareImage({
+          topic: 'History',
+          score: 4,
+          total: 5,
+          percentage: 80,
+        })
+      ).rejects.toThrow('Canvas not supported');
     });
 
     it('should reject when toBlob returns null', async () => {
       mockCanvas.toBlob = vi.fn((callback) => callback(null));
 
-      await expect(generateShareImage({
-        topic: 'History',
-        score: 4,
-        total: 5,
-        percentage: 80
-      })).rejects.toThrow('Failed to create image blob');
+      await expect(
+        generateShareImage({
+          topic: 'History',
+          score: 4,
+          total: 5,
+          percentage: 80,
+        })
+      ).rejects.toThrow('Failed to create image blob');
     });
   });
 
@@ -212,7 +213,7 @@ describe('Share Image Generator', () => {
 
       expect(dimensions).toEqual({
         width: 600,
-        height: 400
+        height: 400,
       });
     });
 
@@ -233,7 +234,7 @@ describe('Share Image Generator', () => {
         topic: 'Math',
         score: 3,
         total: 5,
-        percentage: 60
+        percentage: 60,
       });
 
       // Verify rounded rect drawing sequence
@@ -250,12 +251,12 @@ describe('Share Image Generator', () => {
         topic: 'Science',
         score: 5,
         total: 5,
-        percentage: 100
+        percentage: 100,
       });
 
       // Trophy emoji should be drawn
       const fillTextCalls = mockContext.fillText.mock.calls;
-      const trophyCall = fillTextCalls.find(call => call[0] === '\u{1F3C6}');
+      const trophyCall = fillTextCalls.find((call) => call[0] === '\u{1F3C6}');
       expect(trophyCall).toBeDefined();
     });
 
@@ -264,14 +265,12 @@ describe('Share Image Generator', () => {
         topic: 'Math',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       // Should call fillText with full topic (no ellipsis)
       const fillTextCalls = mockContext.fillText.mock.calls;
-      const topicCall = fillTextCalls.find(call =>
-        call[0] === 'Math Quiz Master!'
-      );
+      const topicCall = fillTextCalls.find((call) => call[0] === 'Math Quiz Master!');
       expect(topicCall).toBeDefined();
     });
 
@@ -282,13 +281,13 @@ describe('Share Image Generator', () => {
         topic,
         score: 3,
         total: 5,
-        percentage: 60
+        percentage: 60,
       });
 
       // Should not truncate (exact 25 chars)
       const fillTextCalls = mockContext.fillText.mock.calls;
-      const topicCall = fillTextCalls.find(call =>
-        call[0].includes(topic) && !call[0].includes('...')
+      const topicCall = fillTextCalls.find(
+        (call) => call[0].includes(topic) && !call[0].includes('...')
       );
       expect(topicCall).toBeDefined();
     });
@@ -300,13 +299,13 @@ describe('Share Image Generator', () => {
         topic,
         score: 3,
         total: 5,
-        percentage: 60
+        percentage: 60,
       });
 
       // Should truncate with ellipsis (22 chars + ...)
       const fillTextCalls = mockContext.fillText.mock.calls;
-      const topicCall = fillTextCalls.find(call =>
-        call[0].includes('...') && call[0].includes('Quiz Master')
+      const topicCall = fillTextCalls.find(
+        (call) => call[0].includes('...') && call[0].includes('Quiz Master')
       );
       expect(topicCall).toBeDefined();
       // Verify the truncated portion is correct length (22 + 3 = 25)
@@ -319,7 +318,7 @@ describe('Share Image Generator', () => {
         topic: 'Test',
         score: 1,
         total: 2,
-        percentage: 50
+        percentage: 50,
       });
 
       // Canvas dimensions should be set
@@ -331,7 +330,7 @@ describe('Share Image Generator', () => {
         topic: 'Test',
         score: 1,
         total: 2,
-        percentage: 50
+        percentage: 50,
       });
 
       // Canvas dimensions should be set
@@ -340,7 +339,7 @@ describe('Share Image Generator', () => {
 
     it('should draw gradient with correct color stops', async () => {
       const mockGradient = {
-        addColorStop: vi.fn()
+        addColorStop: vi.fn(),
       };
       mockContext.createLinearGradient = vi.fn(() => mockGradient);
 
@@ -348,7 +347,7 @@ describe('Share Image Generator', () => {
         topic: 'Colors',
         score: 2,
         total: 3,
-        percentage: 67
+        percentage: 67,
       });
 
       // Should add two color stops for gradient
@@ -361,7 +360,7 @@ describe('Share Image Generator', () => {
         topic: 'Format',
         score: 7,
         total: 10,
-        percentage: 70
+        percentage: 70,
       });
 
       expect(mockContext.fillText).toHaveBeenCalledWith(
@@ -381,33 +380,33 @@ describe('Share Image Generator', () => {
         topic: 'Position',
         score: 5,
         total: 5,
-        percentage: 100
+        percentage: 100,
       });
 
       const fillTextCalls = mockContext.fillText.mock.calls;
 
       // Badge at y=30 + badgeHeight/2 = 30 + 18 = 48
-      const badgeCall = fillTextCalls.find(call => call[0] === 'SABERLOOP');
+      const badgeCall = fillTextCalls.find((call) => call[0] === 'SABERLOOP');
       expect(badgeCall[2]).toBe(48);
 
       // Trophy at y=110
-      const trophyCall = fillTextCalls.find(call => call[0] === '\u{1F3C6}');
+      const trophyCall = fillTextCalls.find((call) => call[0] === '\u{1F3C6}');
       expect(trophyCall[2]).toBe(110);
 
       // Topic at y=170
-      const topicCall = fillTextCalls.find(call => call[0].includes('Quiz Master'));
+      const topicCall = fillTextCalls.find((call) => call[0].includes('Quiz Master'));
       expect(topicCall[2]).toBe(170);
 
       // Score at y=260
-      const scoreCall = fillTextCalls.find(call => call[0] === '5/5');
+      const scoreCall = fillTextCalls.find((call) => call[0] === '5/5');
       expect(scoreCall[2]).toBe(260);
 
       // Percentage at y=260+45=305
-      const percentCall = fillTextCalls.find(call => call[0] === '100%');
+      const percentCall = fillTextCalls.find((call) => call[0] === '100%');
       expect(percentCall[2]).toBe(305);
 
       // Challenge at y=350
-      const challengeCall = fillTextCalls.find(call => call[0] === 'Can you beat my score?');
+      const challengeCall = fillTextCalls.find((call) => call[0] === 'Can you beat my score?');
       expect(challengeCall[2]).toBe(350);
     });
 
@@ -416,13 +415,13 @@ describe('Share Image Generator', () => {
         topic: 'Center',
         score: 2,
         total: 4,
-        percentage: 50
+        percentage: 50,
       });
 
       const fillTextCalls = mockContext.fillText.mock.calls;
 
       // All text should be centered at x=300 (600/2)
-      fillTextCalls.forEach(call => {
+      fillTextCalls.forEach((call) => {
         expect(call[1]).toBe(300);
       });
     });
@@ -433,14 +432,14 @@ describe('Share Image Generator', () => {
       const originalFont = Object.getOwnPropertyDescriptor(mockContext, 'font');
       Object.defineProperty(mockContext, 'font', {
         set: (val) => fontAssignments.push(val),
-        get: () => fontAssignments[fontAssignments.length - 1] || ''
+        get: () => fontAssignments[fontAssignments.length - 1] || '',
       });
 
       await generateShareImage({
         topic: 'Font',
         score: 3,
         total: 5,
-        percentage: 60
+        percentage: 60,
       });
 
       // Score should use bold 64px font
@@ -451,14 +450,14 @@ describe('Share Image Generator', () => {
       const fillStyleAssignments = [];
       Object.defineProperty(mockContext, 'fillStyle', {
         set: (val) => fillStyleAssignments.push(val),
-        get: () => fillStyleAssignments[fillStyleAssignments.length - 1] || ''
+        get: () => fillStyleAssignments[fillStyleAssignments.length - 1] || '',
       });
 
       await generateShareImage({
         topic: 'Style',
         score: 4,
         total: 5,
-        percentage: 80
+        percentage: 80,
       });
 
       // Should use accent color for score

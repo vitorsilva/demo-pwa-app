@@ -15,7 +15,7 @@ export function formatDate(date, options = {}) {
   const defaultOptions = {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   };
   return new Intl.DateTimeFormat(locale, { ...defaultOptions, ...options }).format(date);
 }
@@ -86,6 +86,6 @@ export function formatPercent(value, options = {}) {
     style: 'percent',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-    ...intlOptions
+    ...intlOptions,
   }).format(normalizedValue);
 }

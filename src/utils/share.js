@@ -64,7 +64,13 @@ export async function shareContent({ title, text, url }) {
  * @param {string} [options.fileName] - Image file name (default: 'saberloop-score.png')
  * @returns {Promise<boolean>} True if share was successful, false if cancelled/failed
  */
-export async function shareWithImage({ title, text, url, imageBlob, fileName = 'saberloop-score.png' }) {
+export async function shareWithImage({
+  title,
+  text,
+  url,
+  imageBlob,
+  fileName = 'saberloop-score.png',
+}) {
   if (!canShareFiles()) {
     logger.debug('File sharing not supported, falling back to text share');
     return shareContent({ title, text, url });

@@ -10,10 +10,10 @@ vi.mock('../core/i18n.js', () => ({
     const translations = {
       'dates.today': 'Today',
       'dates.yesterday': 'Yesterday',
-      'dates.daysAgo': `${options?.count} days ago`
+      'dates.daysAgo': `${options?.count} days ago`,
     };
     return translations[key] || key;
-  })
+  }),
 }));
 
 import { formatDate, formatRelativeDate, formatNumber, formatPercent } from './formatters.js';
@@ -28,10 +28,10 @@ describe('Formatters', () => {
     it('should format date using Intl.DateTimeFormat with default options', () => {
       const date = new Date('2024-06-15');
       const result = formatDate(date);
-      // Verify default options are applied: year:'numeric', month:'short', day:'numeric'       
-      expect(result).toContain('Jun');   // month: 'short'
-      expect(result).toContain('2024');  // year: 'numeric'
-      expect(result).toContain('15');    // day: 'numeric'
+      // Verify default options are applied: year:'numeric', month:'short', day:'numeric'
+      expect(result).toContain('Jun'); // month: 'short'
+      expect(result).toContain('2024'); // year: 'numeric'
+      expect(result).toContain('15'); // day: 'numeric'
     });
 
     it('should use current language from i18n', () => {
@@ -91,7 +91,7 @@ describe('Formatters', () => {
     it('should use Intl.RelativeTimeFormat for weeks', () => {
       // Test 1 week ago - should use "last week" (numeric: 'auto')
       const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 10); // 10 days = 1 week in floor division      
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 10); // 10 days = 1 week in floor division
       const resultOne = formatRelativeDate(oneWeekAgo);
       expect(resultOne.toLowerCase()).toContain('last');
       expect(resultOne.toLowerCase()).toContain('week');
@@ -123,7 +123,6 @@ describe('Formatters', () => {
       expect(result.toLowerCase()).not.toContain('week');
       expect(result).toContain(String(thirtyDaysAgo.getFullYear()));
     });
-
   });
 
   describe('formatNumber', () => {

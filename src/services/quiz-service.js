@@ -2,8 +2,20 @@
  * Quiz Service - Business logic for quiz operations
  * Views should use this instead of importing db or api directly
  */
-import { getRecentSessions, getSession, saveSession, updateSession, deleteSession, updateQuestionExplanation as dbUpdateQuestionExplanation, quizExistsBySourceId as dbQuizExistsBySourceId } from '../core/db.js';
-import { generateQuestions as apiGenerateQuestions, generateExplanation as apiGenerateExplanation, generateWrongAnswerExplanation as apiGenerateWrongAnswerExplanation } from '../api/index.js';
+import {
+  getRecentSessions,
+  getSession,
+  saveSession,
+  updateSession,
+  deleteSession,
+  updateQuestionExplanation as dbUpdateQuestionExplanation,
+  quizExistsBySourceId as dbQuizExistsBySourceId,
+} from '../core/db.js';
+import {
+  generateQuestions as apiGenerateQuestions,
+  generateExplanation as apiGenerateExplanation,
+  generateWrongAnswerExplanation as apiGenerateWrongAnswerExplanation,
+} from '../api/index.js';
 
 /**
  * Settings for generating explanations.
@@ -86,7 +98,12 @@ export async function generateExplanation(question, userAnswer, correctAnswer, s
  * @param {ExplanationSettings} settings - API and content settings
  * @returns {Promise<string>} Wrong answer explanation text
  */
-export async function generateWrongAnswerExplanation(question, userAnswer, correctAnswer, settings = {}) {
+export async function generateWrongAnswerExplanation(
+  question,
+  userAnswer,
+  correctAnswer,
+  settings = {}
+) {
   return apiGenerateWrongAnswerExplanation(question, userAnswer, correctAnswer, settings);
 }
 

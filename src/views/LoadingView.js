@@ -13,7 +13,7 @@ import { showConfirmModal } from '../components/ConfirmModal.js';
 const getConfig = () => {
   const defaults = {
     ESTIMATED_DURATION_SECONDS: 60,
-    SHOW_COUNTDOWN_AFTER_SECONDS: 20
+    SHOW_COUNTDOWN_AFTER_SECONDS: 20,
   };
   return /** @type {*} */ (window).LOADING_VIEW_CONFIG || defaults;
 };
@@ -25,12 +25,9 @@ export default class LoadingView extends BaseView {
       t('loading.preparing'),
       t('loading.consulting'),
       t('loading.crafting'),
-      t('loading.almostReady')
+      t('loading.almostReady'),
     ];
-    this.extendedMessages = [
-      t('loading.teachingNotEasy'),
-      t('loading.thinkingHard')
-    ];
+    this.extendedMessages = [t('loading.teachingNotEasy'), t('loading.thinkingHard')];
     this.currentMessageIndex = 0;
     this.messageInterval = null;
     this.countdownInterval = null;
@@ -94,13 +91,17 @@ export default class LoadingView extends BaseView {
           <div id="quiz-loading-ad" class="ad-container mt-6"></div>
 
           <!-- Offline Warning -->
-          ${isOffline ? `
+          ${
+            isOffline
+              ? `
             <div class="mt-4 p-4 bg-warning/10 border border-warning rounded-lg max-w-sm">
               <p class="text-sm text-warning">
                 ${t('loading.offlineWarning')}
               </p>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
         </div>
 
@@ -142,7 +143,7 @@ export default class LoadingView extends BaseView {
     const gradeLevelMap = {
       'middle school': t('topicInput.middleSchool'),
       'high school': t('topicInput.highSchool'),
-      'college': t('topicInput.college')
+      college: t('topicInput.college'),
     };
     return gradeLevelMap[gradeLevel] || gradeLevel;
   }
@@ -210,7 +211,7 @@ export default class LoadingView extends BaseView {
       const questionCount = parseInt(getSetting('questionsPerQuiz'), 10) || 5;
       const options = {
         language: getCurrentLanguage(),
-        questionCount
+        questionCount,
       };
 
       // If continuing on topic, pass previous questions to exclude
@@ -232,7 +233,6 @@ export default class LoadingView extends BaseView {
 
       // Navigate to quiz
       this.navigateTo('/quiz');
-
     } catch (error) {
       logger.error('Failed to generate questions', { error: error.message });
       this.cleanup();
@@ -241,7 +241,7 @@ export default class LoadingView extends BaseView {
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: error.message || t('errors.failedToGenerate'),
-        icon: 'error'
+        icon: 'error',
       });
       this.navigateTo('/topic-input');
     }
@@ -257,7 +257,7 @@ export default class LoadingView extends BaseView {
           icon: 'warning',
           confirmText: t('common.cancel'),
           cancelText: t('common.back'),
-          destructive: true
+          destructive: true,
         });
         if (confirmed) {
           this.cleanup();

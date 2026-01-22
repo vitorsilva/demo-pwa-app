@@ -38,13 +38,11 @@ export function createRoomCodeDisplay(roomCode, options = {}) {
 
   // Room code display
   const codeContainer = document.createElement('div');
-  codeContainer.className =
-    'bg-card-light dark:bg-card-dark rounded-2xl px-8 py-6 shadow-lg';
+  codeContainer.className = 'bg-card-light dark:bg-card-dark rounded-2xl px-8 py-6 shadow-lg';
 
   if (showLabel) {
     const codeLabel = document.createElement('p');
-    codeLabel.className =
-      'text-subtext-light dark:text-subtext-dark text-sm text-center mb-2';
+    codeLabel.className = 'text-subtext-light dark:text-subtext-dark text-sm text-center mb-2';
     codeLabel.textContent = t('party.code');
     codeContainer.appendChild(codeLabel);
   }

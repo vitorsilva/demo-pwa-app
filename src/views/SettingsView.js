@@ -1,22 +1,27 @@
-  import BaseView from './BaseView.js';
-  import { getSettings, saveSetting } from '../core/settings.js';
-  import { APP_VERSION } from '../version.js';
-  import { isConnected, disconnect, getApiKey, getCreditsBalance } from '../services/auth-service.js';
-  import { t, changeLanguage, getCurrentLanguage, SUPPORTED_LANGUAGES } from '../core/i18n.js';
-  import { getSelectedModel, getModelDisplayName, getAvailableModels, saveSelectedModel } from '../services/model-service.js';
-  import { getStorageBreakdown } from '../utils/storage.js';
-  import { showDeleteDataModal } from '../components/DeleteDataModal.js';
-  import { showConfirmModal } from '../components/ConfirmModal.js';
-  import { deleteAllUserData } from '../services/data-service.js';
-  import { createModeToggle } from '../components/ModeToggle.js';
+import BaseView from './BaseView.js';
+import { getSettings, saveSetting } from '../core/settings.js';
+import { APP_VERSION } from '../version.js';
+import { isConnected, disconnect, getApiKey, getCreditsBalance } from '../services/auth-service.js';
+import { t, changeLanguage, getCurrentLanguage, SUPPORTED_LANGUAGES } from '../core/i18n.js';
+import {
+  getSelectedModel,
+  getModelDisplayName,
+  getAvailableModels,
+  saveSelectedModel,
+} from '../services/model-service.js';
+import { getStorageBreakdown } from '../utils/storage.js';
+import { showDeleteDataModal } from '../components/DeleteDataModal.js';
+import { showConfirmModal } from '../components/ConfirmModal.js';
+import { deleteAllUserData } from '../services/data-service.js';
+import { createModeToggle } from '../components/ModeToggle.js';
 
-  export default class SettingsView extends BaseView {
-    constructor() {
-      super();
-    }
+export default class SettingsView extends BaseView {
+  constructor() {
+    super();
+  }
 
-    async render() {
-      this.setHTML(`
+  async render() {
+    this.setHTML(`
         <div class="relative flex min-h-screen w-full flex-col
   bg-background-light dark:bg-background-dark overflow-x-hidden">
           <!-- Top App Bar -->
@@ -268,87 +273,88 @@
         </div>
       `);
 
-      // Mount mode toggle
-      const toggleContainer = this.querySelector('#modeToggleContainer');
-      if (toggleContainer) {
-        toggleContainer.appendChild(createModeToggle());
-      }
-
-      // Load saved settings into form fields
-      this.loadSettings();
-
-      // Load account connection status
-      await this.loadAccountStatus();
-
-      // Load storage breakdown (async, non-blocking)
-      this.loadStorageBreakdown();
-
-      this.bindEvents();
+    // Mount mode toggle
+    const toggleContainer = this.querySelector('#modeToggleContainer');
+    if (toggleContainer) {
+      toggleContainer.appendChild(createModeToggle());
     }
 
-    async loadStorageBreakdown() {
-      try {
-        const breakdown = await getStorageBreakdown();
+    // Load saved settings into form fields
+    this.loadSettings();
 
-        const settingsEl = this.querySelector('[data-testid="storage-settings"]');
-        const quizzesEl = this.querySelector('[data-testid="storage-quizzes"]');
-        const totalEl = this.querySelector('[data-testid="storage-total"]');
+    // Load account connection status
+    await this.loadAccountStatus();
 
-        if (settingsEl) settingsEl.textContent = breakdown.settings;
-        if (quizzesEl) quizzesEl.textContent = breakdown.quizzes;
-        if (totalEl) totalEl.textContent = breakdown.total;
-      } catch {
-        // On error, show "--" instead of "..."
-        const settingsEl = this.querySelector('[data-testid="storage-settings"]');
-        const quizzesEl = this.querySelector('[data-testid="storage-quizzes"]');
-        const totalEl = this.querySelector('[data-testid="storage-total"]');
+    // Load storage breakdown (async, non-blocking)
+    this.loadStorageBreakdown();
 
-        if (settingsEl) settingsEl.textContent = '--';
-        if (quizzesEl) quizzesEl.textContent = '--';
-        if (totalEl) totalEl.textContent = '--';
-      }
+    this.bindEvents();
+  }
+
+  async loadStorageBreakdown() {
+    try {
+      const breakdown = await getStorageBreakdown();
+
+      const settingsEl = this.querySelector('[data-testid="storage-settings"]');
+      const quizzesEl = this.querySelector('[data-testid="storage-quizzes"]');
+      const totalEl = this.querySelector('[data-testid="storage-total"]');
+
+      if (settingsEl) settingsEl.textContent = breakdown.settings;
+      if (quizzesEl) quizzesEl.textContent = breakdown.quizzes;
+      if (totalEl) totalEl.textContent = breakdown.total;
+    } catch {
+      // On error, show "--" instead of "..."
+      const settingsEl = this.querySelector('[data-testid="storage-settings"]');
+      const quizzesEl = this.querySelector('[data-testid="storage-quizzes"]');
+      const totalEl = this.querySelector('[data-testid="storage-total"]');
+
+      if (settingsEl) settingsEl.textContent = '--';
+      if (quizzesEl) quizzesEl.textContent = '--';
+      if (totalEl) totalEl.textContent = '--';
     }
+  }
 
-    renderLanguageOptions() {
-      const currentLang = getCurrentLanguage();
-      return SUPPORTED_LANGUAGES.map(lang =>
+  renderLanguageOptions() {
+    const currentLang = getCurrentLanguage();
+    return SUPPORTED_LANGUAGES.map(
+      (lang) =>
         `<option value="${lang.code}" ${lang.code === currentLang ? 'selected' : ''}>
           ${lang.flag} ${lang.name}
         </option>`
-      ).join('');
-    }
+    ).join('');
+  }
 
-    loadSettings() {
-      const settings = getSettings();
+  loadSettings() {
+    const settings = getSettings();
 
-      // Set each dropdown to its saved value
-      const screenNameInput = this.querySelector('#screenName');
-      const gradeSelect = this.querySelector('#defaultGradeLevel');
-      const questionsSelect = this.querySelector('#questionsPerQuiz');
-      const difficultySelect = this.querySelector('#difficulty');
-      const languageSelect = this.querySelector('#languageSelect');
+    // Set each dropdown to its saved value
+    const screenNameInput = this.querySelector('#screenName');
+    const gradeSelect = this.querySelector('#defaultGradeLevel');
+    const questionsSelect = this.querySelector('#questionsPerQuiz');
+    const difficultySelect = this.querySelector('#difficulty');
+    const languageSelect = this.querySelector('#languageSelect');
 
-      if (screenNameInput) screenNameInput.value = settings.screenName || '';
-      if (gradeSelect) gradeSelect.value = settings.defaultGradeLevel;
-      if (questionsSelect) questionsSelect.value = settings.questionsPerQuiz;
-      if (difficultySelect) difficultySelect.value = settings.difficulty;
-      if (languageSelect) languageSelect.value = getCurrentLanguage();
-    }
+    if (screenNameInput) screenNameInput.value = settings.screenName || '';
+    if (gradeSelect) gradeSelect.value = settings.defaultGradeLevel;
+    if (questionsSelect) questionsSelect.value = settings.questionsPerQuiz;
+    if (difficultySelect) difficultySelect.value = settings.difficulty;
+    if (languageSelect) languageSelect.value = getCurrentLanguage();
+  }
 
-      async loadAccountStatus() {
-        const accountSection = this.querySelector('#accountSection');
-        const connected = await isConnected();
+  async loadAccountStatus() {
+    const accountSection = this.querySelector('#accountSection');
+    const connected = await isConnected();
 
-        if (connected) {
-          const currentModel = getSelectedModel();
-          const modelName = getModelDisplayName(currentModel);
+    if (connected) {
+      const currentModel = getSelectedModel();
+      const modelName = getModelDisplayName(currentModel);
 
-          // Fetch credits balance
-          const credits = await getCreditsBalance();
-          let creditsHtml = '';
-          if (credits) {
-            // Paid account with credits
-            creditsHtml = `
+      // Fetch credits balance
+      const credits = await getCreditsBalance();
+      let creditsHtml = '';
+      if (credits) {
+        // Paid account with credits
+        creditsHtml = `
             <!-- Credits Balance -->
             <a href="https://openrouter.ai/activity" target="_blank" rel="noopener noreferrer"
               class="bg-card-light dark:bg-card-dark rounded-xl p-4 flex items-center justify-between hover:bg-primary/10 transition-colors">
@@ -361,9 +367,9 @@
               </div>
               <span class="material-symbols-outlined text-subtext-light dark:text-subtext-dark">open_in_new</span>
             </a>`;
-          } else {
-            // Free tier account (no credits)
-            creditsHtml = `
+      } else {
+        // Free tier account (no credits)
+        creditsHtml = `
             <!-- Free Tier Status -->
             <a href="https://openrouter.ai/activity" target="_blank" rel="noopener noreferrer"
               class="bg-card-light dark:bg-card-dark rounded-xl p-4 flex items-center justify-between hover:bg-primary/10 transition-colors">
@@ -376,9 +382,9 @@
               </div>
               <span class="material-symbols-outlined text-subtext-light dark:text-subtext-dark">open_in_new</span>
             </a>`;
-          }
+      }
 
-          accountSection.innerHTML = `
+      accountSection.innerHTML = `
             <div class="bg-card-light dark:bg-card-dark rounded-xl p-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -420,15 +426,15 @@
             </button>
           `;
 
-          // Bind disconnect button
-          const disconnectBtn = this.querySelector('#disconnectBtn');
-          this.addEventListener(disconnectBtn, 'click', () => this.handleDisconnect());
+      // Bind disconnect button
+      const disconnectBtn = this.querySelector('#disconnectBtn');
+      this.addEventListener(disconnectBtn, 'click', () => this.handleDisconnect());
 
-          // Bind change model button
-          const changeModelBtn = this.querySelector('#changeModelBtn');
-          this.addEventListener(changeModelBtn, 'click', () => this.toggleModelSelector());
-        } else {
-          accountSection.innerHTML = `
+      // Bind change model button
+      const changeModelBtn = this.querySelector('#changeModelBtn');
+      this.addEventListener(changeModelBtn, 'click', () => this.toggleModelSelector());
+    } else {
+      accountSection.innerHTML = `
             <div class="bg-card-light dark:bg-card-dark rounded-xl p-4">
               <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-yellow-500">warning</span>
@@ -444,141 +450,143 @@
               <span class="font-medium">${t('settings.connectWithOpenRouter')}</span>
             </a>
           `;
-        }
-      }
-
-      async handleDisconnect() {
-        const confirmed = await showConfirmModal({
-          title: t('settings.disconnectTitle'),
-          message: t('settings.confirmDisconnect'),
-          icon: 'warning',
-          confirmText: t('settings.disconnect'),
-          destructive: true
-        });
-        if (confirmed) {
-          await disconnect();
-          // Reload the app to show WelcomeView
-          window.location.href = window.location.origin + '/#/';
-          window.location.reload();
-        }
-      }
-
-
-    bindEvents() {
-      const screenNameInput = this.querySelector('#screenName');
-      const gradeSelect = this.querySelector('#defaultGradeLevel');
-      const questionsSelect = this.querySelector('#questionsPerQuiz');
-      const difficultySelect = this.querySelector('#difficulty');
-      const languageSelect = this.querySelector('#languageSelect');
-
-      // Save screen name on blur (when user finishes typing)
-      this.addEventListener(screenNameInput, 'blur', (e) => {
-        saveSetting('screenName', e.target.value.trim());
-      });
-
-      this.addEventListener(gradeSelect, 'change', (e) => {
-        saveSetting('defaultGradeLevel', e.target.value);
-      });
-
-      this.addEventListener(questionsSelect, 'change', (e) => {
-        saveSetting('questionsPerQuiz', e.target.value);
-      });
-
-      this.addEventListener(difficultySelect, 'change', (e) => {
-        saveSetting('difficulty', e.target.value);
-      });
-
-      this.addEventListener(languageSelect, 'change', async (e) => {
-        const newLang = e.target.value;
-        await changeLanguage(newLang);
-        // Re-render to apply new language
-        await this.render();
-      });
-
-      // Delete all data button
-      const deleteBtn = this.querySelector('#deleteAllDataBtn');
-      if (deleteBtn) {
-        this.addEventListener(deleteBtn, 'click', () => this.handleDeleteAllData());
-      }
     }
+  }
 
-    async handleDeleteAllData() {
-      const confirmed = await showDeleteDataModal(async () => {
-        await deleteAllUserData();
-      });
-
-      if (confirmed) {
-        // Show success toast
-        this.showSuccessToast(t('settings.deleteDataSuccess'));
-
-        // Re-render to update storage display
-        await this.render();
-      }
+  async handleDisconnect() {
+    const confirmed = await showConfirmModal({
+      title: t('settings.disconnectTitle'),
+      message: t('settings.confirmDisconnect'),
+      icon: 'warning',
+      confirmText: t('settings.disconnect'),
+      destructive: true,
+    });
+    if (confirmed) {
+      await disconnect();
+      // Reload the app to show WelcomeView
+      window.location.href = window.location.origin + '/#/';
+      window.location.reload();
     }
+  }
 
-    showSuccessToast(message) {
-      // Create toast element
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-fade-in';
-      toast.innerHTML = `
+  bindEvents() {
+    const screenNameInput = this.querySelector('#screenName');
+    const gradeSelect = this.querySelector('#defaultGradeLevel');
+    const questionsSelect = this.querySelector('#questionsPerQuiz');
+    const difficultySelect = this.querySelector('#difficulty');
+    const languageSelect = this.querySelector('#languageSelect');
+
+    // Save screen name on blur (when user finishes typing)
+    this.addEventListener(screenNameInput, 'blur', (e) => {
+      saveSetting('screenName', e.target.value.trim());
+    });
+
+    this.addEventListener(gradeSelect, 'change', (e) => {
+      saveSetting('defaultGradeLevel', e.target.value);
+    });
+
+    this.addEventListener(questionsSelect, 'change', (e) => {
+      saveSetting('questionsPerQuiz', e.target.value);
+    });
+
+    this.addEventListener(difficultySelect, 'change', (e) => {
+      saveSetting('difficulty', e.target.value);
+    });
+
+    this.addEventListener(languageSelect, 'change', async (e) => {
+      const newLang = e.target.value;
+      await changeLanguage(newLang);
+      // Re-render to apply new language
+      await this.render();
+    });
+
+    // Delete all data button
+    const deleteBtn = this.querySelector('#deleteAllDataBtn');
+    if (deleteBtn) {
+      this.addEventListener(deleteBtn, 'click', () => this.handleDeleteAllData());
+    }
+  }
+
+  async handleDeleteAllData() {
+    const confirmed = await showDeleteDataModal(async () => {
+      await deleteAllUserData();
+    });
+
+    if (confirmed) {
+      // Show success toast
+      this.showSuccessToast(t('settings.deleteDataSuccess'));
+
+      // Re-render to update storage display
+      await this.render();
+    }
+  }
+
+  showSuccessToast(message) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className =
+      'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-fade-in';
+    toast.innerHTML = `
         <span class="material-symbols-outlined">check_circle</span>
         <span>${message}</span>
       `;
 
-      document.body.appendChild(toast);
+    document.body.appendChild(toast);
 
-      // Remove after 3 seconds
-      setTimeout(() => {
-        toast.classList.add('animate-fade-out');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.classList.add('animate-fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
 
-    async toggleModelSelector() {
-      const container = this.querySelector('#modelSelectorContainer');
-      const changeBtn = this.querySelector('#changeModelBtn');
+  async toggleModelSelector() {
+    const container = this.querySelector('#modelSelectorContainer');
+    const changeBtn = this.querySelector('#changeModelBtn');
 
-      if (container.classList.contains('hidden')) {
-        // Show selector and fetch models
-        container.classList.remove('hidden');
-        changeBtn.textContent = t('common.cancel');
+    if (container.classList.contains('hidden')) {
+      // Show selector and fetch models
+      container.classList.remove('hidden');
+      changeBtn.textContent = t('common.cancel');
 
-        // Show loading state
-        container.innerHTML = `
+      // Show loading state
+      container.innerHTML = `
           <div class="flex items-center justify-center py-4">
             <span class="material-symbols-outlined animate-spin text-primary">sync</span>
             <span class="ml-2 text-subtext-light dark:text-subtext-dark">${t('settings.loadingModels')}</span>
           </div>
         `;
 
-        try {
-          const apiKey = await getApiKey();
-          const models = await getAvailableModels(apiKey);
-          this.renderModelSelector(models);
-        } catch {
-          container.innerHTML = `
+      try {
+        const apiKey = await getApiKey();
+        const models = await getAvailableModels(apiKey);
+        this.renderModelSelector(models);
+      } catch {
+        container.innerHTML = `
             <div class="text-red-500 text-sm py-2">
               ${t('settings.errorLoadingModels')}
             </div>
           `;
-        }
-      } else {
-        // Hide selector
-        container.classList.add('hidden');
-        container.innerHTML = '';
-        changeBtn.textContent = t('settings.changeModel');
       }
+    } else {
+      // Hide selector
+      container.classList.add('hidden');
+      container.innerHTML = '';
+      changeBtn.textContent = t('settings.changeModel');
     }
+  }
 
-    renderModelSelector(models) {
-      const container = this.querySelector('#modelSelectorContainer');
-      const currentModel = getSelectedModel();
+  renderModelSelector(models) {
+    const container = this.querySelector('#modelSelectorContainer');
+    const currentModel = getSelectedModel();
 
-      container.innerHTML = `
+    container.innerHTML = `
         <div class="border-t border-border-light dark:border-border-dark pt-4">
           <p class="text-sm text-subtext-light dark:text-subtext-dark mb-3">${t('settings.selectModel')}</p>
           <div class="flex flex-col gap-2 max-h-64 overflow-y-auto">
-            ${models.map(model => `
+            ${models
+              .map(
+                (model) => `
               <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer
                 ${model.id === currentModel ? 'bg-primary/10 border border-primary' : 'bg-background-light dark:bg-background-dark hover:bg-primary/5'}">
                 <input type="radio" name="modelSelect" value="${model.id}"
@@ -589,33 +597,34 @@
                   ${model.contextLength ? `<p class="text-subtext-light dark:text-subtext-dark text-xs">${t('settings.contextLength', { length: Math.round(model.contextLength / 1000) + 'K' })}</p>` : ''}
                 </div>
               </label>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
       `;
 
-      // Bind radio change events
-      const radios = container.querySelectorAll('input[name="modelSelect"]');
-      radios.forEach(radio => {
-        this.addEventListener(radio, 'change', (e) => this.handleModelSelection(e.target.value));
-      });
-    }
-
-    async handleModelSelection(modelId) {
-      saveSelectedModel(modelId);
-
-      // Update the displayed model name
-      const modelNameEl = this.querySelector('[data-testid="current-model-name"]');
-      if (modelNameEl) {
-        modelNameEl.textContent = getModelDisplayName(modelId);
-      }
-
-      // Close the selector
-      const container = this.querySelector('#modelSelectorContainer');
-      const changeBtn = this.querySelector('#changeModelBtn');
-      container.classList.add('hidden');
-      container.innerHTML = '';
-      changeBtn.textContent = t('settings.changeModel');
-    }
-
+    // Bind radio change events
+    const radios = container.querySelectorAll('input[name="modelSelect"]');
+    radios.forEach((radio) => {
+      this.addEventListener(radio, 'change', (e) => this.handleModelSelection(e.target.value));
+    });
   }
+
+  async handleModelSelection(modelId) {
+    saveSelectedModel(modelId);
+
+    // Update the displayed model name
+    const modelNameEl = this.querySelector('[data-testid="current-model-name"]');
+    if (modelNameEl) {
+      modelNameEl.textContent = getModelDisplayName(modelId);
+    }
+
+    // Close the selector
+    const container = this.querySelector('#modelSelectorContainer');
+    const changeBtn = this.querySelector('#changeModelBtn');
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    changeBtn.textContent = t('settings.changeModel');
+  }
+}

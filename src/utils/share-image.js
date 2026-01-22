@@ -39,7 +39,7 @@ const COLORS = {
   accent: '#e94560',
   textPrimary: '#ffffff',
   textSecondary: '#a0a0a0',
-  badge: '#0f3460'
+  badge: '#0f3460',
 };
 
 /**
@@ -124,9 +124,7 @@ function drawTrophy(ctx, centerX, y) {
 function drawTopic(ctx, topic, centerX, y) {
   // Truncate topic if too long
   const maxLength = 25;
-  const displayTopic = topic.length > maxLength
-    ? topic.substring(0, maxLength - 3) + '...'
-    : topic;
+  const displayTopic = topic.length > maxLength ? topic.substring(0, maxLength - 3) + '...' : topic;
 
   ctx.fillStyle = COLORS.textPrimary;
   ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
@@ -222,6 +220,6 @@ export async function generateShareImage({ topic, score, total, percentage }) {
 export function getShareImageDimensions() {
   return {
     width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT
+    height: CANVAS_HEIGHT,
   };
 }

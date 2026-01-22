@@ -18,7 +18,7 @@ const DEFAULT_OPTIONS = {
   backoffMultiplier: 2,
   maxDelay: 8000,
   shouldRetry: isRetryableError,
-  onRetry: null
+  onRetry: null,
 };
 
 /**
@@ -63,7 +63,7 @@ export async function withRetry(fn, options = {}) {
         attempt,
         maxRetries: config.maxRetries,
         delay,
-        error: error.message
+        error: error.message,
       });
 
       // Call onRetry callback if provided
@@ -124,5 +124,5 @@ export function isRetryableError(error) {
  * @returns {Promise<void>}
  */
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

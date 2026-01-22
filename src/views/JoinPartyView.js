@@ -133,9 +133,7 @@ export default class JoinPartyView extends BaseView {
     });
 
     // Name input
-    const nameInput = /** @type {HTMLInputElement} */ (
-      this.querySelector('#playerName')
-    );
+    const nameInput = /** @type {HTMLInputElement} */ (this.querySelector('#playerName'));
     this.addEventListener(nameInput, 'input', () => {
       this.validateForm();
       const name = nameInput.value.trim();
@@ -168,9 +166,7 @@ export default class JoinPartyView extends BaseView {
 
   validateForm() {
     const code = this.roomCodeInput?.getValue() || '';
-    const name = /** @type {HTMLInputElement} */ (
-      this.querySelector('#playerName')
-    )?.value.trim();
+    const name = /** @type {HTMLInputElement} */ (this.querySelector('#playerName'))?.value.trim();
 
     const isValid = isValidRoomCode(code) && name && name.length > 0;
 
@@ -190,9 +186,7 @@ export default class JoinPartyView extends BaseView {
     }
 
     const code = this.roomCodeInput?.getValue();
-    const name = /** @type {HTMLInputElement} */ (
-      this.querySelector('#playerName')
-    )?.value.trim();
+    const name = /** @type {HTMLInputElement} */ (this.querySelector('#playerName'))?.value.trim();
 
     // Save name for next time
     localStorage.setItem('partyPlayerName', name);

@@ -1,12 +1,12 @@
-  // WelcomeView - First-time user onboarding
+// WelcomeView - First-time user onboarding
 
-  import BaseView from './BaseView.js';
-  import { markWelcomeSeen } from '../features/onboarding.js';
-  import { t } from '../core/i18n.js';
+import BaseView from './BaseView.js';
+import { markWelcomeSeen } from '../features/onboarding.js';
+import { t } from '../core/i18n.js';
 
-  export default class WelcomeView extends BaseView {
-    async render() {
-      this.setHTML(`
+export default class WelcomeView extends BaseView {
+  async render() {
+    this.setHTML(`
         <div class="flex min-h-screen flex-col bg-background-light
   dark:bg-background-dark">
           <div class="flex flex-1 flex-col items-center justify-center p-6">
@@ -94,19 +94,19 @@
         </div>
       `);
 
-      this.attachListeners();
-    }
-
-    attachListeners() {
-      const skipBtn = this.querySelector('#skipBtn');
-      this.addEventListener(skipBtn, 'click', async () => {
-        await markWelcomeSeen();
-        this.navigateTo('/');
-      });
-
-      const connectBtn = this.querySelector('#connectBtn');
-      this.addEventListener(connectBtn, 'click', async () => {
-        this.navigateTo('/setup-openrouter');
-      });
-    }
+    this.attachListeners();
   }
+
+  attachListeners() {
+    const skipBtn = this.querySelector('#skipBtn');
+    this.addEventListener(skipBtn, 'click', async () => {
+      await markWelcomeSeen();
+      this.navigateTo('/');
+    });
+
+    const connectBtn = this.querySelector('#connectBtn');
+    this.addEventListener(connectBtn, 'click', async () => {
+      this.navigateTo('/setup-openrouter');
+    });
+  }
+}

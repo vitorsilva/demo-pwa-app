@@ -6,13 +6,13 @@ import { telemetry } from '../utils/telemetry.js';
 // Mock dependencies
 vi.mock('../core/settings.js', () => ({
   getSetting: vi.fn(),
-  saveSetting: vi.fn()
+  saveSetting: vi.fn(),
 }));
 
 vi.mock('../utils/telemetry.js', () => ({
   telemetry: {
-    track: vi.fn()
-  }
+    track: vi.fn(),
+  },
 }));
 
 describe('Theme Manager Service', () => {
@@ -77,7 +77,7 @@ describe('Theme Manager Service', () => {
       expect(telemetry.track).toHaveBeenCalledWith('event', {
         name: 'mode_switched',
         from: 'learning',
-        to: 'party'
+        to: 'party',
       });
     });
 
@@ -97,7 +97,7 @@ describe('Theme Manager Service', () => {
       expect(telemetry.track).toHaveBeenCalledWith('event', {
         name: 'mode_switched',
         from: 'party',
-        to: 'learning'
+        to: 'learning',
       });
     });
   });
@@ -172,7 +172,7 @@ describe('Theme Manager Service', () => {
       expect(telemetry.track).toHaveBeenCalledWith('event', {
         name: 'mode_switched',
         from: 'learning',
-        to: 'party'
+        to: 'party',
       });
     });
   });

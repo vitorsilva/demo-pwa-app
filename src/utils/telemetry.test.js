@@ -18,8 +18,12 @@ describe('TelemetryClient', () => {
     mockLocalStorage = {
       store: {},
       getItem: vi.fn((key) => mockLocalStorage.store[key] || null),
-      setItem: vi.fn((key, value) => { mockLocalStorage.store[key] = value; }),
-      removeItem: vi.fn((key) => { delete mockLocalStorage.store[key]; })
+      setItem: vi.fn((key, value) => {
+        mockLocalStorage.store[key] = value;
+      }),
+      removeItem: vi.fn((key) => {
+        delete mockLocalStorage.store[key];
+      }),
     };
     global.localStorage = mockLocalStorage;
 
@@ -95,8 +99,8 @@ describe('TelemetryClient', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telemetry-Token': CONFIG.token
-          }
+            'X-Telemetry-Token': CONFIG.token,
+          },
         })
       );
     });

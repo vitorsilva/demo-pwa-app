@@ -2,14 +2,20 @@
  * Unit tests for shuffle utility
  */
 import { describe, it, expect, vi } from 'vitest';
-import { shuffleQuestionOptions, shuffleAllQuestions, shuffleOptions, stripPrefix, addPrefix } from './shuffle.js';
+import {
+  shuffleQuestionOptions,
+  shuffleAllQuestions,
+  shuffleOptions,
+  stripPrefix,
+  addPrefix,
+} from './shuffle.js';
 
 describe('shuffleQuestionOptions', () => {
   const sampleQuestion = {
     question: 'What is 2 + 2?',
     options: ['A) 3', 'B) 4', 'C) 5', 'D) 6'],
     correct: 1, // B) 4 is correct
-    difficulty: 'easy'
+    difficulty: 'easy',
   };
 
   it('should return a new object (not mutate original)', () => {
@@ -25,8 +31,10 @@ describe('shuffleQuestionOptions', () => {
 
     expect(shuffled.options).toHaveLength(4);
     // Extract answer text (without labels) and compare
-    const originalContent = sampleQuestion.options.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
-    const shuffledContent = shuffled.options.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
+    const originalContent = sampleQuestion.options
+      .map((opt) => opt.replace(/^[A-D]\)\s*/, ''))
+      .sort();
+    const shuffledContent = shuffled.options.map((opt) => opt.replace(/^[A-D]\)\s*/, '')).sort();
     expect(shuffledContent).toEqual(originalContent);
   });
 
@@ -34,7 +42,10 @@ describe('shuffleQuestionOptions', () => {
     const shuffled = shuffleQuestionOptions(sampleQuestion);
 
     // The correct answer content (without label) should be the same
-    const originalCorrectContent = sampleQuestion.options[sampleQuestion.correct].replace(/^[A-D]\)\s*/, '');
+    const originalCorrectContent = sampleQuestion.options[sampleQuestion.correct].replace(
+      /^[A-D]\)\s*/,
+      ''
+    );
     const shuffledCorrectContent = shuffled.options[shuffled.correct].replace(/^[A-D]\)\s*/, '');
 
     expect(shuffledCorrectContent).toBe(originalCorrectContent);
@@ -51,7 +62,7 @@ describe('shuffleQuestionOptions', () => {
     const question = {
       question: 'Test?',
       options: ['A) Correct', 'B) Wrong1', 'C) Wrong2', 'D) Wrong3'],
-      correct: 0
+      correct: 0,
     };
 
     const shuffled = shuffleQuestionOptions(question);
@@ -63,7 +74,7 @@ describe('shuffleQuestionOptions', () => {
     const question = {
       question: 'Test?',
       options: ['A) Wrong1', 'B) Wrong2', 'C) Wrong3', 'D) Correct'],
-      correct: 3
+      correct: 3,
     };
 
     const shuffled = shuffleQuestionOptions(question);
@@ -75,7 +86,7 @@ describe('shuffleQuestionOptions', () => {
     const question = {
       question: 'True or False?',
       options: ['True', 'False'],
-      correct: 0
+      correct: 0,
     };
 
     const shuffled = shuffleQuestionOptions(question);
@@ -88,7 +99,7 @@ describe('shuffleQuestionOptions', () => {
     const question = {
       question: 'Only one option?',
       options: ['The only answer'],
-      correct: 0
+      correct: 0,
     };
 
     const shuffled = shuffleQuestionOptions(question);
@@ -100,7 +111,7 @@ describe('shuffleQuestionOptions', () => {
     const question = {
       question: 'No options?',
       options: [],
-      correct: 0
+      correct: 0,
     };
 
     const result = shuffleQuestionOptions(question);
@@ -110,7 +121,7 @@ describe('shuffleQuestionOptions', () => {
   it('should handle missing options', () => {
     const question = {
       question: 'No options property?',
-      correct: 0
+      correct: 0,
     };
 
     const result = shuffleQuestionOptions(question);
@@ -137,7 +148,7 @@ describe('shuffleQuestionOptions', () => {
       const question = {
         question: 'What is the capital of France?',
         options: ['A) London', 'B) Paris', 'C) Berlin', 'D) Madrid'],
-        correct: 1 // B) Paris is correct
+        correct: 1, // B) Paris is correct
       };
 
       // Run multiple times to ensure labels are always sequential
@@ -156,7 +167,7 @@ describe('shuffleQuestionOptions', () => {
       const question = {
         question: 'What is 2 + 2?',
         options: ['A) 3', 'B) 4', 'C) 5', 'D) 6'],
-        correct: 1 // B) 4 is correct (answer text is "4")
+        correct: 1, // B) 4 is correct (answer text is "4")
       };
 
       for (let i = 0; i < 10; i++) {
@@ -174,13 +185,13 @@ describe('shuffleAllQuestions', () => {
     {
       question: 'Q1?',
       options: ['A', 'B', 'C', 'D'],
-      correct: 0
+      correct: 0,
     },
     {
       question: 'Q2?',
       options: ['W', 'X', 'Y', 'Z'],
-      correct: 2
-    }
+      correct: 2,
+    },
   ];
 
   it('should return a new array', () => {
@@ -229,8 +240,10 @@ describe('shuffleOptions', () => {
 
     expect(result.shuffledOptions).toHaveLength(4);
     // Extract answer text (without labels) and compare
-    const originalContent = sampleOptions.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
-    const shuffledContent = result.shuffledOptions.map(opt => opt.replace(/^[A-D]\)\s*/, '')).sort();
+    const originalContent = sampleOptions.map((opt) => opt.replace(/^[A-D]\)\s*/, '')).sort();
+    const shuffledContent = result.shuffledOptions
+      .map((opt) => opt.replace(/^[A-D]\)\s*/, ''))
+      .sort();
     expect(shuffledContent).toEqual(originalContent);
   });
 

@@ -26,7 +26,7 @@ import { prefetchModelPricing } from './services/model-service.js';
 import { shouldShowWelcome, markWelcomeSeen } from './features/onboarding.js';
 import { logger } from './utils/logger.js';
 import { initErrorHandling } from './utils/errorHandler.js';
-import { initPerformanceMonitoring } from './utils/performance.js'
+import { initPerformanceMonitoring } from './utils/performance.js';
 import { telemetry } from './utils/telemetry.js';
 import { initI18n, t } from './core/i18n.js';
 import state from './core/state.js';
@@ -77,7 +77,7 @@ async function init() {
     router.addRoute('/topic-input', TopicInputView);
     router.addRoute('/quiz', QuizView);
     router.addRoute('/results', ResultsView);
-    router.addRoute('/loading', LoadingView)
+    router.addRoute('/loading', LoadingView);
     router.addRoute('/settings', SettingsView);
     router.addRoute('/history', TopicsView);
     router.addRoute('/welcome', WelcomeView);
@@ -121,8 +121,7 @@ async function init() {
     logger.debug('Show welcome check', { showWelcome, isPartyJoinRoute, isSharedQuizRoute });
     if (showWelcome && !isPartyJoinRoute && !isSharedQuizRoute) {
       window.location.hash = '#/welcome';
-    }    
-
+    }
   } catch (error) {
     logger.error('Initialization failed', { error: error.message });
   }
@@ -150,14 +149,14 @@ function handleDeepLinks() {
   }
 }
 
-  /**
-   * Handle OAuth callback from OpenRouter
-   */
-  async function handleOAuthCallback() {
-    const appContainer = document.getElementById('app');
+/**
+ * Handle OAuth callback from OpenRouter
+ */
+async function handleOAuthCallback() {
+  const appContainer = document.getElementById('app');
 
-    // Show loading state
-    appContainer.innerHTML = `
+  // Show loading state
+  appContainer.innerHTML = `
       <div class="flex min-h-screen items-center justify-center
   bg-background-light dark:bg-background-dark">
         <div class="text-center">
@@ -171,26 +170,25 @@ function handleDeepLinks() {
       </div>
     `;
 
-    try {
-      // Exchange code for API key
-      const apiKey = await handleCallback();
+  try {
+    // Exchange code for API key
+    const apiKey = await handleCallback();
 
-      // Store the key
-      await storeOpenRouterKey(apiKey);
+    // Store the key
+    await storeOpenRouterKey(apiKey);
 
-      // Mark welcome as seen so user goes to home
-      await markWelcomeSeen();
+    // Mark welcome as seen so user goes to home
+    await markWelcomeSeen();
 
-      logger.info('OpenRouter connected successfully');
+    logger.info('OpenRouter connected successfully');
 
-      // Redirect to connection confirmed page
-      window.location.href = window.location.origin + '/app/#/connection-confirmed';
+    // Redirect to connection confirmed page
+    window.location.href = window.location.origin + '/app/#/connection-confirmed';
+  } catch (error) {
+    logger.error('OAuth callback failed', { error: error.message });
 
-    } catch (error) {
-      logger.error('OAuth callback failed', { error: error.message });
-
-      // Show error
-      appContainer.innerHTML = `
+    // Show error
+    appContainer.innerHTML = `
         <div class="flex min-h-screen items-center justify-center
   bg-background-light dark:bg-background-dark p-6">
           <div class="text-center max-w-sm">
@@ -213,8 +211,8 @@ function handleDeepLinks() {
           </div>
         </div>
       `;
-    }
   }
+}
 
 init();
 
@@ -228,7 +226,7 @@ if ('serviceWorker' in navigator) {
         message: t('app.updateMessage'),
         icon: 'info',
         confirmText: t('app.reload'),
-        destructive: false
+        destructive: false,
       });
       if (confirmed) {
         updateSW(true); // Force reload with new version
@@ -240,10 +238,10 @@ if ('serviceWorker' in navigator) {
     },
     onRegistered(registration) {
       logger.info('Service Worker registered', {
-        scope: registration?.scope
+        scope: registration?.scope,
       });
       telemetry.track('sw_registered', {
-        scope: registration?.scope
+        scope: registration?.scope,
       });
     },
     onRegisterError(error) {
@@ -254,7 +252,7 @@ if ('serviceWorker' in navigator) {
         userAgent: navigator.userAgent,
         url: window.location.href,
         online: navigator.onLine,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       logger.error('Service Worker registration failed', errorContext);
@@ -263,18 +261,18 @@ if ('serviceWorker' in navigator) {
       telemetry.track('sw_registration_failed', {
         error: error.message,
         userAgent: navigator.userAgent,
-        online: navigator.onLine
+        online: navigator.onLine,
       });
-    }
+    },
   });
 } else {
   // Browser doesn't support service workers
   // Type assertion needed because TypeScript narrows navigator to 'never' in else branch
   const nav = /** @type {Navigator} */ (navigator);
   logger.warn('Service Worker not supported', {
-    userAgent: nav.userAgent
+    userAgent: nav.userAgent,
   });
   telemetry.track('sw_not_supported', {
-    userAgent: nav.userAgent
+    userAgent: nav.userAgent,
   });
 }

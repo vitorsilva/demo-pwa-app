@@ -16,11 +16,11 @@ const log = logger.child({ module: 'party-session' });
  * Scoring configuration.
  */
 export const SCORING = {
-  basePoints: 10,           // Points for correct answer
-  maxSpeedBonus: 5,         // Maximum bonus for fast answers
-  speedBonusWindow: 5000,   // Milliseconds to get full speed bonus
-  wrongAnswerPoints: 0,     // No points for wrong answers
-  noAnswerPoints: 0,        // No points for timeout
+  basePoints: 10, // Points for correct answer
+  maxSpeedBonus: 5, // Maximum bonus for fast answers
+  speedBonusWindow: 5000, // Milliseconds to get full speed bonus
+  wrongAnswerPoints: 0, // No points for wrong answers
+  noAnswerPoints: 0, // No points for timeout
 };
 
 /**
@@ -28,25 +28,25 @@ export const SCORING = {
  */
 export const MESSAGE_TYPES = {
   // Host → Guests
-  SESSION_INFO: 'session_info',     // Quiz data and settings
-  QUIZ_START: 'quiz_start',         // Start time for synchronization
-  SCORE_UPDATE: 'score_update',     // Live score updates
-  QUIZ_END: 'quiz_end',             // Final results
-  KICK: 'kick',                     // Remove participant
+  SESSION_INFO: 'session_info', // Quiz data and settings
+  QUIZ_START: 'quiz_start', // Start time for synchronization
+  SCORE_UPDATE: 'score_update', // Live score updates
+  QUIZ_END: 'quiz_end', // Final results
+  KICK: 'kick', // Remove participant
 
   // Guests → Host
-  ANSWER: 'answer',                 // Answer submission
-  LEAVE: 'leave',                   // Participant leaving
+  ANSWER: 'answer', // Answer submission
+  LEAVE: 'leave', // Participant leaving
 };
 
 /**
  * Session states.
  */
 export const SESSION_STATES = {
-  WAITING: 'waiting',       // In lobby, waiting for participants
-  PLAYING: 'playing',       // Quiz in progress
-  FINISHED: 'finished',     // Quiz completed
-  ENDED: 'ended',           // Session terminated
+  WAITING: 'waiting', // In lobby, waiting for participants
+  PLAYING: 'playing', // Quiz in progress
+  FINISHED: 'finished', // Quiz completed
+  ENDED: 'ended', // Session terminated
 };
 
 /**
@@ -88,7 +88,7 @@ export function calculatePoints(correct, responseTimeMs) {
 
   // Speed bonus: faster answers get more bonus points
   if (responseTimeMs < SCORING.speedBonusWindow) {
-    const speedRatio = 1 - (responseTimeMs / SCORING.speedBonusWindow);
+    const speedRatio = 1 - responseTimeMs / SCORING.speedBonusWindow;
     points += Math.round(SCORING.maxSpeedBonus * speedRatio);
   }
 
@@ -425,7 +425,7 @@ export class PartySession {
     }
 
     // Calculate response time
-    const questionStartTime = this.startTime + (questionIndex * this.secondsPerQuestion * 1000);
+    const questionStartTime = this.startTime + questionIndex * this.secondsPerQuestion * 1000;
     const responseTime = timestamp - questionStartTime;
 
     // Check if correct
@@ -476,7 +476,7 @@ export class PartySession {
     // Ignore if already answered
     if (participant.answers[questionIndex] !== undefined) return;
 
-    const questionStartTime = this.startTime + (questionIndex * this.secondsPerQuestion * 1000);
+    const questionStartTime = this.startTime + questionIndex * this.secondsPerQuestion * 1000;
     const responseTime = Date.now() - questionStartTime;
 
     const question = this.quiz.questions[questionIndex];
@@ -570,7 +570,7 @@ export class PartySession {
       duration,
     });
 
-    log.info('Quiz ended', { standings: standings.map(p => ({ name: p.name, score: p.score })) });
+    log.info('Quiz ended', { standings: standings.map((p) => ({ name: p.name, score: p.score })) });
   }
 
   /**
@@ -579,7 +579,7 @@ export class PartySession {
    * @private
    */
   _broadcastScoreUpdate() {
-    const scores = Array.from(this.participants.values()).map(p => ({
+    const scores = Array.from(this.participants.values()).map((p) => ({
       id: p.id,
       name: p.name,
       score: p.score,
@@ -918,8 +918,7 @@ export class PartySession {
    * @returns {Participant[]} Sorted participants
    */
   getStandings() {
-    return Array.from(this.participants.values())
-      .sort((a, b) => b.score - a.score);
+    return Array.from(this.participants.values()).sort((a, b) => b.score - a.score);
   }
 
   /**

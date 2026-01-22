@@ -2,19 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-  /* Mode theming - add this section */
-  :root {
-    --color-primary: #4A90E2;
-    --color-primary-hover: #3A7BC8;
-    --color-accent: #14B8A6;
-  }
+/* Mode theming - add this section */
+:root {
+  --color-primary: #4a90e2;
+  --color-primary-hover: #3a7bc8;
+  --color-accent: #14b8a6;
+}
 
-  :root.party-mode {
-    --color-primary: #F97316;
-    --color-primary-hover: #EA580C;
-    --color-accent: #A855F7;
-  }
-  
+:root.party-mode {
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-accent: #a855f7;
+}
+
 @layer base {
   select {
     --select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(150,168,197)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
@@ -30,7 +30,11 @@
 }
 
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
 }
 
 .material-symbols-outlined.fill {

@@ -14,7 +14,7 @@ import {
   generateShareUrl,
   generateShareText,
   shareToTwitter,
-  shareToFacebook
+  shareToFacebook,
 } from '../utils/share.js';
 
 /**
@@ -85,14 +85,18 @@ export function showShareModal({ topic, score, total, percentage }) {
         </div>
 
         <!-- More Options (Native Share) -->
-        ${canShare() ? `
+        ${
+          canShare()
+            ? `
         <div class="px-4 mb-6">
           <button id="moreOptionsBtn" data-testid="share-more-options" class="w-full bg-primary/10 hover:bg-primary/20 text-primary rounded-xl py-4 font-semibold flex items-center justify-center gap-2 transition-colors">
             <span class="material-symbols-outlined">share</span>
             ${t('share.moreOptions')}
           </button>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- Close Button -->
         <div class="px-4 pb-8">
@@ -199,7 +203,7 @@ export function showShareModal({ topic, score, total, percentage }) {
             title: t('share.quizMaster', { topic }),
             text: shareText,
             url: shareUrl,
-            imageBlob
+            imageBlob,
           });
         } else {
           // Fallback to text share if image not ready
@@ -207,7 +211,7 @@ export function showShareModal({ topic, score, total, percentage }) {
           await shareContent({
             title: t('share.quizMaster', { topic }),
             text: shareText,
-            url: shareUrl
+            url: shareUrl,
           });
         }
       });

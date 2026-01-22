@@ -11,10 +11,12 @@ import { logger } from './logger.js';
  * @returns {string} Cleaned JSON string
  */
 function cleanJSON(text) {
-  return text
-    .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas before } or ]
-    // eslint-disable-next-line no-control-regex, sonarjs/no-control-regex -- Intentionally removing control chars from JSON
-    .replace(/[\u0000-\u001F]+/g, ' ');
+  return (
+    text
+      .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas before } or ]
+      // eslint-disable-next-line no-control-regex, sonarjs/no-control-regex -- Intentionally removing control chars from JSON
+      .replace(/[\u0000-\u001F]+/g, ' ')
+  );
 }
 
 /**
@@ -38,7 +40,7 @@ export function extractJSON(text) {
   }
 
   // Step 1: Remove BOM if present
-  if (cleaned.charCodeAt(0) === 0xFEFF) {
+  if (cleaned.charCodeAt(0) === 0xfeff) {
     cleaned = cleaned.slice(1);
   }
 
@@ -48,7 +50,7 @@ export function extractJSON(text) {
 
   // Step 3: Normalize smart quotes to straight quotes
   cleaned = cleaned
-    .replace(/[\u201C\u201D]/g, '"')  // Smart double quotes " "
+    .replace(/[\u201C\u201D]/g, '"') // Smart double quotes " "
     .replace(/[\u2018\u2019]/g, "'"); // Smart single quotes ' '
 
   // Step 4: Try direct parse first (most common case)
@@ -107,7 +109,7 @@ export function extractJSON(text) {
   // All strategies failed - log the raw text for debugging
   logger.error('JSON extraction failed', {
     rawText: text.substring(0, 500),
-    textLength: text.length
+    textLength: text.length,
   });
 
   throw new Error('Failed to extract valid JSON from response');

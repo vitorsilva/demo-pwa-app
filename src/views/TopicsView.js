@@ -1,21 +1,21 @@
- import BaseView from './BaseView.js';
-  import { getQuizHistory, getQuizSession, deleteQuiz } from '../services/quiz-service.js';
-  import state from '../core/state.js';
-  import { t } from '../core/i18n.js';
-  import { formatRelativeDate } from '../utils/formatters.js';
-  import { formatCost, isFreeModel } from '../services/cost-service.js';
-  import { showShareQuizModal } from '../components/ShareQuizModal.js';
-  import { showDeleteQuizModal } from '../components/DeleteQuizModal.js';
-  import { showAlertModal } from '../components/AlertModal.js';
-  import { logger } from '../utils/logger.js';
-  import { createModeToggle } from '../components/ModeToggle.js';
+import BaseView from './BaseView.js';
+import { getQuizHistory, getQuizSession, deleteQuiz } from '../services/quiz-service.js';
+import state from '../core/state.js';
+import { t } from '../core/i18n.js';
+import { formatRelativeDate } from '../utils/formatters.js';
+import { formatCost, isFreeModel } from '../services/cost-service.js';
+import { showShareQuizModal } from '../components/ShareQuizModal.js';
+import { showDeleteQuizModal } from '../components/DeleteQuizModal.js';
+import { showAlertModal } from '../components/AlertModal.js';
+import { logger } from '../utils/logger.js';
+import { createModeToggle } from '../components/ModeToggle.js';
 
-  export default class TopicsView extends BaseView {
-    async render() {
-      // Get ALL sessions (pass a large number or modify db function)
-      const sessions = await getQuizHistory(100);
+export default class TopicsView extends BaseView {
+  async render() {
+    // Get ALL sessions (pass a large number or modify db function)
+    const sessions = await getQuizHistory(100);
 
-      this.setHTML(`
+    this.setHTML(`
         <div class="relative flex min-h-screen w-full flex-col
   bg-background-light dark:bg-background-dark">
           <!-- Header -->
@@ -32,8 +32,7 @@
 
           <!-- Main Content -->
           <main class="flex-grow px-4 pb-24">
-            ${sessions.length === 0 ? this.renderEmptyState() :
-  this.renderQuizList(sessions)}
+            ${sessions.length === 0 ? this.renderEmptyState() : this.renderQuizList(sessions)}
           </main>
 
           <!-- Bottom Navigation Bar -->
@@ -67,17 +66,17 @@
         </div>
       `);
 
-      // Mount mode toggle
-      const toggleContainer = this.querySelector('#modeToggleContainer');
-      if (toggleContainer) {
-        toggleContainer.appendChild(createModeToggle());
-      }
-
-      this.attachListeners();
+    // Mount mode toggle
+    const toggleContainer = this.querySelector('#modeToggleContainer');
+    if (toggleContainer) {
+      toggleContainer.appendChild(createModeToggle());
     }
 
-    renderEmptyState() {
-      return `
+    this.attachListeners();
+  }
+
+  renderEmptyState() {
+    return `
         <div class="flex flex-col items-center justify-center py-16
   text-center">
           <span class="material-symbols-outlined text-6xl
@@ -92,58 +91,55 @@
           </a>
         </div>
       `;
-    }
+  }
 
-    renderQuizList(sessions) {
-      return `
+  renderQuizList(sessions) {
+    return `
         <div class="flex flex-col gap-3 pt-4">
-          ${sessions.map(session =>
-  this.renderQuizItem(session)).join('')}
+          ${sessions.map((session) => this.renderQuizItem(session)).join('')}
         </div>
       `;
+  }
+
+  renderQuizItem(session) {
+    const hasScore = session.score !== null && session.score !== undefined;
+    const percentage = hasScore ? Math.round((session.score / session.totalQuestions) * 100) : null;
+    const scoreDisplay = hasScore
+      ? `${session.score}/${session.totalQuestions}`
+      : `--/${session.totalQuestions}`;
+
+    // Format the date - handle unplayed quizzes (timestamp = 0)
+    let dateStr;
+    if (!session.timestamp || session.timestamp === 0) {
+      dateStr = hasScore ? formatRelativeDate(session.timestamp) : t('home.notPlayedYet');
+    } else {
+      dateStr = formatRelativeDate(session.timestamp);
     }
 
-    renderQuizItem(session) {
-      const hasScore = session.score !== null && session.score !== undefined;
-      const percentage = hasScore
-        ? Math.round((session.score / session.totalQuestions) * 100)
-        : null;
-      const scoreDisplay = hasScore
-        ? `${session.score}/${session.totalQuestions}`
-        : `--/${session.totalQuestions}`;
+    // Format cost if available and feature enabled
+    const showCost = session.usage;
+    let costStr = '';
+    if (showCost) {
+      const isFree = isFreeModel(session.model);
+      costStr = ` • ${formatCost(session.usage.costUsd || 0, isFree)}`;
+    }
 
-      // Format the date - handle unplayed quizzes (timestamp = 0)
-      let dateStr;
-      if (!session.timestamp || session.timestamp === 0) {
-        dateStr = hasScore ? formatRelativeDate(session.timestamp) : t('home.notPlayedYet');
+    const canReplay = !!session.questions;
+    const canShare = canReplay; // Share quiz always available when replay is possible
+
+    // Choose color based on score (gray for unplayed)
+    let colorClass = 'text-subtext-light bg-gray-500';
+    if (hasScore) {
+      if (percentage >= 80) {
+        colorClass = 'text-green-500 bg-green-500';
+      } else if (percentage >= 50) {
+        colorClass = 'text-orange-500 bg-orange-500';
       } else {
-        dateStr = formatRelativeDate(session.timestamp);
+        colorClass = 'text-red-500 bg-red-500';
       }
+    }
 
-      // Format cost if available and feature enabled
-      const showCost = session.usage;
-      let costStr = '';
-      if (showCost) {
-        const isFree = isFreeModel(session.model);
-        costStr = ` • ${formatCost(session.usage.costUsd || 0, isFree)}`;
-      }
-
-      const canReplay = !!session.questions;
-      const canShare = canReplay;  // Share quiz always available when replay is possible
-
-      // Choose color based on score (gray for unplayed)
-      let colorClass = 'text-subtext-light bg-gray-500';
-      if (hasScore) {
-        if (percentage >= 80) {
-          colorClass = 'text-green-500 bg-green-500';
-        } else if (percentage >= 50) {
-          colorClass = 'text-orange-500 bg-orange-500';
-        } else {
-          colorClass = 'text-red-500 bg-red-500';
-        }
-      }
-
-      return `
+    return `
         <div class="quiz-item flex items-center gap-4 bg-card-light
   dark:bg-card-dark rounded-xl p-4
           ${canReplay ? 'cursor-pointer hover:opacity-80' : 'opacity-60'}    
@@ -164,13 +160,17 @@
             </p>
           </div>
           <div class="flex items-center gap-2">
-            ${canShare ? `
+            ${
+              canShare
+                ? `
             <button class="share-quiz-btn flex size-10 items-center justify-center rounded-full hover:bg-primary/10 text-primary transition-colors"
               data-session-id="${session.id}"
               aria-label="Share quiz">
               <span class="material-symbols-outlined text-xl">link</span>
             </button>
-            ` : ''}
+            `
+                : ''
+            }
             <button class="delete-quiz-btn flex size-10 items-center justify-center rounded-full hover:bg-red-500/10 text-red-500 transition-colors"
               data-session-id="${session.id}"
               data-topic="${session.topic.replace(/"/g, '&quot;')}"
@@ -183,117 +183,117 @@
           </div>
         </div>
       `;
+  }
+
+  attachListeners() {
+    // Quiz item click handlers for replay
+    const quizItems = document.querySelectorAll('.quiz-item:not([data-no-replay])');
+    quizItems.forEach((item) => {
+      this.addEventListener(item, 'click', async () => {
+        const sessionId = parseInt(/** @type {HTMLElement} */ (item).dataset.sessionId);
+        await this.replayQuiz(sessionId);
+      });
+    });
+
+    // Share quiz button handlers
+    const shareButtons = document.querySelectorAll('.share-quiz-btn');
+    shareButtons.forEach((btn) => {
+      this.addEventListener(btn, 'click', async (e) => {
+        e.stopPropagation(); // Prevent triggering quiz item click
+        const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
+        await this.shareQuiz(sessionId);
+      });
+    });
+
+    // Delete quiz button handlers
+    const deleteButtons = document.querySelectorAll('.delete-quiz-btn');
+    deleteButtons.forEach((btn) => {
+      this.addEventListener(btn, 'click', async (e) => {
+        e.stopPropagation(); // Prevent triggering quiz item click
+        const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
+        const topic = /** @type {HTMLElement} */ (btn).dataset.topic;
+        await this.handleDeleteQuiz(sessionId, topic);
+      });
+    });
+  }
+
+  async replayQuiz(sessionId) {
+    const session = await getQuizSession(sessionId);
+
+    if (!session || !session.questions) {
+      await showAlertModal({
+        title: t('modal.errorTitle'),
+        message: t('errors.cannotReplay'),
+        icon: 'error',
+      });
+      return;
     }
 
-    attachListeners() {
-      // Quiz item click handlers for replay
-      const quizItems =
-  document.querySelectorAll('.quiz-item:not([data-no-replay])');
-      quizItems.forEach(item => {
-        this.addEventListener(item, 'click', async () => {
-          const sessionId = parseInt(/** @type {HTMLElement} */ (item).dataset.sessionId);
-          await this.replayQuiz(sessionId);
-        });
-      });
+    state.set('currentTopic', session.topic);
+    state.set('currentGradeLevel', session.gradeLevel || 'middle school');
+    state.set('generatedQuestions', session.questions);
+    state.set('currentAnswers', []);
+    state.set('replaySessionId', sessionId);
 
-      // Share quiz button handlers
-      const shareButtons = document.querySelectorAll('.share-quiz-btn');
-      shareButtons.forEach(btn => {
-        this.addEventListener(btn, 'click', async (e) => {
-          e.stopPropagation(); // Prevent triggering quiz item click
-          const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
-          await this.shareQuiz(sessionId);
-        });
-      });
+    this.navigateTo('/quiz');
+  }
 
-      // Delete quiz button handlers
-      const deleteButtons = document.querySelectorAll('.delete-quiz-btn');
-      deleteButtons.forEach(btn => {
-        this.addEventListener(btn, 'click', async (e) => {
-          e.stopPropagation(); // Prevent triggering quiz item click
-          const sessionId = parseInt(/** @type {HTMLElement} */ (btn).dataset.sessionId);
-          const topic = /** @type {HTMLElement} */ (btn).dataset.topic;
-          await this.handleDeleteQuiz(sessionId, topic);
-        });
-      });
+  async shareQuiz(sessionId) {
+    const session = await getQuizSession(sessionId);
+
+    if (!session || !session.questions) {
+      return;
     }
 
-    async replayQuiz(sessionId) {
-      const session = await getQuizSession(sessionId);
+    logger.action('share_quiz_initiated_from_history', {
+      topic: session.topic,
+      questionCount: session.questions.length,
+    });
 
-      if (!session || !session.questions) {
-        await showAlertModal({
-          title: t('modal.errorTitle'),
-          message: t('errors.cannotReplay'),
-          icon: 'error'
-        });
-        return;
-      }
+    showShareQuizModal({
+      topic: session.topic,
+      gradeLevel: session.gradeLevel,
+      questions: session.questions,
+    });
+  }
 
-      state.set('currentTopic', session.topic);
-      state.set('currentGradeLevel', session.gradeLevel || 'middle school');
-      state.set('generatedQuestions', session.questions);
-      state.set('currentAnswers', []);
-      state.set('replaySessionId', sessionId);
+  async handleDeleteQuiz(sessionId, topic) {
+    const confirmed = await showDeleteQuizModal(topic);
 
-      this.navigateTo('/quiz');
+    if (!confirmed) {
+      return;
     }
 
-    async shareQuiz(sessionId) {
-      const session = await getQuizSession(sessionId);
+    logger.action('delete_quiz', {
+      sessionId,
+      topic,
+    });
 
-      if (!session || !session.questions) {
-        return;
-      }
+    const success = await deleteQuiz(sessionId);
 
-      logger.action('share_quiz_initiated_from_history', {
-        topic: session.topic,
-        questionCount: session.questions.length
-      });
-
-      showShareQuizModal({
-        topic: session.topic,
-        gradeLevel: session.gradeLevel,
-        questions: session.questions
-      });
+    if (success) {
+      this.showSuccessToast(t('history.quizDeleted'));
+      // Re-render the view to update the list
+      await this.render();
     }
+  }
 
-    async handleDeleteQuiz(sessionId, topic) {
-      const confirmed = await showDeleteQuizModal(topic);
-
-      if (!confirmed) {
-        return;
-      }
-
-      logger.action('delete_quiz', {
-        sessionId,
-        topic
-      });
-
-      const success = await deleteQuiz(sessionId);
-
-      if (success) {
-        this.showSuccessToast(t('history.quizDeleted'));
-        // Re-render the view to update the list
-        await this.render();
-      }
-    }
-
-    showSuccessToast(message) {
-      // Create toast element
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-fade-in';
-      toast.innerHTML = `
+  showSuccessToast(message) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className =
+      'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-fade-in';
+    toast.innerHTML = `
         <span class="material-symbols-outlined">check_circle</span>
         <span>${message}</span>
       `;
 
-      document.body.appendChild(toast);
+    document.body.appendChild(toast);
 
-      // Remove after 3 seconds
-      setTimeout(() => {
-        toast.classList.add('animate-fade-out');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.classList.add('animate-fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
+}

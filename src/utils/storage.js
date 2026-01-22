@@ -57,7 +57,7 @@ export async function getStorageBreakdown() {
     'quizmaster_settings',
     'openrouter_models_cache',
     'i18nextLng',
-    'saberloop_telemetry_queue'
+    'saberloop_telemetry_queue',
   ];
 
   for (const key of localStorageKeys) {
@@ -84,6 +84,6 @@ export async function getStorageBreakdown() {
     total: formatStorageSize(totalBytes),
     settingsBytes,
     quizzesBytes,
-    totalBytes
+    totalBytes,
   };
 }

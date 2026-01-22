@@ -11,11 +11,12 @@ import { createParticipantList } from '../components/ParticipantList.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
 import { getRoom, leaveRoom } from '../services/party-api.js';
-import {
-  CONNECTION_MODES,
-} from '../services/party-connection-manager.js';
+import { CONNECTION_MODES } from '../services/party-connection-manager.js';
 import { getConnection, clearConnection } from '../services/party-connection-store.js';
-import { createConnectionModeIndicator, updateConnectionModeIndicator } from '../components/ConnectionModeIndicator.js';
+import {
+  createConnectionModeIndicator,
+  updateConnectionModeIndicator,
+} from '../components/ConnectionModeIndicator.js';
 import { showAlertModal } from '../components/AlertModal.js';
 
 const log = logger.child({ module: 'PartyLobbyView' });
@@ -92,7 +93,7 @@ export default class PartyLobbyView extends BaseView {
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('party.roomNotFound'),
-        icon: 'error'
+        icon: 'error',
       });
       this.navigateTo('/');
       return false;
@@ -162,7 +163,7 @@ export default class PartyLobbyView extends BaseView {
     if (container) {
       container.appendChild(indicator);
     }
-        
+
     // Render participant list
     this.updateParticipantList();
 
@@ -270,7 +271,7 @@ export default class PartyLobbyView extends BaseView {
         await showAlertModal({
           title: t('modal.warningTitle'),
           message: t('party.hostLeft'),
-          icon: 'warning'
+          icon: 'warning',
         });
         this.navigateTo('/');
         return;
@@ -294,7 +295,6 @@ export default class PartyLobbyView extends BaseView {
       log.error('Failed to fetch participants', { error: error.message });
     }
   }
-
 
   updateParticipantList() {
     const container = this.querySelector('#participantContainer');
@@ -353,7 +353,7 @@ export default class PartyLobbyView extends BaseView {
     await showAlertModal({
       title: t('modal.warningTitle'),
       message: t('party.hostLeft'),
-      icon: 'warning'
+      icon: 'warning',
     });
     this.navigateTo('/');
   }

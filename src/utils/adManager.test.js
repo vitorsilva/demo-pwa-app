@@ -6,18 +6,18 @@ vi.mock('./logger.js', () => ({
     info: vi.fn(),
     debug: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 vi.mock('./network.js', () => ({
   isOnline: vi.fn(),
   onOnline: vi.fn(),
-  onOffline: vi.fn()
+  onOffline: vi.fn(),
 }));
 
 vi.mock('../core/features.js', () => ({
-  isFeatureEnabled: vi.fn()
+  isFeatureEnabled: vi.fn(),
 }));
 
 import {
@@ -29,7 +29,7 @@ import {
   resetForNavigation,
   initAdManager,
   getPublisherId,
-  setAdSlot
+  setAdSlot,
 } from './adManager.js';
 import { logger } from './logger.js';
 import { isOnline, onOnline, onOffline } from './network.js';
@@ -82,7 +82,9 @@ describe('AdManager', () => {
       const result = canLoadAds();
 
       expect(result).toBe(false);
-      expect(logger.debug).toHaveBeenCalledWith('[AdManager] Cannot load ads: adsbygoogle not loaded');
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[AdManager] Cannot load ads: adsbygoogle not loaded'
+      );
     });
 
     it('should return true when all conditions are met', () => {
@@ -111,7 +113,9 @@ describe('AdManager', () => {
       const result = await loadAd('nonexistent-container', 'quizLoading');
 
       expect(result).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith('[AdManager] Container not found: nonexistent-container');
+      expect(logger.warn).toHaveBeenCalledWith(
+        '[AdManager] Container not found: nonexistent-container'
+      );
     });
 
     it('should return false and show placeholder when no slot ID is configured for quizLoading', async () => {
@@ -119,7 +123,9 @@ describe('AdManager', () => {
       const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(false);
-      expect(logger.debug).toHaveBeenCalledWith('[AdManager] No slot ID for quizLoading - AdSense pending approval');
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[AdManager] No slot ID for quizLoading - AdSense pending approval'
+      );
 
       // Should show placeholder instead of hiding
       const container = document.getElementById('test-ad-container');
@@ -132,7 +138,9 @@ describe('AdManager', () => {
       const result = await loadAd('test-ad-container', 'resultsLoading');
 
       expect(result).toBe(false);
-      expect(logger.debug).toHaveBeenCalledWith('[AdManager] No slot ID for resultsLoading - AdSense pending approval');
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[AdManager] No slot ID for resultsLoading - AdSense pending approval'
+      );
 
       // Should show placeholder instead of hiding
       const container = document.getElementById('test-ad-container');
@@ -151,7 +159,9 @@ describe('AdManager', () => {
       const result = await loadAd('test-ad-container', 'quizLoading');
 
       expect(result).toBe(false);
-      expect(logger.debug).toHaveBeenCalledWith('[AdManager] Ad already loaded in test-ad-container');
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[AdManager] Ad already loaded in test-ad-container'
+      );
     });
 
     it('should hide container when ads cannot load', async () => {
@@ -213,7 +223,7 @@ describe('AdManager', () => {
       Object.defineProperty(window, 'adsbygoogle', {
         value: [],
         writable: true,
-        configurable: true
+        configurable: true,
       });
 
       loadAd('test-ad-container', 'quizLoading');
@@ -327,7 +337,7 @@ describe('AdManager', () => {
       expect(logger.info).toHaveBeenCalledWith('[AdManager] Initialized', {
         publisherId: 'ca-pub-9849708569219157',
         featureEnabled: true,
-        online: true
+        online: true,
       });
     });
   });
@@ -415,7 +425,9 @@ describe('AdManager', () => {
 
       // Make appendChild throw an error
       const container = document.getElementById('error-test-container');
-      container.appendChild = () => { throw new Error('DOM error'); };
+      container.appendChild = () => {
+        throw new Error('DOM error');
+      };
 
       const result = await loadAd('error-test-container', 'quizLoading');
 

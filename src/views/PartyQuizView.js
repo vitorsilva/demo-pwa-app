@@ -13,7 +13,11 @@ import { createLiveScoreboard } from '../components/LiveScoreboard.js';
 import { shuffleOptions } from '../utils/shuffle.js';
 import { logger } from '../utils/logger.js';
 import router from '../core/router.js';
-import { getRoom, submitAnswer as submitAnswerApi, advanceQuestion as advanceQuestionApi } from '../services/party-api.js';
+import {
+  getRoom,
+  submitAnswer as submitAnswerApi,
+  advanceQuestion as advanceQuestionApi,
+} from '../services/party-api.js';
 import { CONNECTION_MODES } from '../services/party-connection-manager.js';
 import { getConnection } from '../services/party-connection-store.js';
 import { showAlertModal } from '../components/AlertModal.js';
@@ -32,7 +36,11 @@ export default class PartyQuizView extends BaseView {
   constructor(options = {}) {
     super();
     // Support both new (roomCode) and legacy (session) approaches
-    this.roomCode = options.roomCode || router.getPartyQuizCode() || sessionStorage.getItem('partyRoomCode') || '';
+    this.roomCode =
+      options.roomCode ||
+      router.getPartyQuizCode() ||
+      sessionStorage.getItem('partyRoomCode') ||
+      '';
     this.participantId = sessionStorage.getItem('partyParticipantId') || '';
     this.isHost = sessionStorage.getItem('partyIsHost') === 'true';
     this.session = options.session; // Legacy support
@@ -142,7 +150,9 @@ export default class PartyQuizView extends BaseView {
           </div>
 
           <!-- Next Question button (host only, after answering) -->
-          ${this.isHost ? `
+          ${
+            this.isHost
+              ? `
             <button
               id="nextQuestionBtn"
               data-testid="next-question-btn"
@@ -156,7 +166,9 @@ export default class PartyQuizView extends BaseView {
                 ${t('party.nextQuestion')}
               </span>
             </button>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Status text -->
           <span id="statusText" class="text-sm">${t('party.waiting')}</span>
@@ -213,14 +225,17 @@ export default class PartyQuizView extends BaseView {
       this.participants = this._mapParticipants(roomData.participants || []);
       this.questionStartTime = Date.now();
 
-      log.info('Quiz loaded', { questions: this.quiz?.questions?.length, participants: this.participants.length });
+      log.info('Quiz loaded', {
+        questions: this.quiz?.questions?.length,
+        participants: this.participants.length,
+      });
       return true;
     } catch (error) {
       log.error('Failed to load room', { error: error.message });
       await showAlertModal({
         title: t('modal.errorTitle'),
         message: t('party.roomNotFound'),
-        icon: 'error'
+        icon: 'error',
       });
       this.navigateTo('/');
       return false;
@@ -313,7 +328,9 @@ export default class PartyQuizView extends BaseView {
           </div>
 
           <!-- Next Question button (host only, after answering) -->
-          ${this.isHost ? `
+          ${
+            this.isHost
+              ? `
             <button
               id="nextQuestionBtn"
               data-testid="next-question-btn"
@@ -327,7 +344,9 @@ export default class PartyQuizView extends BaseView {
                 ${t('party.nextQuestion')}
               </span>
             </button>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Status text -->
           <span id="statusText" class="text-sm">${t('party.waiting')}</span>
@@ -367,7 +386,9 @@ export default class PartyQuizView extends BaseView {
 
     const labels = ['A', 'B', 'C', 'D'];
 
-    return this.shuffledOptions.map((option, index) => `
+    return this.shuffledOptions
+      .map(
+        (option, index) => `
       <button
         class="option-btn flex items-start gap-3 p-4 rounded-xl
                bg-card-light dark:bg-card-dark
@@ -385,7 +406,9 @@ export default class PartyQuizView extends BaseView {
           ${option}
         </span>
       </button>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
@@ -402,7 +425,7 @@ export default class PartyQuizView extends BaseView {
     let highlightId;
 
     if (this.session) {
-      participants = this.session.getParticipants().map(p => ({
+      participants = this.session.getParticipants().map((p) => ({
         ...p,
         isYou: p.id === this.session.participantId,
       }));
@@ -580,7 +603,7 @@ export default class PartyQuizView extends BaseView {
           participantId: this.participantId,
           questionIndex: this.currentQuestion,
           answerIndex: originalIndex,
-          timeMs
+          timeMs,
         };
         const result = await submitAnswerApi(this.roomCode, answer);
 
@@ -595,7 +618,11 @@ export default class PartyQuizView extends BaseView {
         }
         this._updateAnswerStatus();
 
-        log.info('Answer result', { isCorrect: result.isCorrect, points: result.points, score: result.score });
+        log.info('Answer result', {
+          isCorrect: result.isCorrect,
+          points: result.points,
+          score: result.score,
+        });
       } catch (error) {
         log.error('Failed to submit answer', { error: error.message });
         this._updateStatus(t('party.answered'));
@@ -716,7 +743,7 @@ export default class PartyQuizView extends BaseView {
           participantId: this.participantId,
           questionIndex: this.currentQuestion,
           answerIndex: -1,
-          timeMs: this.secondsPerQuestion * 1000
+          timeMs: this.secondsPerQuestion * 1000,
         };
         await submitAnswerApi(this.roomCode, noAnswer);
       } catch (error) {
@@ -859,15 +886,13 @@ export default class PartyQuizView extends BaseView {
    */
   _updateAnswerStatus() {
     // Get participants from session or local state
-    const participants = this.session
-      ? this.session.getParticipants()
-      : this.participants;
+    const participants = this.session ? this.session.getParticipants() : this.participants;
 
     // Count who has answered (support both HTTP and P2P modes)
     const answered = participants.filter((p) => {
       // HTTP mode: hasAnsweredCurrent from API
       // P2P mode: status === 'answered'
-      return p.hasAnsweredCurrent ?? (p.status === 'answered');
+      return p.hasAnsweredCurrent ?? p.status === 'answered';
     }).length;
 
     const total = participants.length;

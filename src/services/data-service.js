@@ -17,16 +17,14 @@ const LOCAL_STORAGE_KEYS = [
   'quizmaster_settings',
   'openrouter_models_cache',
   'i18nextLng',
-  'saberloop_telemetry_queue'
+  'saberloop_telemetry_queue',
 ];
 
 /**
  * sessionStorage keys used by the application.
  * These will be cleared during data deletion.
  */
-const SESSION_STORAGE_KEYS = [
-  'openrouter_code_verifier'
-];
+const SESSION_STORAGE_KEYS = ['openrouter_code_verifier'];
 
 /**
  * Delete all user data from all storage locations.

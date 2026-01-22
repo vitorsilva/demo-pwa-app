@@ -96,7 +96,7 @@ export default class TopicInputView extends BaseView {
         await showAlertModal({
           title: t('modal.warningTitle'),
           message: t('errors.enterTopic'),
-          icon: 'warning'
+          icon: 'warning',
         });
         return;
       }

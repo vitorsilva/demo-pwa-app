@@ -1,6 +1,12 @@
 import BaseView from './BaseView.js';
 import state from '../core/state.js';
-import { saveQuizSession, updateQuizSession, generateExplanation, generateWrongAnswerExplanation, updateQuestionExplanation } from '../services/quiz-service.js';
+import {
+  saveQuizSession,
+  updateQuizSession,
+  generateExplanation,
+  generateWrongAnswerExplanation,
+  updateQuestionExplanation,
+} from '../services/quiz-service.js';
 import { getApiKey } from '../services/auth-service.js';
 import { logger } from '../utils/logger.js';
 import { showExplanationModal } from '../components/ExplanationModal.js';
@@ -24,7 +30,7 @@ export default class ResultsView extends BaseView {
     // Calculate score
     let correctCount = 0;
     questions.forEach((question, index) => {
-      if (Number(answers[index]) === Number(question.correct) ) {
+      if (Number(answers[index]) === Number(question.correct)) {
         correctCount++;
       }
     });
@@ -84,13 +90,14 @@ export default class ResultsView extends BaseView {
     };
 
     // Generate question review HTML
-    const questionReviewHTML = questions.map((question, index) => {
-      const isCorrect = Number(answers[index]) === Number(question.correct);
-      const userAnswer = question.options[Number(answers[index])];
-      const correctAnswer = question.options[Number(question.correct)];
+    const questionReviewHTML = questions
+      .map((question, index) => {
+        const isCorrect = Number(answers[index]) === Number(question.correct);
+        const userAnswer = question.options[Number(answers[index])];
+        const correctAnswer = question.options[Number(question.correct)];
 
-      if (isCorrect) {
-        return `
+        if (isCorrect) {
+          return `
           <div class="flex items-center gap-4 bg-card-light dark:bg-card-dark p-3 rounded-lg min-h-[72px] justify-between">
             <div class="flex items-center gap-4">
               <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
@@ -108,16 +115,16 @@ export default class ResultsView extends BaseView {
             </div>
           </div>
         `;
-      } else {
-        // Incorrect answer - show explain button
-        const rightSideContent = `<button
+        } else {
+          // Incorrect answer - show explain button
+          const rightSideContent = `<button
               aria-label="Explain answer"
               data-question-index="${index}"
               class="explain-btn flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-all hover:bg-primary/20 active:scale-95 animate-pulse shadow-[0_0_10px_rgba(74,144,226,0.5)]">
               <span class="material-symbols-outlined text-[20px]">info</span>
             </button>`;
 
-        return `
+          return `
           <div class="flex items-center gap-4 bg-card-light dark:bg-card-dark p-3 rounded-lg min-h-[72px] justify-between">
             <div class="flex items-center gap-4">
               <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error">
@@ -134,8 +141,9 @@ export default class ResultsView extends BaseView {
             </div>
           </div>
         `;
-      }
-    }).join('');
+        }
+      })
+      .join('');
 
     this.setHTML(`
       <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
@@ -227,7 +235,6 @@ export default class ResultsView extends BaseView {
   }
 
   async saveQuizSession(questions, answers, correctCount, totalQuestions) {
-
     // Skip saving if this is a replay
     const replaySessionId = state.get('replaySessionId');
 
@@ -237,7 +244,7 @@ export default class ResultsView extends BaseView {
         await updateQuizSession(replaySessionId, {
           score: correctCount,
           answers,
-          timestamp: Date.now()  // Update timestamp to show when last played
+          timestamp: Date.now(), // Update timestamp to show when last played
         });
         // Store session ID for explanation caching
         state.set('currentSessionId', replaySessionId);
@@ -263,7 +270,7 @@ export default class ResultsView extends BaseView {
       questions,
       answers,
       model,
-      usage
+      usage,
     };
 
     try {
@@ -301,7 +308,7 @@ export default class ResultsView extends BaseView {
 
     // Explanation buttons for incorrect answers
     const explainBtns = this.appContainer.querySelectorAll('.explain-btn');
-    explainBtns.forEach(btn => {
+    explainBtns.forEach((btn) => {
       this.addEventListener(btn, 'click', async () => {
         const questionIndex = parseInt(/** @type {HTMLElement} */ (btn).dataset.questionIndex, 10);
         await this.handleExplanationClick(questionIndex);
@@ -345,14 +352,14 @@ export default class ResultsView extends BaseView {
       topic,
       score: correctCount,
       total: totalQuestions,
-      percentage
+      percentage,
     });
 
     showShareModal({
       topic,
       score: correctCount,
       total: totalQuestions,
-      percentage
+      percentage,
     });
   }
 
@@ -363,13 +370,13 @@ export default class ResultsView extends BaseView {
 
     logger.action('share_quiz_initiated', {
       topic,
-      questionCount: questions.length
+      questionCount: questions.length,
     });
 
     showShareQuizModal({
       topic,
       gradeLevel,
-      questions
+      questions,
     });
   }
 
@@ -391,7 +398,10 @@ export default class ResultsView extends BaseView {
     }
 
     // Calculate next grade level
-    const nextGradeLevel = calculateNextGradeLevel(chain.continueCount + 1, chain.startingGradeLevel);
+    const nextGradeLevel = calculateNextGradeLevel(
+      chain.continueCount + 1,
+      chain.startingGradeLevel
+    );
 
     // Track telemetry
     logger.action('continue_topic_clicked', {
@@ -399,7 +409,7 @@ export default class ResultsView extends BaseView {
       continueCount: chain.continueCount + 1,
       currentGradeLevel: gradeLevel,
       nextGradeLevel,
-      previousQuestionCount: chain.previousQuestions.length
+      previousQuestionCount: chain.previousQuestions.length,
     });
 
     // Update grade level for next quiz
@@ -435,7 +445,7 @@ export default class ResultsView extends BaseView {
       questionIndex,
       gradeLevel,
       cached: hasCache,
-      offline
+      offline,
     });
 
     await showExplanationModal({
@@ -476,7 +486,11 @@ export default class ResultsView extends BaseView {
         // Cache the rightAnswerExplanation for future use
         if (result.rightAnswerExplanation && sessionId) {
           try {
-            await updateQuestionExplanation(sessionId, questionIndex, result.rightAnswerExplanation);
+            await updateQuestionExplanation(
+              sessionId,
+              questionIndex,
+              result.rightAnswerExplanation
+            );
             // Also update the in-memory state
             questions[questionIndex].rightAnswerExplanation = result.rightAnswerExplanation;
             state.set('currentQuestions', questions);
@@ -488,7 +502,7 @@ export default class ResultsView extends BaseView {
         }
 
         return result;
-      }
+      },
     });
   }
 }

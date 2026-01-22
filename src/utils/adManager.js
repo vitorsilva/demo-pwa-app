@@ -24,8 +24,8 @@ const PUBLISHER_ID = 'ca-pub-9849708569219157';
  * @type {Object.<string, string>}
  */
 const AD_SLOTS = {
-  quizLoading: '',      // Slot ID for quiz generation loading screen
-  resultsLoading: '',   // Slot ID for results calculation loading screen
+  quizLoading: '', // Slot ID for quiz generation loading screen
+  resultsLoading: '', // Slot ID for results calculation loading screen
 };
 
 /**
@@ -54,14 +54,14 @@ async function loadAdSenseScript() {
     adsenseScriptLoaded = true;
     return true;
   }
-    
+
   // Loading in progress - return existing promise
   if (adsenseLoadPromise) return adsenseLoadPromise;
 
   // Start loading
   adsenseLoadPromise = new Promise((resolve) => {
     const script = document.createElement('script');
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLISHER_ID}`;      
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLISHER_ID}`;
     script.async = true;
     script.crossOrigin = 'anonymous';
 
@@ -135,7 +135,7 @@ export async function loadAd(containerId, slotKey) {
     hideContainer(containerId);
     return false;
   }
-  
+
   // Check if we can load
   if (!canLoadAds()) {
     hideContainer(containerId);
@@ -262,7 +262,7 @@ function handleOnline() {
  */
 function handleOffline() {
   logger.debug('[AdManager] Offline - hiding ads');
-  loadedAds.forEach(containerId => {
+  loadedAds.forEach((containerId) => {
     hideContainer(containerId);
   });
 }
@@ -279,7 +279,7 @@ export function initAdManager() {
   logger.info('[AdManager] Initialized', {
     publisherId: PUBLISHER_ID,
     featureEnabled: isFeatureEnabled('SHOW_ADS'),
-    online: isOnline()
+    online: isOnline(),
   });
 }
 

@@ -5,16 +5,22 @@ vi.mock('./logger.js', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
-import { isOnline, onOnline, onOffline, updateNetworkIndicator, updateOfflineUI, initNetworkMonitoring } from './network.js';
+import {
+  isOnline,
+  onOnline,
+  onOffline,
+  updateNetworkIndicator,
+  updateOfflineUI,
+  initNetworkMonitoring,
+} from './network.js';
 import { logger } from './logger.js';
 
 describe('Network Utilities', () => {
   describe('isOnline function', () => {
-
     it('should return true when navigator is online', () => {
       // Arrange: Mock navigator.onLine to be true
       vi.stubGlobal('navigator', { onLine: true });
@@ -36,11 +42,9 @@ describe('Network Utilities', () => {
       // Assert
       expect(result).toBe(false);
     });
-
   });
 
   describe('updateNetworkIndicator function', () => {
-
     beforeEach(() => {
       // Setup: Create DOM element before each test
       document.body.innerHTML = `
@@ -52,7 +56,7 @@ describe('Network Utilities', () => {
       // Arrange: Mock as online
       vi.stubGlobal('navigator', { onLine: true });
 
-      const indicator = document.getElementById('networkStatusDot');     
+      const indicator = document.getElementById('networkStatusDot');
 
       // Act: Update the indicator
       updateNetworkIndicator();
@@ -65,7 +69,7 @@ describe('Network Utilities', () => {
       // Arrange: Mock as offline
       vi.stubGlobal('navigator', { onLine: false });
 
-      const indicator = document.getElementById('networkStatusDot');     
+      const indicator = document.getElementById('networkStatusDot');
 
       // Act
       updateNetworkIndicator();
@@ -74,7 +78,7 @@ describe('Network Utilities', () => {
       expect(indicator.className).toContain('bg-orange-500');
     });
 
-    it('should not crash when indicator element is missing', () => {     
+    it('should not crash when indicator element is missing', () => {
       // Arrange: Remove the element
       document.body.innerHTML = '';
 
@@ -83,90 +87,88 @@ describe('Network Utilities', () => {
         updateNetworkIndicator();
       }).not.toThrow();
     });
-
   });
 
-    describe('updateOfflineUI function', () => {
-      let banner, button;
+  describe('updateOfflineUI function', () => {
+    let banner, button;
 
-      beforeEach(() => {
-        // Setup: Create mock DOM elements before each test
-        document.body.innerHTML = `
+    beforeEach(() => {
+      // Setup: Create mock DOM elements before each test
+      document.body.innerHTML = `
           <div id="offlineBanner" class="hidden"></div>
           <button id="startQuizBtn"></button>
         `;
-        banner = document.getElementById('offlineBanner');
-        button = document.getElementById('startQuizBtn');
-      });
+      banner = document.getElementById('offlineBanner');
+      button = document.getElementById('startQuizBtn');
+    });
 
-      it('should hide banner and enable button when online', () => {
-        // Arrange: Mock as online
-        vi.stubGlobal('navigator', { onLine: true });
+    it('should hide banner and enable button when online', () => {
+      // Arrange: Mock as online
+      vi.stubGlobal('navigator', { onLine: true });
 
-        // Start with banner visible and button disabled
-        banner.classList.remove('hidden');
-        button.disabled = true;
+      // Start with banner visible and button disabled
+      banner.classList.remove('hidden');
+      button.disabled = true;
 
-        // Act: Update UI
-        updateOfflineUI();
+      // Act: Update UI
+      updateOfflineUI();
 
-        // Assert: Banner should be hidden, button enabled
-        expect(banner.classList.contains('hidden')).toBe(true);
-        expect(button.disabled).toBe(false);
-      });
+      // Assert: Banner should be hidden, button enabled
+      expect(banner.classList.contains('hidden')).toBe(true);
+      expect(button.disabled).toBe(false);
+    });
 
-      it('should show banner and disable button when offline', () => {
-        // Arrange: Mock as offline
-        vi.stubGlobal('navigator', { onLine: false });
+    it('should show banner and disable button when offline', () => {
+      // Arrange: Mock as offline
+      vi.stubGlobal('navigator', { onLine: false });
 
-        // Start with banner hidden and button enabled
-        banner.classList.add('hidden');
-        button.disabled = false;
+      // Start with banner hidden and button enabled
+      banner.classList.add('hidden');
+      button.disabled = false;
 
-        // Act: Update UI
-        updateOfflineUI();
+      // Act: Update UI
+      updateOfflineUI();
 
-        // Assert: Banner should be visible, button disabled
-        expect(banner.classList.contains('hidden')).toBe(false);
-        expect(button.disabled).toBe(true);
-      });
+      // Assert: Banner should be visible, button disabled
+      expect(banner.classList.contains('hidden')).toBe(false);
+      expect(button.disabled).toBe(true);
+    });
 
-      it('should handle missing banner element gracefully', () => {
-        // Arrange: Remove banner but keep button
-        banner.remove();
-        vi.stubGlobal('navigator', { onLine: false });
+    it('should handle missing banner element gracefully', () => {
+      // Arrange: Remove banner but keep button
+      banner.remove();
+      vi.stubGlobal('navigator', { onLine: false });
 
-        // Act & Assert: Should not throw
-        expect(() => updateOfflineUI()).not.toThrow();
+      // Act & Assert: Should not throw
+      expect(() => updateOfflineUI()).not.toThrow();
 
-        // Button should still be updated
-        expect(button.disabled).toBe(true);
-      });
+      // Button should still be updated
+      expect(button.disabled).toBe(true);
+    });
 
-      it('should handle missing button element gracefully', () => {
-        // Arrange: Remove button but keep banner
-        button.remove();
-        vi.stubGlobal('navigator', { onLine: false });
+    it('should handle missing button element gracefully', () => {
+      // Arrange: Remove button but keep banner
+      button.remove();
+      vi.stubGlobal('navigator', { onLine: false });
 
-        // Act & Assert: Should not throw
-        expect(() => updateOfflineUI()).not.toThrow();
+      // Act & Assert: Should not throw
+      expect(() => updateOfflineUI()).not.toThrow();
 
-        // Banner should still be updated
-        expect(banner.classList.contains('hidden')).toBe(false);
-      });
+      // Banner should still be updated
+      expect(banner.classList.contains('hidden')).toBe(false);
+    });
 
-      it('should handle both elements missing gracefully', () => {
-        // Arrange: Remove all elements
-        document.body.innerHTML = '';
-        vi.stubGlobal('navigator', { onLine: true });
+    it('should handle both elements missing gracefully', () => {
+      // Arrange: Remove all elements
+      document.body.innerHTML = '';
+      vi.stubGlobal('navigator', { onLine: true });
 
-        // Act & Assert: Should not throw error
-        expect(() => updateOfflineUI()).not.toThrow();
-      });
-    });  
+      // Act & Assert: Should not throw error
+      expect(() => updateOfflineUI()).not.toThrow();
+    });
+  });
 
   describe('Event listener functions', () => {
-
     it('onOnline should register listener that fires when going online', () => {
       // Arrange: Create a mock callback
       const mockCallback = vi.fn();
@@ -194,7 +196,6 @@ describe('Network Utilities', () => {
       // Assert
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
-
   });
 
   describe('initNetworkMonitoring', () => {
@@ -303,5 +304,4 @@ describe('Network Utilities', () => {
       expect(logger.info).toHaveBeenCalledWith('Network monitoring initialized');
     });
   });
-
 });

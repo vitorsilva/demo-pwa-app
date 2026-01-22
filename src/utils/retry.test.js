@@ -21,7 +21,8 @@ describe('retry utility', () => {
     });
 
     it('retries on failure and eventually succeeds', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Network error'))
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValue('success');
@@ -44,7 +45,8 @@ describe('retry utility', () => {
     });
 
     it('uses exponential backoff delays', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
         .mockRejectedValueOnce(new Error('fail'))
@@ -87,7 +89,7 @@ describe('retry utility', () => {
       promise.catch(() => {});
 
       // Advance through all retries
-      await vi.advanceTimersByTimeAsync(0);    // attempt 1
+      await vi.advanceTimersByTimeAsync(0); // attempt 1
       await vi.advanceTimersByTimeAsync(1000); // attempt 2
       await vi.advanceTimersByTimeAsync(2000); // attempt 3
 
@@ -102,7 +104,7 @@ describe('retry utility', () => {
       const fn = vi.fn().mockRejectedValue(nonRetryableError);
 
       const promise = withRetry(fn, {
-        shouldRetry: (error) => isRetryableError(error)
+        shouldRetry: (error) => isRetryableError(error),
       });
 
       await expect(promise).rejects.toThrow('Invalid API key');
@@ -117,7 +119,7 @@ describe('retry utility', () => {
       // Catch the rejection to avoid unhandled rejection warnings
       promise.catch(() => {});
 
-      await vi.advanceTimersByTimeAsync(0);    // attempt 1
+      await vi.advanceTimersByTimeAsync(0); // attempt 1
       await vi.advanceTimersByTimeAsync(1000); // attempt 2
 
       await expect(promise).rejects.toThrow('fail');
@@ -126,7 +128,8 @@ describe('retry utility', () => {
 
     it('calls onRetry callback with attempt info', async () => {
       const onRetry = vi.fn();
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail 1'))
         .mockRejectedValueOnce(new Error('fail 2'))
         .mockResolvedValue('success');
@@ -140,16 +143,22 @@ describe('retry utility', () => {
       await promise;
 
       expect(onRetry).toHaveBeenCalledTimes(2);
-      expect(onRetry).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        attempt: 1,
-        error: expect.any(Error),
-        delay: 1000
-      }));
-      expect(onRetry).toHaveBeenNthCalledWith(2, expect.objectContaining({
-        attempt: 2,
-        error: expect.any(Error),
-        delay: 2000
-      }));
+      expect(onRetry).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          attempt: 1,
+          error: expect.any(Error),
+          delay: 1000,
+        })
+      );
+      expect(onRetry).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          attempt: 2,
+          error: expect.any(Error),
+          delay: 2000,
+        })
+      );
     });
   });
 

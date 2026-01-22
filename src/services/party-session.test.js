@@ -36,9 +36,15 @@ function createMockP2P() {
   };
 
   return {
-    onMessage: vi.fn((cb) => { callbacks.onMessage = cb; }),
-    onPeerConnected: vi.fn((cb) => { callbacks.onPeerConnected = cb; }),
-    onPeerDisconnected: vi.fn((cb) => { callbacks.onPeerDisconnected = cb; }),
+    onMessage: vi.fn((cb) => {
+      callbacks.onMessage = cb;
+    }),
+    onPeerConnected: vi.fn((cb) => {
+      callbacks.onPeerConnected = cb;
+    }),
+    onPeerDisconnected: vi.fn((cb) => {
+      callbacks.onPeerDisconnected = cb;
+    }),
     send: vi.fn(),
     broadcast: vi.fn(),
     destroy: vi.fn(),
@@ -646,9 +652,9 @@ describe('PartySession', () => {
       const participants = session.getParticipants();
 
       expect(participants).toHaveLength(3);
-      expect(participants.map(p => p.name)).toContain('Host');
-      expect(participants.map(p => p.name)).toContain('Guest 1');
-      expect(participants.map(p => p.name)).toContain('Guest 2');
+      expect(participants.map((p) => p.name)).toContain('Host');
+      expect(participants.map((p) => p.name)).toContain('Guest 1');
+      expect(participants.map((p) => p.name)).toContain('Guest 2');
     });
   });
 
@@ -794,8 +800,18 @@ describe('PartySession', () => {
       it('updates participant scores', () => {
         const session = new PartySession(mockP2P, false);
         session.joinSession('ABCD', 'Guest');
-        session.participants.set('host-1', { id: 'host-1', name: 'Host', score: 0, status: 'thinking' });
-        session.participants.set('peer-2', { id: 'peer-2', name: 'Other Guest', score: 0, status: 'thinking' });
+        session.participants.set('host-1', {
+          id: 'host-1',
+          name: 'Host',
+          score: 0,
+          status: 'thinking',
+        });
+        session.participants.set('peer-2', {
+          id: 'peer-2',
+          name: 'Other Guest',
+          score: 0,
+          status: 'thinking',
+        });
 
         mockP2P._simulateMessage('host-peer', {
           type: MESSAGE_TYPES.SCORE_UPDATE,
@@ -930,9 +946,9 @@ describe('PartySession', () => {
 
       session.submitHostAnswer(0, 0);
 
-      expect(callback).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ name: 'Host' }),
-      ]));
+      expect(callback).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ name: 'Host' })])
+      );
     });
 
     it('calls onQuizEnd callback when quiz finishes', () => {

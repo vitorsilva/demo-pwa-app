@@ -3,7 +3,7 @@ import {
   calculateNextGradeLevel,
   getContinuesUntilNextLevel,
   GRADE_LEVELS,
-  PROGRESSION_THRESHOLDS
+  PROGRESSION_THRESHOLDS,
 } from './gradeProgression.js';
 
 describe('gradeProgression', () => {

@@ -174,9 +174,7 @@ describe('ParticipantList', () => {
     });
 
     it('should not show scores when showScore is false', () => {
-      const participantsWithScores = [
-        { id: '1', name: 'Alice', score: 999 },
-      ];
+      const participantsWithScores = [{ id: '1', name: 'Alice', score: 999 }];
 
       const list = createParticipantList(participantsWithScores, { showScore: false });
 

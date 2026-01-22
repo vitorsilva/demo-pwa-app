@@ -1,49 +1,49 @@
-  /**
-   * ImportView - Handles importing quizzes from shared URLs
-   */
+/**
+ * ImportView - Handles importing quizzes from shared URLs
+ */
 
-  import BaseView from './BaseView.js';
-  import router from '../core/router.js';
-  import state from '../core/state.js';
-  import { importQuizFromUrl, saveImportedQuiz } from '../services/quiz-import.js';
-  import { t } from '../core/i18n.js';
+import BaseView from './BaseView.js';
+import router from '../core/router.js';
+import state from '../core/state.js';
+import { importQuizFromUrl, saveImportedQuiz } from '../services/quiz-import.js';
+import { t } from '../core/i18n.js';
 
-  export default class ImportView extends BaseView {
-    async render() {
-      // Show loading state first
-      this.showLoading();
+export default class ImportView extends BaseView {
+  async render() {
+    // Show loading state first
+    this.showLoading();
 
-      // Get encoded data from router
-      const encodedData = router.getSharedQuizData();
+    // Get encoded data from router
+    const encodedData = router.getSharedQuizData();
 
-      if (!encodedData) {
-        this.showError(t('import.error.description'));
-        return;
-      }
-
-      // Try to import the quiz
-      const result = await importQuizFromUrl(encodedData);
-
-      if (result.success) {
-        this.showPreview(result.quiz);
-      } else {
-        this.showError(result.error);
-      }
+    if (!encodedData) {
+      this.showError(t('import.error.description'));
+      return;
     }
 
-    showLoading() {
-      this.setHTML(`
+    // Try to import the quiz
+    const result = await importQuizFromUrl(encodedData);
+
+    if (result.success) {
+      this.showPreview(result.quiz);
+    } else {
+      this.showError(result.error);
+    }
+  }
+
+  showLoading() {
+    this.setHTML(`
         <div class="flex min-h-screen flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
           <p class="text-text-light dark:text-text-dark text-lg">${t('import.loading')}</p>
         </div>
       `);
-    }
+  }
 
-    showPreview(quiz) {
-      this.quiz = quiz; // Store for later use
+  showPreview(quiz) {
+    this.quiz = quiz; // Store for later use
 
-      this.setHTML(`
+    this.setHTML(`
         <div class="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
           <!-- Header -->
           <div class="p-4 text-center border-b border-border-light dark:border-border-dark">
@@ -68,12 +68,16 @@
                 <span class="material-symbols-outlined text-lg">help</span>
                 ${t('import.questions_count', { count: quiz.questions.length })}
               </p>
-              ${quiz.gradeLevel ? `
+              ${
+                quiz.gradeLevel
+                  ? `
                 <p class="flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-lg">school</span>
                   ${t('import.grade_level', { level: quiz.gradeLevel })}
                 </p>
-              ` : ''}
+              `
+                  : ''
+              }
               <p class="flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined text-lg">person</span>
                 ${t('import.shared_by', { name: quiz.originalCreator })}
@@ -109,11 +113,11 @@
         </div>
       `);
 
-      this.attachPreviewListeners();
-    }
+    this.attachPreviewListeners();
+  }
 
-    showError(_errorMessage) {
-      this.setHTML(`
+  showError(_errorMessage) {
+    this.setHTML(`
         <div class="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
           <!-- Header -->
           <div class="p-4 text-center border-b border-border-light dark:border-border-dark">
@@ -156,11 +160,11 @@
         </div>
       `);
 
-      this.attachErrorListeners();
-    }
+    this.attachErrorListeners();
+  }
 
-    showSaveSuccess() {
-      this.setHTML(`
+  showSaveSuccess() {
+    this.setHTML(`
         <div class="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
           <!-- Content -->
           <div class="flex-grow flex flex-col items-center justify-center p-6">
@@ -200,61 +204,61 @@
         </div>
       `);
 
-      this.attachSaveSuccessListeners();
-    }
+    this.attachSaveSuccessListeners();
+  }
 
-    attachPreviewListeners() {
-      const playNowBtn = this.querySelector('#playNowBtn');
-      const saveBtn = this.querySelector('#saveBtn');
-      const dismissBtn = this.querySelector('#dismissBtn');
+  attachPreviewListeners() {
+    const playNowBtn = this.querySelector('#playNowBtn');
+    const saveBtn = this.querySelector('#saveBtn');
+    const dismissBtn = this.querySelector('#dismissBtn');
 
-      this.addEventListener(playNowBtn, 'click', () => this.handlePlayNow());
-      this.addEventListener(saveBtn, 'click', () => this.handleSave());
-      this.addEventListener(dismissBtn, 'click', () => this.navigateTo('/'));
-    }
+    this.addEventListener(playNowBtn, 'click', () => this.handlePlayNow());
+    this.addEventListener(saveBtn, 'click', () => this.handleSave());
+    this.addEventListener(dismissBtn, 'click', () => this.navigateTo('/'));
+  }
 
-    attachErrorListeners() {
-      const goHomeBtn = this.querySelector('#goHomeBtn');
-      this.addEventListener(goHomeBtn, 'click', () => this.navigateTo('/'));
-    }
+  attachErrorListeners() {
+    const goHomeBtn = this.querySelector('#goHomeBtn');
+    this.addEventListener(goHomeBtn, 'click', () => this.navigateTo('/'));
+  }
 
-    attachSaveSuccessListeners() {
-      const playBtn = this.querySelector('#playAfterSaveBtn');
-      const homeBtn = this.querySelector('#goHomeAfterSaveBtn');
+  attachSaveSuccessListeners() {
+    const playBtn = this.querySelector('#playAfterSaveBtn');
+    const homeBtn = this.querySelector('#goHomeAfterSaveBtn');
 
-      this.addEventListener(playBtn, 'click', () => this.startQuiz());
-      this.addEventListener(homeBtn, 'click', () => this.navigateTo('/'));
-    }
+    this.addEventListener(playBtn, 'click', () => this.startQuiz());
+    this.addEventListener(homeBtn, 'click', () => this.navigateTo('/'));
+  }
 
-    async handlePlayNow() {
-      // Save first, then start quiz
-      const result = await saveImportedQuiz(this.quiz);
-      if (result.success) {
-        this.savedSessionId = result.id;
-        this.startQuiz();
-      } else {
-        this.showError(result.error);
-      }
-    }
-
-    async handleSave() {
-      const result = await saveImportedQuiz(this.quiz);
-      if (result.success) {
-        this.savedSessionId = result.id;
-        this.showSaveSuccess();
-      } else {
-        this.showError(result.error);
-      }
-    }
-
-    startQuiz() {
-      // Set up state for QuizView
-      state.set('currentTopic', this.quiz.topic);
-      state.set('currentGradeLevel', this.quiz.gradeLevel || 'middle school');
-      state.set('generatedQuestions', this.quiz.questions);
-      // Use replaySessionId so ResultsView updates this session instead of creating a duplicate
-      state.set('replaySessionId', this.savedSessionId);
-
-      this.navigateTo('/quiz');
+  async handlePlayNow() {
+    // Save first, then start quiz
+    const result = await saveImportedQuiz(this.quiz);
+    if (result.success) {
+      this.savedSessionId = result.id;
+      this.startQuiz();
+    } else {
+      this.showError(result.error);
     }
   }
+
+  async handleSave() {
+    const result = await saveImportedQuiz(this.quiz);
+    if (result.success) {
+      this.savedSessionId = result.id;
+      this.showSaveSuccess();
+    } else {
+      this.showError(result.error);
+    }
+  }
+
+  startQuiz() {
+    // Set up state for QuizView
+    state.set('currentTopic', this.quiz.topic);
+    state.set('currentGradeLevel', this.quiz.gradeLevel || 'middle school');
+    state.set('generatedQuestions', this.quiz.questions);
+    // Use replaySessionId so ResultsView updates this session instead of creating a duplicate
+    state.set('replaySessionId', this.savedSessionId);
+
+    this.navigateTo('/quiz');
+  }
+}

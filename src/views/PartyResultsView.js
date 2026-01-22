@@ -42,12 +42,17 @@ export default class PartyResultsView extends BaseView {
   constructor(options = {}) {
     super();
     // Support both new (roomCode) and legacy (standings) approaches
-    this.roomCode = options.roomCode || router.getPartyResultsCode() || sessionStorage.getItem('partyRoomCode') || '';
+    this.roomCode =
+      options.roomCode ||
+      router.getPartyResultsCode() ||
+      sessionStorage.getItem('partyRoomCode') ||
+      '';
     this.standings = options.standings || [];
     this.quiz = options.quiz;
-    this.participantId = options.participantId || sessionStorage.getItem('partyParticipantId') || '';
+    this.participantId =
+      options.participantId || sessionStorage.getItem('partyParticipantId') || '';
     this.isHost = options.isHost || sessionStorage.getItem('partyIsHost') === 'true';
-    this.connectionManager = null
+    this.connectionManager = null;
   }
 
   async render() {
@@ -57,7 +62,7 @@ export default class PartyResultsView extends BaseView {
     if (this.connectionManager) {
       const session = this.connectionManager.getSession();
       if (session && session.quiz) {
-        this.standings = session.getStandings().map(p => ({
+        this.standings = session.getStandings().map((p) => ({
           ...p,
           isYou: p.id === session.participantId,
         }));
@@ -83,8 +88,8 @@ export default class PartyResultsView extends BaseView {
     this.standings.sort((a, b) => b.score - a.score);
 
     const winner = this.standings[0];
-    const myStanding = this.standings.find(p => p.id === this.participantId || p.isYou);
-    const myRank = this.standings.findIndex(p => p.id === this.participantId || p.isYou) + 1;
+    const myStanding = this.standings.find((p) => p.id === this.participantId || p.isYou);
+    const myRank = this.standings.findIndex((p) => p.id === this.participantId || p.isYou) + 1;
     const isWinner = myRank === 1;
 
     this.setHTML(`
@@ -103,18 +108,24 @@ export default class PartyResultsView extends BaseView {
             <h2 class="text-text-light dark:text-text-dark text-2xl font-bold mb-2">
               ${isWinner ? t('results.perfectScore') : t('party.complete')}
             </h2>
-            ${winner ? `
+            ${
+              winner
+                ? `
               <p class="text-primary text-xl font-bold">
                 ${t('party.winner')}: ${winner.name}
               </p>
               <p class="text-subtext-light dark:text-subtext-dark">
                 ${winner.score} ${t('party.points', { points: winner.score }).replace(/\+\d+ pts/, 'points')}
               </p>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
 
           <!-- Your Result -->
-          ${myStanding ? `
+          ${
+            myStanding
+              ? `
             <div class="bg-primary/10 border border-primary/30 rounded-xl p-4 mb-6">
               <div class="flex items-center justify-between">
                 <div>
@@ -131,7 +142,9 @@ export default class PartyResultsView extends BaseView {
                 </div>
               </div>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Final Standings -->
           <h3 class="text-text-light dark:text-text-dark text-lg font-bold mb-3">
@@ -153,7 +166,9 @@ export default class PartyResultsView extends BaseView {
               ${t('party.shareResults')}
             </button>
 
-            ${this.isHost ? `
+            ${
+              this.isHost
+                ? `
               <button
                 id="playAgainBtn"
                 class="w-full py-4 rounded-xl bg-purple-500 text-white font-bold
@@ -163,9 +178,13 @@ export default class PartyResultsView extends BaseView {
                 <span class="material-symbols-outlined">replay</span>
                 ${t('party.playAgain')}
               </button>
-            ` : ''}
+            `
+                : ''
+            }
 
-            ${!this.isHost ? `
+            ${
+              !this.isHost
+                ? `
               <button
                 id="saveBtn"
                 data-testid="save-locally-btn"
@@ -174,7 +193,9 @@ export default class PartyResultsView extends BaseView {
               >
                 ${t('party.saveLocally')}
               </button>
-            ` : ''}
+            `
+                : ''
+            }
 
             <button
               id="homeBtn"
@@ -199,7 +220,7 @@ export default class PartyResultsView extends BaseView {
    * @returns {Array} Standings array
    */
   _mapParticipants(participants) {
-    return participants.map(p => ({
+    return participants.map((p) => ({
       id: p.id,
       name: p.name,
       score: p.score || 0,
@@ -224,7 +245,7 @@ export default class PartyResultsView extends BaseView {
 
     // Handle array format (P2P mode)
     if (Array.isArray(answers)) {
-      return answers.filter(a => a !== undefined && a !== null).length;
+      return answers.filter((a) => a !== undefined && a !== null).length;
     }
 
     // Handle object format (HTTP API mode)
@@ -244,11 +265,12 @@ export default class PartyResultsView extends BaseView {
    * @returns {string} HTML string
    */
   _renderStandings() {
-    return this.standings.map((participant, index) => {
-      const isMe = participant.id === this.participantId;
-      const medal = getMedalEmoji(index);
+    return this.standings
+      .map((participant, index) => {
+        const isMe = participant.id === this.participantId;
+        const medal = getMedalEmoji(index);
 
-      return `
+        return `
         <div class="flex items-center gap-3 p-3 rounded-xl
                     ${isMe ? 'bg-primary/10 border border-primary/30' : 'bg-card-light dark:bg-card-dark'}">
           <span class="w-8 h-8 rounded-full flex items-center justify-center text-lg
@@ -272,7 +294,8 @@ export default class PartyResultsView extends BaseView {
           </span>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   attachListeners() {
@@ -313,7 +336,7 @@ export default class PartyResultsView extends BaseView {
    */
   async _shareResults() {
     const winner = this.standings[0];
-    const myStanding = this.standings.find(p => p.id === this.participantId);
+    const myStanding = this.standings.find((p) => p.id === this.participantId);
 
     const text = myStanding
       ? t('share.scoreMessage', {
@@ -412,5 +435,5 @@ export default class PartyResultsView extends BaseView {
     sessionStorage.removeItem('partyIsHost');
 
     super.destroy();
-  }  
+  }
 }

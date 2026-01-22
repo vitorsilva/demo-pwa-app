@@ -7,8 +7,8 @@ vi.mock('./logger.js', () => ({
     error: vi.fn(),
     debug: vi.fn(),
     info: vi.fn(),
-    warn: vi.fn()
-  }
+    warn: vi.fn(),
+  },
 }));
 
 describe('JSON Extractor', () => {
@@ -70,7 +70,7 @@ describe('JSON Extractor', () => {
 
     describe('BOM and special characters', () => {
       it('should remove BOM character at start', () => {
-        const bom = String.fromCharCode(0xFEFF);
+        const bom = String.fromCharCode(0xfeff);
         const input = bom + '{"name": "test"}';
         const result = extractJSON(input);
         expect(result).toEqual({ name: 'test' });
@@ -332,7 +332,10 @@ Let me structure the JSON properly.
       it('should extract nested array', () => {
         const input = '[[1, 2], [3, 4]]';
         const result = extractJSON(input);
-        expect(result).toEqual([[1, 2], [3, 4]]);
+        expect(result).toEqual([
+          [1, 2],
+          [3, 4],
+        ]);
       });
 
       it('should extract array with objects', () => {
@@ -419,13 +422,13 @@ Let me structure the JSON properly.
       it('should convert left single smart quote', () => {
         const input = '{"name": "it\u2018s"}'; // Left single quote
         const result = extractJSON(input);
-        expect(result.name).toContain("it");
+        expect(result.name).toContain('it');
       });
 
       it('should convert right single smart quote', () => {
         const input = '{"name": "it\u2019s"}'; // Right single quote
         const result = extractJSON(input);
-        expect(result.name).toContain("it");
+        expect(result.name).toContain('it');
       });
 
       it('should handle mixed smart quotes', () => {
@@ -531,10 +534,7 @@ Let me structure the JSON properly.
         expect(() => extractJSON(input)).toThrow('Failed to extract valid JSON from response');
 
         // Verify logger.error was called with the correct message
-        expect(logger.error).toHaveBeenCalledWith(
-          'JSON extraction failed',
-          expect.any(Object)
-        );
+        expect(logger.error).toHaveBeenCalledWith('JSON extraction failed', expect.any(Object));
       });
 
       it('should log error with rawText and textLength context', async () => {
@@ -548,7 +548,7 @@ Let me structure the JSON properly.
           expect.any(String),
           expect.objectContaining({
             rawText: expect.any(String),
-            textLength: expect.any(Number)
+            textLength: expect.any(Number),
           })
         );
       });

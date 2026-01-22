@@ -18,7 +18,7 @@ const CONFIG = {
   endpoint: import.meta.env.VITE_TELEMETRY_ENDPOINT || '',
   token: import.meta.env.VITE_TELEMETRY_TOKEN || '',
   batchSize: parseInt(import.meta.env.VITE_TELEMETRY_BATCH_SIZE, 10) || 10,
-  flushInterval: parseInt(import.meta.env.VITE_TELEMETRY_FLUSH_INTERVAL, 10) || 30000
+  flushInterval: parseInt(import.meta.env.VITE_TELEMETRY_FLUSH_INTERVAL, 10) || 30000,
 };
 
 // localStorage key for offline queue
@@ -144,7 +144,7 @@ class TelemetryClient {
       timestamp: new Date().toISOString(),
       sessionId: this.sessionId,
       url: typeof window !== 'undefined' ? window.location.href : '',
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ''
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
     };
 
     this.queue.push(event);
@@ -179,12 +179,12 @@ class TelemetryClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Telemetry-Token': CONFIG.token
+          'X-Telemetry-Token': CONFIG.token,
         },
         body: JSON.stringify({
           events: eventsToSend,
-          sentAt: new Date().toISOString()
-        })
+          sentAt: new Date().toISOString(),
+        }),
       });
 
       if (!response.ok) {

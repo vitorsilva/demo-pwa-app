@@ -4,20 +4,20 @@ import {
   getPaidEquivalent,
   calculateEstimatedCost,
   formatCost,
-  getUsageSummary
+  getUsageSummary,
 } from './cost-service.js';
 
 // Mock model-service
 vi.mock('./model-service.js', () => ({
-  getModelPricing: vi.fn()
+  getModelPricing: vi.fn(),
 }));
 
 // Mock logger
 vi.mock('../utils/logger.js', () => ({
   logger: {
     debug: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 import { getModelPricing } from './model-service.js';
@@ -52,13 +52,13 @@ describe('Cost Service', () => {
 
   describe('getPaidEquivalent', () => {
     it('should strip :free suffix from model ID', () => {
-      expect(getPaidEquivalent('meta-llama/llama-3-8b-instruct:free'))
-        .toBe('meta-llama/llama-3-8b-instruct');
+      expect(getPaidEquivalent('meta-llama/llama-3-8b-instruct:free')).toBe(
+        'meta-llama/llama-3-8b-instruct'
+      );
     });
 
     it('should return unchanged ID for already paid models', () => {
-      expect(getPaidEquivalent('openai/gpt-4'))
-        .toBe('openai/gpt-4');
+      expect(getPaidEquivalent('openai/gpt-4')).toBe('openai/gpt-4');
     });
 
     it('should handle null/undefined', () => {
@@ -70,8 +70,8 @@ describe('Cost Service', () => {
   describe('calculateEstimatedCost', () => {
     it('should calculate cost based on token counts and pricing', () => {
       getModelPricing.mockReturnValue({
-        prompt: '0.00000007',  // $0.07 per 1M tokens
-        completion: '0.00000021'  // $0.21 per 1M tokens
+        prompt: '0.00000007', // $0.07 per 1M tokens
+        completion: '0.00000021', // $0.21 per 1M tokens
       });
 
       // 100 prompt tokens, 50 completion tokens
@@ -91,7 +91,7 @@ describe('Cost Service', () => {
     it('should handle zero tokens', () => {
       getModelPricing.mockReturnValue({
         prompt: '0.00000007',
-        completion: '0.00000021'
+        completion: '0.00000021',
       });
 
       const cost = calculateEstimatedCost(0, 0, 'model');
@@ -119,7 +119,7 @@ describe('Cost Service', () => {
     it('should show 2 decimal places for larger costs', () => {
       expect(formatCost(0.01, false)).toBe('$0.01');
       expect(formatCost(1.23, false)).toBe('$1.23');
-      expect(formatCost(100.00, false)).toBe('$100.00');
+      expect(formatCost(100.0, false)).toBe('$100.00');
     });
 
     it('should show $0.00 for zero cost on paid models', () => {
@@ -138,14 +138,14 @@ describe('Cost Service', () => {
     it('should return complete summary for free model', () => {
       getModelPricing.mockReturnValue({
         prompt: '0.00000007',
-        completion: '0.00000021'
+        completion: '0.00000021',
       });
 
       const usage = {
         promptTokens: 100,
         completionTokens: 50,
         totalTokens: 150,
-        costUsd: 0
+        costUsd: 0,
       };
 
       const summary = getUsageSummary(usage, 'meta-llama/llama-3-8b-instruct:free');
@@ -165,7 +165,7 @@ describe('Cost Service', () => {
         promptTokens: 100,
         completionTokens: 50,
         totalTokens: 150,
-        costUsd: 0.05
+        costUsd: 0.05,
       };
 
       const summary = getUsageSummary(usage, 'openai/gpt-4');
@@ -204,7 +204,7 @@ describe('Cost Service', () => {
         promptTokens: 100,
         completionTokens: 50,
         totalTokens: 150,
-        costUsd: 0
+        costUsd: 0,
       };
 
       const summary = getUsageSummary(usage, 'unknown-model:free');

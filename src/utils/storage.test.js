@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../core/db.js', () => ({
   getAllSessions: vi.fn(),
   getAllTopics: vi.fn(),
-  getSetting: vi.fn()
+  getSetting: vi.fn(),
 }));
 
 import { formatStorageSize, getStorageBreakdown } from './storage.js';
@@ -132,7 +132,7 @@ describe('Storage Utilities', () => {
 
     it('should calculate quizzes size from sessions', async () => {
       getAllSessions.mockResolvedValue([
-        { id: 1, topic: 'Test Topic', questions: [{ text: 'Question 1' }] }
+        { id: 1, topic: 'Test Topic', questions: [{ text: 'Question 1' }] },
       ]);
 
       const result = await getStorageBreakdown();
@@ -141,9 +141,7 @@ describe('Storage Utilities', () => {
     });
 
     it('should calculate quizzes size from topics', async () => {
-      getAllTopics.mockResolvedValue([
-        { id: 'topic-1', name: 'Test Topic' }
-      ]);
+      getAllTopics.mockResolvedValue([{ id: 'topic-1', name: 'Test Topic' }]);
 
       const result = await getStorageBreakdown();
 
@@ -152,9 +150,7 @@ describe('Storage Utilities', () => {
 
     it('should sum settings and quizzes for total', async () => {
       localStorage.setItem('quizmaster_settings', JSON.stringify({ grade: 'middle' }));
-      getAllSessions.mockResolvedValue([
-        { id: 1, topic: 'Test Topic' }
-      ]);
+      getAllSessions.mockResolvedValue([{ id: 1, topic: 'Test Topic' }]);
 
       const result = await getStorageBreakdown();
 

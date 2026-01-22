@@ -158,9 +158,7 @@ describe('SignalingClient', () => {
 
   describe('polling', () => {
     it('should start polling and call callback with messages', async () => {
-      const messages = [
-        { id: 1, fromId: 'user-2', type: 'offer', payload: {} },
-      ];
+      const messages = [{ id: 1, fromId: 'user-2', type: 'offer', payload: {} }];
 
       fetchMock.mockResolvedValue({
         ok: true,
@@ -228,8 +226,9 @@ describe('SignalingClient', () => {
         json: () => Promise.resolve({ error: { message: 'Bad request' } }),
       });
 
-      await expect(client.sendOffer('user-2', { type: 'offer', sdp: '' }))
-        .rejects.toThrow('Bad request');
+      await expect(client.sendOffer('user-2', { type: 'offer', sdp: '' })).rejects.toThrow(
+        'Bad request'
+      );
     });
 
     it('should handle JSON parse error', async () => {
@@ -239,8 +238,9 @@ describe('SignalingClient', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
-      await expect(client.sendOffer('user-2', { type: 'offer', sdp: '' }))
-        .rejects.toThrow('HTTP 500');
+      await expect(client.sendOffer('user-2', { type: 'offer', sdp: '' })).rejects.toThrow(
+        'HTTP 500'
+      );
     });
   });
 });

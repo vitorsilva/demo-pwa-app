@@ -27,8 +27,8 @@ async function generateQRCode(url) {
       errorCorrectionLevel: 'H',
       color: {
         dark: '#000000',
-        light: '#ffffff'
-      }
+        light: '#ffffff',
+      },
     });
   } catch (err) {
     logger.error('Failed to generate QR code', err);
@@ -49,7 +49,7 @@ export async function showShareQuizModal(quiz, creatorName = null) {
   telemetry.track('event', {
     name: 'quiz_share_modal_opened',
     topic: quiz.topic,
-    questionCount: quiz.questions.length
+    questionCount: quiz.questions.length,
   });
 
   // Generate share URL
@@ -57,9 +57,10 @@ export async function showShareQuizModal(quiz, creatorName = null) {
 
   // Generate QR code only if URL is short enough to be scannable
   const MAX_QR_URL_LENGTH = 300;
-  const qrCodeDataUrl = shareResult.success && shareResult.url.length <= MAX_QR_URL_LENGTH
-    ? await generateQRCode(shareResult.url)
-    : null;
+  const qrCodeDataUrl =
+    shareResult.success && shareResult.url.length <= MAX_QR_URL_LENGTH
+      ? await generateQRCode(shareResult.url)
+      : null;
 
   return new Promise((resolve) => {
     // Create modal backdrop
@@ -213,13 +214,17 @@ function createShareContent(quiz, url, qrCodeDataUrl) {
       </div>
 
         <!-- QR Code -->
-        ${qrCodeDataUrl ? `
+        ${
+          qrCodeDataUrl
+            ? `
         <div class="px-4 mb-4 flex justify-center">
           <div class="bg-white p-3 rounded-xl">
             <img src="${qrCodeDataUrl}" alt="QR Code" class="w-56 h-56" />
           </div>
         </div>
-        ` : ''}      
+        `
+            : ''
+        }      
 
       <!-- Copy Button -->
       <div class="px-4 mb-4">
@@ -230,14 +235,18 @@ function createShareContent(quiz, url, qrCodeDataUrl) {
       </div>
 
       <!-- Native Share (if supported) -->
-      ${isNativeShareSupported() ? `
+      ${
+        isNativeShareSupported()
+          ? `
       <div class="px-4 mb-4">
         <button id="nativeShareQuizBtn" class="w-full bg-primary/10 hover:bg-primary/20 text-primary rounded-xl py-4 font-semibold flex items-center justify-center gap-2 transition-colors">
           <span class="material-symbols-outlined">share</span>
           ${t('shareQuiz.shareVia')}
         </button>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <!-- Note about explanations -->
       <div class="px-4 mb-4">

@@ -60,7 +60,9 @@ export function showDeleteDataModal(onConfirm) {
     document.body.appendChild(backdrop);
 
     const cancelBtn = backdrop.querySelector('#cancelDeleteBtn');
-    const confirmBtn = /** @type {HTMLButtonElement} */ (backdrop.querySelector('#confirmDeleteBtn'));
+    const confirmBtn = /** @type {HTMLButtonElement} */ (
+      backdrop.querySelector('#confirmDeleteBtn')
+    );
 
     // Handle cancel button
     cancelBtn.addEventListener('click', () => {

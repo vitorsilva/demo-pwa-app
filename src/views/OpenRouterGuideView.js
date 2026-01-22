@@ -1,25 +1,25 @@
-  import BaseView from './BaseView.js';
-  import { startAuth } from '../services/auth-service.js';
-  import { t } from '../core/i18n.js';
+import BaseView from './BaseView.js';
+import { startAuth } from '../services/auth-service.js';
+import { t } from '../core/i18n.js';
 
-  /**
-   * Step card content and display options.
-   * @typedef {Object} StepCard
-   * @property {number} number - Step number (1-based)
-   * @property {string} title - Step title
-   * @property {string} description - Step description
-   * @property {string} icon - Material icon name
-   * @property {boolean} [highlighted=false] - Whether to highlight this step
-   * @property {string|null} [imageSrc=null] - Optional image URL
-   */
+/**
+ * Step card content and display options.
+ * @typedef {Object} StepCard
+ * @property {number} number - Step number (1-based)
+ * @property {string} title - Step title
+ * @property {string} description - Step description
+ * @property {string} icon - Material icon name
+ * @property {boolean} [highlighted=false] - Whether to highlight this step
+ * @property {string|null} [imageSrc=null] - Optional image URL
+ */
 
-  export default class OpenRouterGuideView extends BaseView {
-    constructor() {
-      super();
-    }
+export default class OpenRouterGuideView extends BaseView {
+  constructor() {
+    super();
+  }
 
-    async render() {
-      this.setHTML(`
+  async render() {
+    this.setHTML(`
         <div class="relative flex h-auto min-h-screen w-full flex-col
           bg-background-light dark:bg-background-dark overflow-x-hidden">
 
@@ -96,7 +96,7 @@
                   number: 1,
                   title: t('openrouter.step1Title'),
                   description: t('openrouter.step1Desc'),
-                  icon: 'how_to_reg'
+                  icon: 'how_to_reg',
                 })}
 
                 ${this.renderStepCard({
@@ -104,7 +104,7 @@
                   title: t('openrouter.step2Title'),
                   description: t('openrouter.step2Desc'),
                   icon: 'person_add',
-                  imageSrc: '/app/images/onboarding/openrouter_step2_createaccount.png'
+                  imageSrc: '/app/images/onboarding/openrouter_step2_createaccount.png',
                 })}
 
                 ${this.renderStepCard({
@@ -113,7 +113,7 @@
                   description: t('openrouter.step3Desc'),
                   icon: 'money_off',
                   highlighted: true,
-                  imageSrc: '/app/images/onboarding/openrouter_step3_freeaccount.png'
+                  imageSrc: '/app/images/onboarding/openrouter_step3_freeaccount.png',
                 })}
 
                 ${this.renderStepCard({
@@ -121,7 +121,7 @@
                   title: t('openrouter.step4Title'),
                   description: t('openrouter.step4Desc'),
                   icon: 'verified',
-                  imageSrc: '/app/images/onboarding/openrouter_step4_authorization.png'
+                  imageSrc: '/app/images/onboarding/openrouter_step4_authorization.png',
                 })}
             </div>
 
@@ -145,38 +145,38 @@
         </div>
       `);
 
-      this.setupEventListeners();
-    }
+    this.setupEventListeners();
+  }
 
-    /**
-     * Render a step card
-     * @param {StepCard} step - Step card data
-     */
-    renderStepCard(step) {
-      const { number, title, description, icon, highlighted = false, imageSrc = null } = step;
-      const highlightClass = highlighted
-        ? 'border-2 border-primary ring-4 ring-primary/10'
-        : 'border border-border-light dark:border-border-dark';
+  /**
+   * Render a step card
+   * @param {StepCard} step - Step card data
+   */
+  renderStepCard(step) {
+    const { number, title, description, icon, highlighted = false, imageSrc = null } = step;
+    const highlightClass = highlighted
+      ? 'border-2 border-primary ring-4 ring-primary/10'
+      : 'border border-border-light dark:border-border-dark';
 
-      const numberClass = highlighted
-        ? 'bg-primary text-white'
-        : 'bg-primary/20 text-primary';
+    const numberClass = highlighted ? 'bg-primary text-white' : 'bg-primary/20 text-primary';
 
-      const warningBox = highlighted ? `
+    const warningBox = highlighted
+      ? `
         <div class="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20
           border-l-4 border-amber-500">
           <p class="text-sm text-amber-800 dark:text-amber-200 font-medium">
             ${t('openrouter.importantNoPayment')}
           </p>
         </div>
-      ` : '';
+      `
+      : '';
 
-      // Image block (only if image provided)
-      const imageBlock = imageSrc
-        ? `<img src="${imageSrc}" alt="Step ${number}" class="mt-4 w-full rounded-lg border border-border-light dark:border-border-dark" />` 
-        : '';
+    // Image block (only if image provided)
+    const imageBlock = imageSrc
+      ? `<img src="${imageSrc}" alt="Step ${number}" class="mt-4 w-full rounded-lg border border-border-light dark:border-border-dark" />`
+      : '';
 
-      return `
+    return `
         <div class="p-4 rounded-xl bg-card-light dark:bg-card-dark ${highlightClass}">
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-8 h-8 rounded-full ${numberClass}
@@ -197,34 +197,34 @@
           </div>
         </div>
       `;
+  }
+
+  setupEventListeners() {
+    // Back button
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        window.history.back();
+      });
     }
 
-    setupEventListeners() {
-      // Back button
-      const backBtn = document.getElementById('back-btn');
-      if (backBtn) {
-        backBtn.addEventListener('click', () => {
-          window.history.back();
-        });
-      }
+    // CTA buttons (both top and bottom)
+    const ctaTop = document.getElementById('cta-top');
+    const ctaBottom = document.getElementById('cta-bottom');
 
-      // CTA buttons (both top and bottom)
-      const ctaTop = document.getElementById('cta-top');
-      const ctaBottom = document.getElementById('cta-bottom');
+    const handleContinue = () => {
+      startAuth();
+    };
 
-      const handleContinue = () => {
-        startAuth();
-      };
+    if (ctaTop) ctaTop.addEventListener('click', handleContinue);
+    if (ctaBottom) ctaBottom.addEventListener('click', handleContinue);
 
-      if (ctaTop) ctaTop.addEventListener('click', handleContinue);
-      if (ctaBottom) ctaBottom.addEventListener('click', handleContinue);
-
-      // Skip button
-      const skipBtn = document.getElementById('skip-btn');
-      if (skipBtn) {
-        skipBtn.addEventListener('click', () => {
-          this.navigateTo('/');
-        });
-      }
+    // Skip button
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        this.navigateTo('/');
+      });
     }
   }
+}

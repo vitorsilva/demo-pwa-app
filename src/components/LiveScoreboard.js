@@ -65,9 +65,7 @@ export function createLiveScoreboard(scores, options = {}) {
 
   // Score list
   const list = document.createElement('div');
-  list.className = compact
-    ? 'flex flex-wrap gap-2'
-    : 'flex flex-col gap-1';
+  list.className = compact ? 'flex flex-wrap gap-2' : 'flex flex-col gap-1';
   list.setAttribute('data-testid', 'score-list');
 
   // Sort by score (highest first)
@@ -210,4 +208,3 @@ function getStatusColor(status) {
       return 'bg-gray-500';
   }
 }
-

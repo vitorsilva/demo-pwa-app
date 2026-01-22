@@ -43,7 +43,7 @@ export function calculateEstimatedCost(promptTokens, completionTokens, modelId) 
   const promptPrice = parseFloat(pricing.prompt) || 0;
   const completionPrice = parseFloat(pricing.completion) || 0;
 
-  const cost = (promptTokens * promptPrice) + (completionTokens * completionPrice);
+  const cost = promptTokens * promptPrice + completionTokens * completionPrice;
 
   return cost;
 }
@@ -113,6 +113,6 @@ export function getUsageSummary(usage, modelId) {
     estimatedCost,
     isFreeModel: isFree,
     formattedActualCost: formatCost(actualCost, isFree),
-    formattedEstimatedCost
+    formattedEstimatedCost,
   };
 }
