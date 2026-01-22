@@ -34,10 +34,10 @@ After completing **ANY** subtask (3.1, 3.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Subtask 3.3 COMPLETE - API key migration created
+- **Last checkpoint:** Phase 3 COMPLETE - All subtasks finished
 - **Current task:** —
-- **Completed:** 3.1, 3.2, 3.3
-- **Next action:** Begin Subtask 3.4 (Update Main Entry Point)
+- **Completed:** 3.1, 3.2, 3.3, 3.4
+- **Next action:** Create PR and merge to main, then begin Phase 4
 - **Blockers:** None
 - **Session:** January 22, 2026
 
@@ -409,7 +409,7 @@ Before starting 3.4, complete the [Subtask Completion Checklist](#subtask-comple
 
 ---
 
-### ⬚ 3.4 Update Main Entry Point
+### ✅ 3.4 Update Main Entry Point
 
 Add migration call to app initialization.
 

@@ -33,6 +33,7 @@ import state from './core/state.js';
 import { initAdManager } from './utils/adManager.js';
 import { initTheme } from './services/theme-manager.js';
 import { showConfirmModal } from './components/ConfirmModal.js';
+import { migrateApiKeys } from './services/api-keys-migration.js';
 
 logger.info('Saberloop initializing');
 initErrorHandling();
@@ -55,6 +56,9 @@ async function init() {
 
     await initDatabase();
     logger.info('Database initialized');
+
+    // Migrate API keys (if needed)
+    await migrateApiKeys();
 
     // Load sample quizzes if needed
     await loadSamplesIfNeeded();

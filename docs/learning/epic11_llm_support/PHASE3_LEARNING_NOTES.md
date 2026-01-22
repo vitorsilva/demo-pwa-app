@@ -3,7 +3,7 @@
 **Epic:** 11 - Multi-Provider LLM Support
 **Phase:** 3 - API Key Management
 **Started:** January 22, 2026
-**Completed:** —
+**Completed:** January 22, 2026
 
 ---
 
@@ -14,7 +14,7 @@
 | 3.1 Add Key Status and Validation | ✅ Complete | January 22, 2026 |
 | 3.2 Add Async Key Validation Functions | ✅ Complete | January 22, 2026 |
 | 3.3 Migrate OpenRouter Key | ✅ Complete | January 22, 2026 |
-| 3.4 Update Main Entry Point | ⬚ Pending | — |
+| 3.4 Update Main Entry Point | ✅ Complete | January 22, 2026 |
 
 ---
 
@@ -102,6 +102,58 @@
 
 #### Next Steps
 - Continue with Subtask 3.4: Wire migration into main.js
+
+---
+
+### Session: January 22, 2026 - Subtask 3.4
+
+#### Completed
+- Added import for `migrateApiKeys` to `main.js`
+- Wired migration call in `init()` function, right after database initialization
+- All 1301 unit tests pass
+- All 179 E2E tests pass
+- Phase 3 complete!
+
+#### Difficulties & Solutions
+- **No difficulties** - Simple one-line addition to main.js
+
+#### Learnings
+- Migration should run early in the initialization sequence (after DB, before other features)
+- The migration is idempotent so it's safe to run on every app start
+
+---
+
+## Phase 3 Summary
+
+### What Was Built
+1. **Key Status Tracking** (`provider-settings-service.js`)
+   - `KEY_STATUS` enum for validation states
+   - Status persistence in IndexedDB
+   - `getMaskedKey()` for secure display
+
+2. **Async Key Validation** (`provider-settings-service.js`)
+   - OpenRouter: Direct validation via `/api/v1/auth/key`
+   - Other providers: Validation via backend proxy
+   - Fire-and-forget pattern (doesn't block UI)
+
+3. **API Key Migration** (`api-keys-migration.js`)
+   - Sets initial status for existing OpenRouter keys
+   - Migrates legacy localStorage keys
+   - Runs once on app startup
+
+### Files Created/Modified
+- `src/services/provider-settings-service.js` - Extended with 8 new functions
+- `src/services/provider-settings-service.test.js` - Added 32 new tests
+- `src/services/api-keys-migration.js` - New file
+- `src/services/api-keys-migration.test.js` - New file (7 tests)
+- `src/main.js` - Added migration call
+
+### Test Results
+- Unit tests: 1301 (all pass)
+- E2E tests: 179 (all pass)
+
+### Ready for Phase 4
+The key management service layer is complete. Phase 4 will add the Settings UI to expose these functions to users.
 
 ---
 
