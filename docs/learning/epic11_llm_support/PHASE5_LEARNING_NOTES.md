@@ -195,11 +195,21 @@
 - URL: https://saberloop.com/app-staging/
 - Feature flag `MULTI_PROVIDER_LLM` set to `ENABLED`
 - E2E tests: 179 passed, 7 skipped
-- Ready for manual verification
+- **Status:** User testing in progress
+
+### Manual Testing Checklist (Staging)
+
+- [ ] Settings > LLM Providers section visible
+- [ ] Can add API key for a provider (e.g., OpenAI, Anthropic)
+- [ ] Key validation works (shows Valid/Invalid status)
+- [ ] Can switch active provider
+- [ ] Provider indicator shows in quiz view
+- [ ] Quiz generation works with non-OpenRouter provider
+- [ ] Error messages display correctly for invalid keys
 
 ### Feature flag enabled in production
 <!-- Date and verification notes when flag will be enabled -->
-Pending - waiting for user approval
+Pending - waiting for manual testing completion
 
 ---
 
