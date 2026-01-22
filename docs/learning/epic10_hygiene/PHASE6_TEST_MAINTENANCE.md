@@ -1,6 +1,6 @@
 # Phase 6: Test Maintenance
 
-**Status:** Planned
+**Status:** Complete
 **Priority:** Medium
 **Created:** 2026-01-21
 
@@ -15,36 +15,33 @@ This phase addresses test maintenance tasks identified during Phase 5 (ESLint Wa
 
 ---
 
-## Task 1: Fix E2E Test Failures
+## Task 1: Fix E2E Test Failures ✅ Complete
 
-### Failing Tests
+### Failing Tests (Fixed)
 
-All 3 failures are in `tests/e2e/preserve-topic-input.spec.js`:
+All 3 failures were in `tests/e2e/preserve-topic-input.spec.js`:
 
-| Test | Line | Issue |
-|------|------|-------|
-| should preserve topic text when generation fails | 23 | Page stuck at `/#/loading` instead of `/#/topic-input` |
-| should preserve topic when user cancels during loading | 67 | Same issue |
-| should prioritize deep link prefill over saved topic | 130 | Same issue |
+| Test | Line | Status |
+|------|------|--------|
+| should preserve topic text when generation fails | 23 | ✅ Fixed |
+| should preserve topic when user cancels during loading | 67 | ✅ Fixed |
+| should prioritize deep link prefill over saved topic | 130 | ✅ Fixed |
 
-### Root Cause Analysis
+### Root Cause
 
-The tests expect the app to return to `/#/topic-input` after a generation failure, but the page stays on `/#/loading`. This could be:
+The tests were using `page.on('dialog', ...)` which handles **native browser dialogs** (`window.alert`, `window.confirm`). However, the app uses **custom modal components** (`AlertModal`, `ConfirmModal`) that require direct button clicks.
 
-1. **Navigation issue** - The error handling doesn't navigate back correctly
-2. **Test timing issue** - The test doesn't wait long enough
-3. **Mock API issue** - The mock isn't triggering the expected error flow
+### Fix Applied
 
-### Investigation Steps
+Replaced native dialog handlers with custom modal interactions:
+- `await page.click('[data-testid="alert-ok-btn"]')` for AlertModal
+- `await page.click('[data-testid="confirm-ok-btn"]')` for ConfirmModal
 
-1. [ ] Run the failing tests with `--headed` to observe behavior
-2. [ ] Check error handling in quiz generation flow
-3. [ ] Review mock API error simulation
-4. [ ] Fix root cause or update tests if behavior changed intentionally
+**Commit:** `80564db` - fix(tests): use custom modal selectors instead of native dialog handlers
 
 ---
 
-## Task 2: Review Unit Test Coverage
+## Task 2: Review Unit Test Coverage ✅ Complete
 
 ### New Functions Added in Phase 5
 
@@ -65,26 +62,47 @@ Phase 5 extracted several helper functions that should have unit test coverage:
 
 ### Coverage Review Steps
 
-1. [ ] Run `npm run test:coverage` to check current coverage
-2. [ ] Identify any coverage gaps in new functions
-3. [ ] Add unit tests for uncovered branches if needed
-4. [ ] Ensure mutation testing still passes
+1. [x] Run `npm run test:coverage` to check current coverage
+2. [x] Identify any coverage gaps in new functions
+3. [x] Add unit tests for uncovered branches if needed
+4. [x] Ensure mutation testing still passes
+
+### Coverage Results
+
+- **Overall:** 93.41% statement coverage
+- **ExplanationModal.js:** 92.38% coverage - helper functions well tested
+- **Views (PartyQuizView, PartyLobbyView):** Covered by E2E tests, not unit tests
+
+### Uncovered Lines (Acceptable)
+
+| File | Lines | Reason |
+|------|-------|--------|
+| ExplanationModal.js | 280-281 | Offline without cache error path (edge case) |
+| ExplanationModal.js | 298-299 | Settings redirect callback in error handler |
+
+These are edge cases that are difficult to unit test but are covered by manual QA and E2E scenarios.
+
+### Mutation Testing Results
+
+Core mutation score: **80%** (meets threshold)
+- All critical logic is well-tested
+- Surviving mutants are mostly initial state values (not critical)
 
 ---
 
 ## Validation Checklist
 
-### E2E Fixes
-- [ ] Root cause identified
-- [ ] Fix implemented
-- [ ] All 3 tests passing
-- [ ] No regressions in other E2E tests
+### E2E Fixes ✅
+- [x] Root cause identified (native dialog handlers vs custom modals)
+- [x] Fix implemented (commit `80564db`)
+- [x] All 3 tests passing
+- [x] No regressions in other E2E tests (172 passed)
 
-### Coverage Review
-- [ ] Coverage report generated
-- [ ] New functions have adequate coverage
-- [ ] Any new tests added pass
-- [ ] Mutation testing passes
+### Coverage Review ✅
+- [x] Coverage report generated (93.41% overall)
+- [x] New functions have adequate coverage (ExplanationModal 92.38%)
+- [x] Any new tests added pass (no new tests needed)
+- [x] Mutation testing passes (80% score)
 
 ---
 

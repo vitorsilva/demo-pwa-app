@@ -22,12 +22,13 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Started | Document |
 |------|---------|----------|
-| Test Maintenance | 2026-01-21 | [PHASE6_TEST_MAINTENANCE.md](./PHASE6_TEST_MAINTENANCE.md) |
+| (none) | - | - |
 
 ## Completed Tasks
 
 | Task | Completed | Document |
 |------|-----------|----------|
+| Test Maintenance | 2026-01-21 | [PHASE6_TEST_MAINTENANCE.md](./PHASE6_TEST_MAINTENANCE.md) |
 | ESLint Warnings Cleanup | 2026-01-21 | [PHASE5_ESLINT_WARNINGS.md](./PHASE5_ESLINT_WARNINGS.md) |
 | ESLint Code Quality Cleanup | 2026-01-21 | [PHASE4_ESLINT_CLEANUP.md](./PHASE4_ESLINT_CLEANUP.md) |
 | E2E Test Separation (Tests vs Capture) | 2026-01-15 | [PHASE3_E2E_TEST_SEPARATION.md](./PHASE3_E2E_TEST_SEPARATION.md) |
