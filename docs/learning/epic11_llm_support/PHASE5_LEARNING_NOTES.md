@@ -188,9 +188,18 @@
 - Could add persistent storage for cost tracking in future
 - Could add more comprehensive E2E tests for error scenarios
 
+### Staging Deployment
+
+**Deployed:** January 22, 2026
+
+- URL: https://saberloop.com/app-staging/
+- Feature flag `MULTI_PROVIDER_LLM` set to `ENABLED`
+- E2E tests: 179 passed, 7 skipped
+- Ready for manual verification
+
 ### Feature flag enabled in production
 <!-- Date and verification notes when flag will be enabled -->
-Pending - waiting for staging deployment and testing
+Pending - waiting for user approval
 
 ---
 
