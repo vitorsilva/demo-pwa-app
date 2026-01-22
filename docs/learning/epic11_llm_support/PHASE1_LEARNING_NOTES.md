@@ -243,6 +243,10 @@ None - all providers follow similar patterns.
   - Response: `{"text":"test successful","model":"gemini-2.0-flash","provider":"google","usage":{"prompt_tokens":9,"completion_tokens":3,"total_tokens":12}}`
   - E2E test passed in 1.6s
   - Note: `gemini-1.5-flash` model deprecated, use `gemini-2.0-flash` or newer
+- **xAI**: ✅ Tested with real API key (grok-3)
+  - Response: `{"text":"test successful","model":"grok-3","provider":"xai","usage":{"prompt_tokens":15,"completion_tokens":2,"total_tokens":17}}`
+  - E2E test passed in 1.4s
+  - Note: `grok-2-latest` and `grok-beta` deprecated, use `grok-3`
 
 ---
 

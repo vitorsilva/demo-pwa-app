@@ -163,7 +163,7 @@ test.describe('LLM Proxy Integration @manual', () => {
         data: {
           provider: 'xai',
           api_key: process.env.TEST_XAI_KEY,
-          model: 'grok-2-latest',
+          model: 'grok-3',
           messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
           options: { max_tokens: 20 }
         },
