@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import sonarjs from 'eslint-plugin-sonarjs';
+import importPlugin from 'eslint-plugin-import';
 import prettierConfig from 'eslint-config-prettier'; 
 
 export default [
@@ -85,6 +86,12 @@ export default [
       // Disable redundant/noisy SonarJS rules
       'sonarjs/cognitive-complexity': 'off',  // Standard complexity rule is sufficient
       'sonarjs/pseudo-random': 'off',         // Math.random is fine for non-crypto uses (shuffling, IDs)
+
+      // Import plugin rules
+      'import/no-duplicates': 'warn',         // Merge duplicate imports from same module
+    },
+    plugins: {
+      import: importPlugin,
     }
   },
   {
