@@ -14,10 +14,13 @@ import { showDeleteDataModal } from '../components/DeleteDataModal.js';
 import { showConfirmModal } from '../components/ConfirmModal.js';
 import { deleteAllUserData } from '../services/data-service.js';
 import { createModeToggle } from '../components/ModeToggle.js';
+import { createLLMProvidersSettings } from '../components/LLMProvidersSettings.js';
+import { isFeatureEnabled } from '../core/features.js';
 
 export default class SettingsView extends BaseView {
   constructor() {
     super();
+    this.llmProvidersComponent = null;
   }
 
   async render() {
@@ -119,6 +122,11 @@ export default class SettingsView extends BaseView {
 
               <div id="accountSection" class="flex flex-col gap-3">
                 <!-- Will be populated by loadAccountStatus() -->
+              </div>
+
+              <!-- LLM Providers Section (feature flagged) -->
+              <div id="llmProvidersSection">
+                <!-- Will be populated by createLLMProvidersSettings() if feature enabled -->
               </div>
 
               <!-- Data Management Section -->
@@ -285,10 +293,33 @@ export default class SettingsView extends BaseView {
     // Load account connection status
     await this.loadAccountStatus();
 
+    // Load LLM Providers section if feature is enabled
+    await this.loadLLMProvidersSection();
+
     // Load storage breakdown (async, non-blocking)
     this.loadStorageBreakdown();
 
     this.bindEvents();
+  }
+
+  async loadLLMProvidersSection() {
+    // Check if multi-provider LLM feature is enabled (context: 'settings' for SETTINGS_ONLY phase)
+    if (!isFeatureEnabled('MULTI_PROVIDER_LLM', 'settings')) {
+      return;
+    }
+
+    const container = this.querySelector('#llmProvidersSection');
+    if (!container) return;
+
+    // Destroy previous instance if exists
+    if (this.llmProvidersComponent) {
+      this.llmProvidersComponent.destroy();
+    }
+
+    // Create new instance
+    this.llmProvidersComponent = await createLLMProvidersSettings(container, () => {
+      // Callback when settings change - could refresh other parts of the view if needed
+    });
   }
 
   async loadStorageBreakdown() {
