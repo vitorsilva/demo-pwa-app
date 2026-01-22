@@ -22,10 +22,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 
 | Task | Priority | Document |
 |------|----------|----------|
-| Code Quality Enhancement | Medium | [PHASE5_CODE_QUALITY_ENHANCEMENT.md](./PHASE5_CODE_QUALITY_ENHANCEMENT.md) |
-| Task | Started | Document |
-|------|---------|----------|
-| (none) | - | - |
+| Code Quality Enhancement | Medium | [PHASE7_CODE_QUALITY_ENHANCEMENT.md](./PHASE7_CODE_QUALITY_ENHANCEMENT.md) |
 
 ## Completed Tasks
 
@@ -44,7 +41,7 @@ Unlike other epics, Epic 10 is an **ongoing container** for project hygiene task
 |------|----------|-------|
 | Feature flag lifecycle process | Medium | Document when to remove flags |
 | ESLint complexity warnings | Low | Address ~86 warnings gradually when touching files |
-| Complexity hotspot refactoring | Low | PartyQuizView, party-session, SettingsView - see Phase 5 |
+| Complexity hotspot refactoring | Low | PartyQuizView, party-session, SettingsView - see Phase 7 |
 
 ### Future Flag Cleanup (When Ready)
 

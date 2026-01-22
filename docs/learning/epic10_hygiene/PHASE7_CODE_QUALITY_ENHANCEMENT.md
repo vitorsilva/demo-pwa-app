@@ -1,4 +1,4 @@
-# Phase 5: Code Quality Enhancement
+# Phase 7: Code Quality Enhancement
 
 **Status:** Planned
 **Priority:** Medium
@@ -48,7 +48,7 @@ All tools must be:
 
 ## Implementation Phases
 
-### Phase 5.1: Code Formatting (Prettier) - HIGH PRIORITY
+### Phase 7.1: Code Formatting (Prettier) - HIGH PRIORITY
 
 **Why:** No auto-formatter exists. This causes inconsistent style and "noise" in diffs where formatting changes mix with logic changes.
 
@@ -119,7 +119,7 @@ export default [
 
 ---
 
-### Phase 5.2: Git Hooks (Husky + lint-staged) - HIGH PRIORITY
+### Phase 7.2: Git Hooks (Husky + lint-staged) - HIGH PRIORITY
 
 **Why:** Quality checks only run in CI, meaning developers discover issues late. Git hooks catch problems before commits.
 
@@ -168,7 +168,7 @@ npx lint-staged
 
 ---
 
-### Phase 5.3: Commit Message Linting (commitlint) - MEDIUM PRIORITY
+### Phase 7.3: Commit Message Linting (commitlint) - MEDIUM PRIORITY
 
 **Why:** Inconsistent commit messages make history hard to navigate and prevent automated changelog generation.
 
@@ -244,7 +244,7 @@ chore(deps): upgrade vitest to 3.0
 
 ---
 
-### Phase 5.4: Security Static Analysis (Semgrep) - MEDIUM PRIORITY
+### Phase 7.4: Security Static Analysis (Semgrep) - MEDIUM PRIORITY
 
 **Why:** No security-focused static analysis. Could miss XSS, injection, or other OWASP Top 10 vulnerabilities.
 
@@ -319,7 +319,7 @@ semgrep scan --config auto --json --output reports/security.json src/
 
 ---
 
-### Phase 5.5: Enhanced Knip Configuration - MEDIUM PRIORITY
+### Phase 7.5: Enhanced Knip Configuration - MEDIUM PRIORITY
 
 **Why:** Current Knip config is basic. Enhanced configuration provides better detection and reporting.
 
@@ -409,7 +409,7 @@ semgrep scan --config auto --json --output reports/security.json src/
 
 ---
 
-### Phase 5.6: Complexity Analysis & Reporting - LOW PRIORITY
+### Phase 7.6: Complexity Analysis & Reporting - LOW PRIORITY
 
 **Why:** ESLint warns about complexity but doesn't provide trends or reports. Dedicated tools offer better visibility.
 
@@ -474,7 +474,7 @@ These are already configured as warnings. Dedicated tools add:
 
 ---
 
-### Phase 5.7: Bundle Size Analysis - LOW PRIORITY
+### Phase 7.7: Bundle Size Analysis - LOW PRIORITY
 
 **Why:** PWA performance depends on bundle size. No visibility into what's contributing to bundle bloat.
 
@@ -531,7 +531,7 @@ npx source-map-explorer dist/assets/*.js
 
 ---
 
-### Phase 5.8: Duplicate Code Detection - LOW PRIORITY
+### Phase 7.8: Duplicate Code Detection - LOW PRIORITY
 
 **Why:** Copy-paste programming leads to maintenance burden. No automated detection currently.
 
@@ -584,7 +584,7 @@ npm install -D jscpd
 
 ---
 
-### Phase 5.9: Enhanced ESLint Plugins - LOW PRIORITY
+### Phase 7.9: Enhanced ESLint Plugins - LOW PRIORITY
 
 **Why:** Additional plugins catch more issues without much configuration overhead.
 
@@ -649,10 +649,10 @@ Useful rules:
 | 5.9 ESLint plugins | LOW | 1h | Additional lint rules |
 
 **Recommended order:**
-1. Phase 5.1 + 5.2 together (Prettier + Husky) - Foundation
-2. Phase 5.3 (commitlint) - While hooks are fresh
-3. Phase 5.5 (Enhanced Knip) - Quick win
-4. Phase 5.4 (Semgrep) - Security baseline
+1. Phase 7.1 + 5.2 together (Prettier + Husky) - Foundation
+2. Phase 7.3 (commitlint) - While hooks are fresh
+3. Phase 7.5 (Enhanced Knip) - Quick win
+4. Phase 7.4 (Semgrep) - Security baseline
 5. Remaining phases as time permits
 
 ---
