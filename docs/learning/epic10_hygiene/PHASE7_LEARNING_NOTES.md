@@ -97,6 +97,47 @@ npx lint-staged
 
 ---
 
+## Phase 7.3: commitlint (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `@commitlint/cli` and `@commitlint/config-conventional`
+- Created `commitlint.config.js` extending conventional config
+- Created `.husky/commit-msg` hook to validate commits
+
+### Key Learnings
+
+1. **Conventional Commits format** - Messages must follow `type(scope): description`:
+   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`
+   - Scope is optional but helpful for context (e.g., `hygiene`, `core`, `api`)
+
+2. **--edit "$1" explained** - Git passes the commit message file path as the first argument to the hook. `--edit "$1"` tells commitlint to read and validate that file.
+
+3. **Two hooks now active**:
+   - `pre-commit` → runs lint-staged (code quality)
+   - `commit-msg` → runs commitlint (message format)
+
+### Configuration
+
+`commitlint.config.js`:
+```js
+export default {
+  extends: ['@commitlint/config-conventional'],
+};
+```
+
+`.husky/commit-msg`:
+```bash
+npx --no -- commitlint --edit "$1"
+```
+
+### Files Changed
+
+- **New:** `commitlint.config.js`, `.husky/commit-msg`
+- **Modified:** `package.json`, `package-lock.json`
+
+---
+
 ## Next Steps
 
-- Phase 7.3: commitlint (commit message linting)
+- Phase 7.4: Semgrep (security static analysis) - or stop here for now
