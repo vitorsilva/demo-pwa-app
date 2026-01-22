@@ -32,10 +32,10 @@ After completing **ANY** subtask (2.1, 2.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Subtask 2.1 complete - providers-config.js created with tests
-- **Current task:** Subtask 2.2 - Create provider-router.js
-- **Completed:** 2.1 (providers-config.js + tests)
-- **Next action:** Create provider-router.js
+- **Last checkpoint:** Subtasks 2.2 and 2.3 complete
+- **Current task:** Subtask 2.4 - Update api.real.js to use router
+- **Completed:** 2.1, 2.2, 2.3
+- **Next action:** Update api.real.js to use provider router
 - **Blockers:** None
 - **Session:** January 22, 2026
 
@@ -316,7 +316,7 @@ Before starting 2.2, complete the [Subtask Completion Checklist](#subtask-comple
 
 ---
 
-### ⬚ 2.2 Create Provider Router
+### ✅ 2.2 Create Provider Router
 
 **File:** `src/api/provider-router.js`
 
@@ -425,7 +425,7 @@ Before starting 2.3, complete the [Subtask Completion Checklist](#subtask-comple
 
 ---
 
-### ⬚ 2.3 Create Provider Settings Service
+### ✅ 2.3 Create Provider Settings Service
 
 **File:** `src/services/provider-settings-service.js`
 

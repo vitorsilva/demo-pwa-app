@@ -11,8 +11,8 @@
 | Subtask | Status | Session Date |
 |---------|--------|--------------|
 | 2.1 Create Provider Configuration | ✅ Complete | January 22, 2026 |
-| 2.2 Create Provider Router | ⬚ Pending | — |
-| 2.3 Create Provider Settings Service | ⬚ Pending | — |
+| 2.2 Create Provider Router | ✅ Complete | January 22, 2026 |
+| 2.3 Create Provider Settings Service | ✅ Complete | January 22, 2026 |
 | 2.4 Update api.real.js | ⬚ Pending | — |
 
 ---
@@ -49,29 +49,56 @@ N/A
 
 ## Subtask 2.2: Create Provider Router
 
-**Completed:** —
+**Completed:** January 22, 2026
 
 ### What was done
+- Created `src/api/provider-router.js` with main `completion()` function
+- Implemented feature flag check for backward compatibility
+- OpenRouter: direct browser call via existing `callOpenRouter`
+- Other providers: route through backend proxy at `/llm/completion.php`
+- Added `getActiveProviderInfo()` helper for UI display
+- 16 unit tests passing
 
 ### Difficulties encountered
+- **Dependency on provider-settings-service**: The spec listed 2.2 before 2.3, but provider-router imports from provider-settings-service. Had to implement both in the same session.
 
 ### Solutions applied
+- Implemented subtasks 2.2 and 2.3 together to resolve the dependency
+- Followed the pattern of the existing `callOpenRouter` function (takes prompt string, not messages array)
 
 ### Key learnings
+- The router maintains backward compatibility via feature flag - when DISABLED, uses legacy OpenRouter behavior
+- Error handling includes status code fallback when JSON parsing fails
+- Provider router is a thin routing layer - business logic stays in api.real.js
 
 ---
 
 ## Subtask 2.3: Create Provider Settings Service
 
-**Completed:** —
+**Completed:** January 22, 2026
 
 ### What was done
+- Created `src/services/provider-settings-service.js`
+- Implemented functions:
+  - `getActiveProvider()` / `setActiveProvider()` - Manage active provider
+  - `getActiveModel()` / `setActiveModel()` - Manage active model
+  - `getProviderKey()` / `setProviderKey()` / `removeProviderKey()` - API key management
+  - `hasProviderKey()` - Check if provider is configured
+  - `getConfiguredProviders()` - List all configured providers
+- Special handling for OpenRouter to use existing `getOpenRouterKey()` from db.js
+- 22 unit tests passing
 
 ### Difficulties encountered
+None significant.
 
 ### Solutions applied
+- Reused existing OpenRouter key storage mechanism from db.js for backward compatibility
+- Used consistent `llm_*` key prefix for new settings
 
 ### Key learnings
+- Integration with existing IndexedDB pattern was smooth
+- OpenRouter special case: use existing `storeOpenRouterKey`/`getOpenRouterKey` from db.js
+- Settings keys use `llm_` prefix for easy identification
 
 ---
 
