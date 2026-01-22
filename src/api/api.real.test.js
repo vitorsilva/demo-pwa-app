@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the dependencies before importing the module
-vi.mock('./openrouter-client.js', () => ({
-  callOpenRouter: vi.fn(),
+vi.mock('./provider-router.js', () => ({
+  completion: vi.fn(),
 }));
 
 vi.mock('../utils/logger.js', () => ({
@@ -15,7 +15,7 @@ vi.mock('../utils/logger.js', () => ({
 }));
 
 import { generateQuestions, generateExplanation } from './api.real.js';
-import { callOpenRouter } from './openrouter-client.js';
+import { completion } from './provider-router.js';
 
 // Helper to generate mock questions of a specific count
 function generateMockQuestions(count) {
@@ -35,7 +35,7 @@ describe('generateQuestions prompt', () => {
   it('should include guidance for distinct answer options', async () => {
     // Arrange: Mock the API to capture the prompt
     let capturedPrompt = '';
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return {
         text: JSON.stringify({
@@ -56,7 +56,7 @@ describe('generateQuestions prompt', () => {
       };
     });
 
-    // Act: Call the function
+    // Act: Call the function (apiKey param is now ignored, read from settings)
     await generateQuestions('Test Topic', 'middle school', 'fake-api-key');
 
     // Assert: Check that the prompt contains guidance for distinct options
@@ -68,7 +68,7 @@ describe('generateQuestions prompt', () => {
   it('should include previous questions in prompt when provided', async () => {
     // Arrange: Mock the API to capture the prompt
     let capturedPrompt = '';
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return {
         text: JSON.stringify({
@@ -102,7 +102,7 @@ describe('generateQuestions prompt', () => {
   it('should not include exclusion section when no previous questions', async () => {
     // Arrange: Mock the API to capture the prompt
     let capturedPrompt = '';
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return {
         text: JSON.stringify({
@@ -132,7 +132,7 @@ describe('generateQuestions prompt', () => {
 
   it('should use default questionCount of 5 in prompt', async () => {
     let capturedPrompt = '';
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return {
         text: JSON.stringify({
@@ -149,7 +149,7 @@ describe('generateQuestions prompt', () => {
 
   it('should use custom questionCount in prompt', async () => {
     let capturedPrompt = '';
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       capturedPrompt = prompt;
       return {
         text: JSON.stringify({
@@ -165,7 +165,7 @@ describe('generateQuestions prompt', () => {
   });
 
   it('should validate response has correct number of questions', async () => {
-    callOpenRouter.mockImplementation(async () => {
+    completion.mockImplementation(async () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
@@ -180,7 +180,7 @@ describe('generateQuestions prompt', () => {
   });
 
   it('should accept response with matching questionCount', async () => {
-    callOpenRouter.mockImplementation(async () => {
+    completion.mockImplementation(async () => {
       return {
         text: JSON.stringify({
           language: 'EN-US',
@@ -208,7 +208,7 @@ describe('generateExplanation JSON parsing', () => {
   };
 
   it('should parse clean JSON response', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify(validExplanation),
     });
 
@@ -222,7 +222,7 @@ describe('generateExplanation JSON parsing', () => {
   });
 
   it('should parse JSON wrapped in markdown code block', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: '```json\n' + JSON.stringify(validExplanation) + '\n```',
     });
 
@@ -236,7 +236,7 @@ describe('generateExplanation JSON parsing', () => {
   });
 
   it('should parse JSON with leading/trailing whitespace', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: '  \n\n' + JSON.stringify(validExplanation) + '\n\n  ',
     });
 
@@ -255,7 +255,7 @@ describe('generateExplanation JSON parsing', () => {
     const jsonWithSmartQuotes =
       '{ "rightAnswerExplanation": "Paris is correct.", "wrongAnswerExplanation": "London is wrong." }';
 
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: jsonWithSmartQuotes,
     });
 
@@ -274,7 +274,7 @@ describe('generateExplanation JSON parsing', () => {
 
   it('should parse JSON with extra text before it', async () => {
     // Some LLMs add conversational text before the JSON
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: 'Here is the explanation:\n' + JSON.stringify(validExplanation),
     });
 
@@ -290,7 +290,7 @@ describe('generateExplanation JSON parsing', () => {
   });
 
   it('should parse JSON with extra text after it', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify(validExplanation) + '\n\nI hope this helps!',
     });
 
@@ -308,7 +308,7 @@ describe('generateExplanation JSON parsing', () => {
   it('should handle JSON with BOM character', async () => {
     // BOM (Byte Order Mark) can appear at the start of some text
     const BOM = '\uFEFF';
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: BOM + JSON.stringify(validExplanation),
     });
 
@@ -338,7 +338,7 @@ describe('generateQuestions retry logic', () => {
   }
 
   it('should succeed on first attempt when response is valid', async () => {
-    callOpenRouter.mockResolvedValueOnce({
+    completion.mockResolvedValueOnce({
       text: JSON.stringify({ language: 'en', questions: generateValidQuestions(5) }),
       model: 'test-model',
       usage: { promptTokens: 100, completionTokens: 200, totalTokens: 300 },
@@ -347,12 +347,12 @@ describe('generateQuestions retry logic', () => {
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
 
     expect(result.questions).toHaveLength(5);
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 
   it('should retry with stricter prompt on parse failure', async () => {
     let callCount = 0;
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       callCount++;
       if (callCount === 1) {
         // First call: return invalid response
@@ -369,15 +369,15 @@ describe('generateQuestions retry logic', () => {
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
 
     expect(result.questions).toHaveLength(5);
-    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    expect(completion).toHaveBeenCalledTimes(2);
     // Second call should have stricter prompt
-    const secondCallPrompt = callOpenRouter.mock.calls[1][1];
+    const secondCallPrompt = completion.mock.calls[1][0];
     expect(secondCallPrompt).toContain('CRITICAL: Respond with ONLY valid JSON');
   });
 
   it('should retry on schema validation failure', async () => {
     let callCount = 0;
-    callOpenRouter.mockImplementation(async () => {
+    completion.mockImplementation(async () => {
       callCount++;
       if (callCount === 1) {
         // First call: return JSON with missing 'correct' field
@@ -401,31 +401,31 @@ describe('generateQuestions retry logic', () => {
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
 
     expect(result.questions).toHaveLength(5);
-    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    expect(completion).toHaveBeenCalledTimes(2);
   });
 
   it('should NOT retry on rate limit error', async () => {
-    callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
+    completion.mockRejectedValueOnce(new Error('Rate limit exceeded'));
 
     await expect(generateQuestions('Test', 'middle school', 'fake-key')).rejects.toThrow(
       'Rate limit exceeded'
     );
 
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 
   it('should NOT retry on authentication error', async () => {
-    callOpenRouter.mockRejectedValueOnce(new Error('Invalid API key'));
+    completion.mockRejectedValueOnce(new Error('Invalid API key'));
 
     await expect(generateQuestions('Test', 'middle school', 'fake-key')).rejects.toThrow(
       'Invalid API key'
     );
 
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 
   it('should fail after max retry attempts', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: 'Invalid JSON response',
     });
 
@@ -433,11 +433,11 @@ describe('generateQuestions retry logic', () => {
       'Invalid response format from AI'
     );
 
-    expect(callOpenRouter).toHaveBeenCalledTimes(2); // 2 attempts max
+    expect(completion).toHaveBeenCalledTimes(2); // 2 attempts max
   });
 
   it('should handle DeepSeek thinking tags in response', async () => {
-    callOpenRouter.mockResolvedValueOnce({
+    completion.mockResolvedValueOnce({
       text: `<think>Let me create a quiz...</think>${JSON.stringify({ language: 'en', questions: generateValidQuestions(5) })}`,
       model: 'deepseek-r1',
       usage: {},
@@ -446,7 +446,7 @@ describe('generateQuestions retry logic', () => {
     const result = await generateQuestions('Test', 'middle school', 'fake-key');
 
     expect(result.questions).toHaveLength(5);
-    expect(callOpenRouter).toHaveBeenCalledTimes(1); // No retry needed
+    expect(completion).toHaveBeenCalledTimes(1); // No retry needed
   });
 });
 
@@ -456,7 +456,7 @@ describe('generateQuestions schema validation', () => {
   });
 
   it('should reject question missing question text', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({
         language: 'en',
         questions: [
@@ -471,7 +471,7 @@ describe('generateQuestions schema validation', () => {
   });
 
   it('should reject question with wrong number of options', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({
         language: 'en',
         questions: [
@@ -486,7 +486,7 @@ describe('generateQuestions schema validation', () => {
   });
 
   it('should reject question with invalid correct index', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({
         language: 'en',
         questions: [
@@ -501,7 +501,7 @@ describe('generateQuestions schema validation', () => {
   });
 
   it('should reject question with string correct value', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({
         language: 'en',
         questions: [
@@ -516,7 +516,7 @@ describe('generateQuestions schema validation', () => {
   });
 
   it('should accept valid quiz with all required fields', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({
         language: 'en',
         questions: [
@@ -552,7 +552,7 @@ describe('generateExplanation retry logic', () => {
   };
 
   it('should succeed on first attempt when response is valid', async () => {
-    callOpenRouter.mockResolvedValueOnce({
+    completion.mockResolvedValueOnce({
       text: JSON.stringify(validExplanation),
     });
 
@@ -563,12 +563,12 @@ describe('generateExplanation retry logic', () => {
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
     expect(result.wrongAnswerExplanation).toBe(validExplanation.wrongAnswerExplanation);
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 
   it('should retry with stricter prompt on parse failure', async () => {
     let callCount = 0;
-    callOpenRouter.mockImplementation(async (apiKey, prompt) => {
+    completion.mockImplementation(async (prompt) => {
       callCount++;
       if (callCount === 1) {
         return { text: 'This is not JSON at all' };
@@ -582,14 +582,14 @@ describe('generateExplanation retry logic', () => {
     });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
-    expect(callOpenRouter).toHaveBeenCalledTimes(2);
-    const secondCallPrompt = callOpenRouter.mock.calls[1][1];
+    expect(completion).toHaveBeenCalledTimes(2);
+    const secondCallPrompt = completion.mock.calls[1][0];
     expect(secondCallPrompt).toContain('CRITICAL: Respond with ONLY valid JSON');
   });
 
   it('should retry on schema validation failure', async () => {
     let callCount = 0;
-    callOpenRouter.mockImplementation(async () => {
+    completion.mockImplementation(async () => {
       callCount++;
       if (callCount === 1) {
         // Missing wrongAnswerExplanation
@@ -604,11 +604,11 @@ describe('generateExplanation retry logic', () => {
     });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
-    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    expect(completion).toHaveBeenCalledTimes(2);
   });
 
   it('should NOT retry on rate limit error', async () => {
-    callOpenRouter.mockRejectedValueOnce(new Error('Rate limit exceeded'));
+    completion.mockRejectedValueOnce(new Error('Rate limit exceeded'));
 
     await expect(
       generateExplanation('What is the capital?', 'London', 'Paris', {
@@ -617,11 +617,11 @@ describe('generateExplanation retry logic', () => {
       })
     ).rejects.toThrow('Rate limit exceeded');
 
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 
   it('should fail after max retry attempts', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: 'Invalid JSON response',
     });
 
@@ -632,11 +632,11 @@ describe('generateExplanation retry logic', () => {
       })
     ).rejects.toThrow('Invalid response format from AI');
 
-    expect(callOpenRouter).toHaveBeenCalledTimes(2);
+    expect(completion).toHaveBeenCalledTimes(2);
   });
 
   it('should handle DeepSeek thinking tags in response', async () => {
-    callOpenRouter.mockResolvedValueOnce({
+    completion.mockResolvedValueOnce({
       text: `<think>Let me explain this...</think>${JSON.stringify(validExplanation)}`,
     });
 
@@ -646,7 +646,7 @@ describe('generateExplanation retry logic', () => {
     });
 
     expect(result.rightAnswerExplanation).toBe(validExplanation.rightAnswerExplanation);
-    expect(callOpenRouter).toHaveBeenCalledTimes(1);
+    expect(completion).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -656,7 +656,7 @@ describe('generateExplanation schema validation', () => {
   });
 
   it('should reject response missing rightAnswerExplanation', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({ wrongAnswerExplanation: 'Something' }),
     });
 
@@ -666,7 +666,7 @@ describe('generateExplanation schema validation', () => {
   });
 
   it('should reject response missing wrongAnswerExplanation', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({ rightAnswerExplanation: 'Something' }),
     });
 
@@ -676,7 +676,7 @@ describe('generateExplanation schema validation', () => {
   });
 
   it('should reject empty rightAnswerExplanation', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({ rightAnswerExplanation: '', wrongAnswerExplanation: 'Something' }),
     });
 
@@ -686,7 +686,7 @@ describe('generateExplanation schema validation', () => {
   });
 
   it('should reject empty wrongAnswerExplanation', async () => {
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify({ rightAnswerExplanation: 'Something', wrongAnswerExplanation: '  ' }),
     });
 
@@ -701,7 +701,7 @@ describe('generateExplanation schema validation', () => {
       wrongAnswerExplanation: 'Your answer was incorrect because...',
     };
 
-    callOpenRouter.mockResolvedValue({
+    completion.mockResolvedValue({
       text: JSON.stringify(validExplanation),
     });
 
