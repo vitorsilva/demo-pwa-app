@@ -11,7 +11,7 @@ import { defineConfig } from 'vitest/config';
 
       // Only include unit test files, exclude E2E tests
       include: ['**/*.test.js'],
-      exclude: ['node_modules', 'dist', 'tests/e2e/**'],
+      exclude: ['node_modules', 'dist', 'tests/e2e/**', '.stryker-tmp'],
 
       // Coverage configuration
       coverage: {
@@ -22,7 +22,8 @@ import { defineConfig } from 'vitest/config';
           'dist/',
           '*.config.js',
           'sw.js',  // Service worker is hard to test in unit tests
-          'tests/e2e/**'  // Also exclude E2E from coverage
+          'tests/e2e/**',  // Also exclude E2E from coverage
+          '.stryker-tmp'
         ]
       }
     }
