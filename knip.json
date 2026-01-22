@@ -18,8 +18,12 @@
 ],
 "ignoreBinaries": [
     "docker-compose",
-    "start"
+    "start",
+    "semgrep"
 ],
 "ignoreExportsUsedInFile": true,
-"vite": true
+"vite": true,
+"vitest": true,
+"playwright": true,
+"eslint": true
 }
