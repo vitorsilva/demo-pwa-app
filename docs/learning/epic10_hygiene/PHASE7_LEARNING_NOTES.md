@@ -138,6 +138,59 @@ npx --no -- commitlint --edit "$1"
 
 ---
 
+## Phase 7.4: Semgrep (2026-01-22) ✅
+
+### What was implemented
+
+- Installed Semgrep via pip (`pip install semgrep`)
+- Added npm scripts: `security:scan` and `security:scan:ci`
+- Ran initial scan - 39 findings reviewed
+
+### Key Learnings
+
+1. **pip PATH issue on Windows** - pip installs scripts to `C:\Users\<user>\AppData\Roaming\Python\Python314\Scripts` which is NOT on PATH by default. Must add manually.
+
+2. **Windows encoding issue** - Semgrep fails with `'charmap' codec can't encode character` error. Fix: Set `PYTHONUTF8=1` as environment variable.
+
+3. **npm audit vs Semgrep** - Different tools for different purposes:
+   - `npm audit` scans **dependencies** for known CVEs
+   - Semgrep scans **your source code** for security patterns
+   - They're complementary, not alternatives
+
+4. **innerHTML findings** - Most findings were innerHTML usage. Need to distinguish:
+   - **False positives**: i18n translations, hardcoded values, test cleanup
+   - **Real concerns**: User-provided data (names, topics, error messages)
+
+### Windows Setup Requirements
+
+Add to user environment variables:
+- `Path`: Add `C:\Users\<user>\AppData\Roaming\Python\Python314\Scripts`
+- `PYTHONUTF8`: Set to `1`
+
+### Findings Review
+
+**Real concerns (added to backlog):**
+| File | Data Source | Risk |
+|------|-------------|------|
+| `ParticipantList.js:68` | `participant.name` | User enters name |
+| `errorHandler.js:65` | `message` | Could contain user data |
+| `ShareModal.js:145` | `topic` | User-entered quiz topic |
+
+**False positives (safe):**
+- i18n translations (`t('key')`)
+- Hardcoded icons/classes
+- Test file cleanup
+
+### Configuration
+
+`package.json` scripts:
+```json
+"security:scan": "semgrep scan --config auto src/",
+"security:scan:ci": "semgrep scan --config auto --error src/"
+```
+
+---
+
 ## Next Steps
 
-- Phase 7.4: Semgrep (security static analysis) - or stop here for now
+- Phase 7.5: Enhanced Knip Configuration - or stop here
