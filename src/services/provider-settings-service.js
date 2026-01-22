@@ -4,7 +4,12 @@
  */
 
 import { getSetting, saveSetting, getOpenRouterKey } from '../core/db.js';
-import { getProvider, validateKeyFormat, getAllProviders } from '../api/providers-config.js';
+import {
+  getProvider,
+  validateKeyFormat,
+  getAllProviders,
+  supportsCors,
+} from '../api/providers-config.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -250,25 +255,93 @@ export async function revalidateKey(providerId) {
 }
 
 // =============================================================================
-// Async Key Validation (Phase 3.2 - placeholder, implemented in next subtask)
+// Async Key Validation (Phase 3.2)
 // =============================================================================
 
 /**
  * Async validation - makes test call to provider
  * Called after key is saved, updates status when complete
  * @param {string} providerId - Provider ID
- * @param {string} _apiKey - API key to validate (unused in placeholder, used in 3.2)
+ * @param {string} apiKey - API key to validate
  */
-async function validateKeyAsync(providerId, _apiKey) {
-  // Placeholder - will be implemented in Subtask 3.2
-  // For now, just mark as valid after a delay to simulate async behavior
+async function validateKeyAsync(providerId, apiKey) {
   try {
     logger.debug(`Validating ${providerId} key...`);
-    // Actual implementation in 3.2 will call testProviderKey() with _apiKey
-    await setKeyStatus(providerId, KEY_STATUS.VALID);
-    logger.info(`${providerId} key marked as valid (full validation in 3.2)`);
+
+    const isValid = await testProviderKey(providerId, apiKey);
+
+    if (isValid) {
+      await setKeyStatus(providerId, KEY_STATUS.VALID);
+      logger.info(`${providerId} key validated successfully`);
+    } else {
+      await setKeyStatus(providerId, KEY_STATUS.INVALID);
+      logger.warn(`${providerId} key validation failed`);
+    }
   } catch (error) {
     logger.error(`${providerId} key validation error:`, error);
     await setKeyStatus(providerId, KEY_STATUS.INVALID);
+  }
+}
+
+/**
+ * Test provider key with minimal request
+ * @param {string} providerId - Provider ID
+ * @param {string} apiKey - API key to test
+ * @returns {Promise<boolean>} True if key is valid
+ */
+async function testProviderKey(providerId, apiKey) {
+  if (supportsCors(providerId)) {
+    // OpenRouter - direct test via auth endpoint
+    return await testOpenRouterKey(apiKey);
+  } else {
+    // Other providers - test via proxy with minimal request
+    return await testViaProxy(providerId, apiKey);
+  }
+}
+
+/**
+ * Test OpenRouter key directly (CORS supported)
+ * @param {string} apiKey - OpenRouter API key
+ * @returns {Promise<boolean>} True if key is valid
+ */
+async function testOpenRouterKey(apiKey) {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+    return response.ok;
+  } catch (error) {
+    logger.debug('OpenRouter key test failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Test other provider keys via backend proxy
+ * @param {string} providerId - Provider ID
+ * @param {string} apiKey - API key to test
+ * @returns {Promise<boolean>} True if key is valid
+ */
+async function testViaProxy(providerId, apiKey) {
+  try {
+    const provider = getProvider(providerId);
+    const response = await fetch('https://saberloop.com/llm/completion.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: providerId,
+        api_key: apiKey,
+        model: provider.defaultModel,
+        messages: [{ role: 'user', content: 'Hi' }],
+        options: { max_tokens: 5 },
+      }),
+    });
+    return response.ok;
+  } catch (error) {
+    logger.debug(`${providerId} key test via proxy failed:`, error);
+    return false;
   }
 }

@@ -34,10 +34,10 @@ After completing **ANY** subtask (3.1, 3.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Subtask 3.1 COMPLETE - Key status tracking added
+- **Last checkpoint:** Subtask 3.2 COMPLETE - Async key validation implemented
 - **Current task:** —
-- **Completed:** 3.1
-- **Next action:** Begin Subtask 3.2 (Add Async Key Validation Functions)
+- **Completed:** 3.1, 3.2
+- **Next action:** Begin Subtask 3.3 (Migrate OpenRouter Key)
 - **Blockers:** None
 - **Session:** January 22, 2026
 
@@ -226,7 +226,7 @@ Before starting 3.2, complete the [Subtask Completion Checklist](#subtask-comple
 
 ---
 
-### ⬚ 3.2 Add Async Key Validation Functions
+### ✅ 3.2 Add Async Key Validation Functions
 
 **File:** `src/services/provider-settings-service.js` (continue extending)
 

@@ -42,11 +42,26 @@ vi.mock('../utils/logger.js', () => ({
 vi.mock('../api/providers-config.js', () => ({
   getProvider: vi.fn((id) => {
     const providers = {
-      openrouter: { id: 'openrouter', name: 'OpenRouter', keyPrefix: 'sk-or-' },
-      openai: { id: 'openai', name: 'OpenAI', keyPrefix: 'sk-' },
-      anthropic: { id: 'anthropic', name: 'Anthropic', keyPrefix: 'sk-ant-' },
-      google: { id: 'google', name: 'Google AI', keyPrefix: 'AIza' },
-      xai: { id: 'xai', name: 'xAI', keyPrefix: 'xai-' },
+      openrouter: {
+        id: 'openrouter',
+        name: 'OpenRouter',
+        keyPrefix: 'sk-or-',
+        defaultModel: 'anthropic/claude-3.5-sonnet',
+      },
+      openai: { id: 'openai', name: 'OpenAI', keyPrefix: 'sk-', defaultModel: 'gpt-4o-mini' },
+      anthropic: {
+        id: 'anthropic',
+        name: 'Anthropic',
+        keyPrefix: 'sk-ant-',
+        defaultModel: 'claude-sonnet-4-20250514',
+      },
+      google: {
+        id: 'google',
+        name: 'Google AI',
+        keyPrefix: 'AIza',
+        defaultModel: 'gemini-2.5-flash',
+      },
+      xai: { id: 'xai', name: 'xAI', keyPrefix: 'xai-', defaultModel: 'grok-3-fast' },
     };
     return providers[id] || null;
   }),
@@ -446,6 +461,144 @@ describe('Provider Settings Service', () => {
       await revalidateKey('openrouter');
 
       expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openrouter', KEY_STATUS.VALIDATING);
+    });
+  });
+
+  // ==========================================================================
+  // Phase 3.2: Async Key Validation Tests
+  // ==========================================================================
+
+  describe('Async Key Validation (integration)', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      global.fetch = vi.fn();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should validate OpenRouter key directly and set VALID status', async () => {
+      storeOpenRouterKey.mockResolvedValue();
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: true });
+
+      await saveProviderKeyWithValidation('openrouter', 'sk-or-v1-validkey123');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Should call OpenRouter auth endpoint directly
+      expect(global.fetch).toHaveBeenCalledWith('https://openrouter.ai/api/v1/auth/key', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer sk-or-v1-validkey123' },
+      });
+
+      // Status should be set to VALID after successful validation
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openrouter', KEY_STATUS.VALID);
+    });
+
+    it('should set INVALID status when OpenRouter validation fails', async () => {
+      storeOpenRouterKey.mockResolvedValue();
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: false, status: 401 });
+
+      await saveProviderKeyWithValidation('openrouter', 'sk-or-v1-invalidkey');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Status should be set to INVALID after failed validation
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openrouter', KEY_STATUS.INVALID);
+    });
+
+    it('should validate OpenAI key via proxy and set VALID status', async () => {
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: true });
+
+      await saveProviderKeyWithValidation('openai', 'sk-validopenaikey123');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Should call backend proxy (not direct API)
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://saberloop.com/llm/completion.php',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+
+      // Verify request body contains correct provider and key
+      const fetchCall = global.fetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.provider).toBe('openai');
+      expect(body.api_key).toBe('sk-validopenaikey123');
+      expect(body.model).toBe('gpt-4o-mini');
+      expect(body.options.max_tokens).toBe(5);
+
+      // Status should be set to VALID
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openai', KEY_STATUS.VALID);
+    });
+
+    it('should set INVALID status when proxy validation fails', async () => {
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: false, status: 401 });
+
+      await saveProviderKeyWithValidation('anthropic', 'sk-ant-invalidkey');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_anthropic', KEY_STATUS.INVALID);
+    });
+
+    it('should handle network errors gracefully', async () => {
+      saveSetting.mockResolvedValue();
+      global.fetch.mockRejectedValue(new Error('Network error'));
+
+      await saveProviderKeyWithValidation('openai', 'sk-validkey12345');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Should set INVALID on network error
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openai', KEY_STATUS.INVALID);
+    });
+
+    it('should validate Google key via proxy', async () => {
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: true });
+
+      await saveProviderKeyWithValidation('google', 'AIzaValidGoogleKey123');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const fetchCall = global.fetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.provider).toBe('google');
+      expect(body.model).toBe('gemini-2.5-flash');
+
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_google', KEY_STATUS.VALID);
+    });
+
+    it('should validate xAI key via proxy', async () => {
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: true });
+
+      await saveProviderKeyWithValidation('xai', 'xai-validxaikey123');
+
+      // Wait for async validation to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const fetchCall = global.fetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.provider).toBe('xai');
+      expect(body.model).toBe('grok-3-fast');
+
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_xai', KEY_STATUS.VALID);
     });
   });
 });
