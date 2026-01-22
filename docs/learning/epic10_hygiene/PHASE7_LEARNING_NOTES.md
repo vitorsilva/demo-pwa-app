@@ -51,6 +51,52 @@
 
 ---
 
+## Phase 7.2: Husky + lint-staged (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `husky` and `lint-staged`
+- Initialized Husky with `npx husky init`
+- Configured `.husky/pre-commit` to run `npx lint-staged`
+- Added `lint-staged` configuration to `package.json`
+
+### Key Learnings
+
+1. **npx in hooks** - Using `npx lint-staged` ensures the command runs from the project's local `node_modules`, not a global installation. This guarantees everyone uses the same version.
+
+2. **lint-staged runs only on staged files** - This keeps pre-commit hooks fast. Since we have a clean baseline from Prettier, we only validate changes.
+
+3. **ESLint before Prettier** - The order matters:
+   - ESLint `--fix` might add/remove code (unused imports, etc.)
+   - Prettier then formats the result
+   - Reversed order would mess up formatting
+
+4. **Empty commit prevention** - lint-staged prevents empty commits if auto-fixes result in no actual changes. This is expected behavior.
+
+### Configuration
+
+`.husky/pre-commit`:
+```bash
+npx lint-staged
+```
+
+`package.json`:
+```json
+"lint-staged": {
+  "src/**/*.js": [
+    "eslint --fix",
+    "prettier --write"
+  ]
+}
+```
+
+### Files Changed
+
+- **New:** `.husky/pre-commit`
+- **Modified:** `package.json`, `package-lock.json`
+
+---
+
 ## Next Steps
 
-- Phase 7.2: Husky + lint-staged (git hooks)
+- Phase 7.3: commitlint (commit message linting)
