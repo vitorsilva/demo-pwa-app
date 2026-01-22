@@ -239,6 +239,10 @@ None - all providers follow similar patterns.
 - **Anthropic**: ✅ Tested with real API key (claude-3-haiku-20240307)
   - Response: `{"text":"test successful","model":"claude-3-haiku-20240307","provider":"anthropic","usage":{"prompt_tokens":17,"completion_tokens":5,"total_tokens":22}}`
   - E2E test passed in 1.2s
+- **Google**: ✅ Tested with real API key (gemini-2.0-flash)
+  - Response: `{"text":"test successful","model":"gemini-2.0-flash","provider":"google","usage":{"prompt_tokens":9,"completion_tokens":3,"total_tokens":12}}`
+  - E2E test passed in 1.6s
+  - Note: `gemini-1.5-flash` model deprecated, use `gemini-2.0-flash` or newer
 
 ---
 

@@ -139,7 +139,7 @@ test.describe('LLM Proxy Integration @manual', () => {
         data: {
           provider: 'google',
           api_key: process.env.TEST_GOOGLE_KEY,
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash',
           messages: [{ role: 'user', content: 'Say "test successful" and nothing else.' }],
           options: { max_tokens: 20 }
         },
