@@ -12,6 +12,7 @@
         "PKCE",
         "qrcode",
         "Saberloop",
+        "semgrep",
         "sonarjs",
         "vite"
     ]

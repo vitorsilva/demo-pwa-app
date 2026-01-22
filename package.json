@@ -58,7 +58,9 @@
     "test:mutation:utils": "stryker run stryker.utils.json",
     "screenshots:process": "node scripts/process-screenshots.cjs",
     "screenshots:process:no-frame": "node scripts/process-screenshots.cjs --no-frame",
-    "prepare": "husky"
+    "prepare": "husky",
+    "security:scan": "semgrep scan --config auto src/",
+    "security:scan:ci": "semgrep scan --config auto --error src/"    
   },
   "lint-staged": {
     "src/**/*.js": [
