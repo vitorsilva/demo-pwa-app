@@ -1,7 +1,7 @@
 # Phase 2: Frontend Provider Router
 
 **Epic:** 11 - Multi-Provider LLM Support
-**Status:** Not Started
+**Status:** In Progress
 **Effort:** 2-3 days
 **Prerequisites:** Phase 1 complete (backend proxy deployed)
 
@@ -32,12 +32,12 @@ After completing **ANY** subtask (2.1, 2.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Not started
-- **Current task:** —
-- **Completed:** —
-- **Next action:** Begin Subtask 2.1 (Create Provider Configuration)
+- **Last checkpoint:** Subtask 2.1 complete - providers-config.js created with tests
+- **Current task:** Subtask 2.2 - Create provider-router.js
+- **Completed:** 2.1 (providers-config.js + tests)
+- **Next action:** Create provider-router.js
 - **Blockers:** None
-- **Session:** —
+- **Session:** January 22, 2026
 
 ---
 
@@ -158,7 +158,7 @@ Create `docs/learning/epic10_hygiene/FLAG_MULTI_PROVIDER_LLM.md` for future clea
 
 ## Tasks
 
-### ⬚ 2.1 Create Provider Configuration
+### ✅ 2.1 Create Provider Configuration
 
 **File:** `src/api/providers-config.js`
 
