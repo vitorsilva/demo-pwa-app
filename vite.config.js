@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // Determine base path based on environment
 // - Development (serve): '/'
@@ -143,6 +144,12 @@ export default defineConfig(({ command }) => {
                 type: 'module',
                 suppressWarnings: true
             }
+        }),
+        visualizer({
+            filename: 'reports/bundle-stats.html',
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
         })
     ],
 
