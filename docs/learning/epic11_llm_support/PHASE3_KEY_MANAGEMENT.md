@@ -13,6 +13,22 @@ Implement API key storage, validation, and management. Include hybrid validation
 
 ---
 
+## ⚠️ Context Management Reminder
+
+**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+
+See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+### Progress Marker
+
+- **Status:** Not started
+- **Current task:** —
+- **Completed:** —
+- **Next action:** Begin Task 3.1 (Create API Keys Service)
+- **Blockers:** None
+
+---
+
 ## Branch & Commit Strategy
 
 ### Branch Naming

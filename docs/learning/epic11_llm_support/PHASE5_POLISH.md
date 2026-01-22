@@ -13,6 +13,22 @@ Final polish including comprehensive error handling, edge case management, statu
 
 ---
 
+## ⚠️ Context Management Reminder
+
+**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+
+See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+### Progress Marker
+
+- **Status:** Not started
+- **Current task:** —
+- **Completed:** —
+- **Next action:** Begin Task 5.1 (Create LLM Error Handler)
+- **Blockers:** None
+
+---
+
 ## Branch & Commit Strategy
 
 ### Branch Naming
@@ -950,23 +966,29 @@ Complete all local testing steps above. Verify:
 npm run build:staging && npm run deploy:staging
 ```
 
-### Step 3: Test Staging with Feature Flag ENABLED
+### Step 3: Enable Feature Flag in Staging
+
+**Update `src/core/features.js` for staging build:**
+```javascript
+MULTI_PROVIDER_LLM: {
+  phase: 'ENABLED',  // Staging: ENABLED for full testing
+  description: 'Allow users to configure and use multiple LLM providers'
+}
+```
 
 ```bash
-# Visit https://saberloop.com/app-staging/
-# Enable feature flag:
-localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
-location.reload();
+npm run build:staging && npm run deploy:staging
 ```
 
 **Staging Verification Checklist:**
+- [ ] Feature flag is `ENABLED` in staging
 - [ ] Error handling shows user-friendly messages
 - [ ] Provider indicator shows during quiz
 - [ ] Cost tracking works (check IndexedDB)
 - [ ] All providers work correctly
 - [ ] No regressions in existing functionality
 
-### Step 4: Run Full Test Suite
+### Step 4: Run Full Test Suite Against Staging
 
 ```bash
 # E2E tests
@@ -976,19 +998,23 @@ PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
 maestro test tests/maestro/
 ```
 
-### Step 5: Enable Feature Flag in Production
+### Step 5: Keep Production DISABLED During Staging Tests
 
-After all staging tests pass:
+**IMPORTANT:** While testing staging, production must remain `DISABLED`:
+- Production users see no changes
+- No risk while validating in staging
 
-**Update `src/core/features.js`:**
+### Step 6: Enable Feature Flag in Production (FINAL STEP)
+
+**Only after ALL staging tests pass:**
+
+**Update `src/core/features.js` for production:**
 ```javascript
 MULTI_PROVIDER_LLM: {
-  phase: 'ENABLED',  // Changed from SETTINGS_ONLY
+  phase: 'ENABLED',  // Production: ENABLED (was DISABLED)
   description: 'Allow users to configure and use multiple LLM providers'
 }
 ```
-
-### Step 6: Deploy to Production
 
 ```bash
 npm run build && npm run deploy
@@ -996,7 +1022,7 @@ npm run build && npm run deploy
 
 ### Step 7: Production Verification
 
-- [ ] Feature flag is `ENABLED`
+- [ ] Feature flag is `ENABLED` in production
 - [ ] Settings UI works
 - [ ] Can generate quiz with OpenRouter (default)
 - [ ] Can switch to other provider and generate quiz
@@ -1007,9 +1033,9 @@ npm run build && npm run deploy
 ### Rollback (if needed)
 
 If issues in production:
-1. Set feature flag back to `SETTINGS_ONLY` in `features.js`
-2. Rebuild and redeploy
-3. Users can still configure providers but won't use them
+1. Set feature flag back to `DISABLED` in `features.js`
+2. Rebuild and redeploy immediately
+3. Existing OpenRouter behavior restored (no user impact)
 4. Investigate issues and fix before re-enabling
 
 ---

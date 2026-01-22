@@ -13,6 +13,22 @@ Create the Settings UI for managing LLM providers, including provider selection,
 
 ---
 
+## ⚠️ Context Management Reminder
+
+**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+
+See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+### Progress Marker
+
+- **Status:** Not started
+- **Current task:** —
+- **Completed:** —
+- **Next action:** Begin Task 4.1 (Create LLMProvidersSettings Component)
+- **Blockers:** None
+
+---
+
 ## Branch & Commit Strategy
 
 ### Branch Naming
@@ -1068,24 +1084,25 @@ PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
 maestro test tests/maestro/llm_providers_settings.yaml
 ```
 
-### Step 5: Deploy to Production (keep SETTINGS_ONLY)
+### Step 5: Deploy to Production (keep DISABLED)
 
 ```bash
 npm run build && npm run deploy
 ```
 
 **Production Verification:**
-- [ ] Feature flag remains `SETTINGS_ONLY`
-- [ ] Settings UI visible (users can configure)
-- [ ] Quiz generation still uses OpenRouter (flag not ENABLED)
+- [ ] Feature flag remains `DISABLED` in production
+- [ ] Settings UI NOT visible to production users yet
+- [ ] Quiz generation uses OpenRouter (existing behavior unchanged)
 - [ ] No errors in telemetry
 
 ---
 
 ## Notes
 
-- Feature flag stays at `SETTINGS_ONLY` until Phase 5 complete
-- Users can configure providers but won't use them until ENABLED
+- **Production:** Feature flag stays `DISABLED` until Phase 5 final validation
+- **Staging:** Feature flag is `SETTINGS_ONLY` - users can configure keys but feature not active
+- Full functionality (`ENABLED`) only happens in Phase 5 after all testing complete
 - Status polling uses 30-second interval to avoid excessive requests
 - Modal uses existing modal patterns for consistency
 

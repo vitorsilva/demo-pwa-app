@@ -13,6 +13,22 @@ Create the frontend provider router that reads the active provider from settings
 
 ---
 
+## ⚠️ Context Management Reminder
+
+**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+
+See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
+
+### Progress Marker
+
+- **Status:** Not started
+- **Current task:** —
+- **Completed:** —
+- **Next action:** Begin Task 2.1 (Add Feature Flag)
+- **Blockers:** None
+
+---
+
 ## Branch & Commit Strategy
 
 ### Branch Naming
@@ -85,8 +101,24 @@ export const FEATURE_FLAGS = {
 | Phase | Behavior |
 |-------|----------|
 | `DISABLED` | New provider router code deployed but inactive. OpenRouter used directly (existing behavior). |
-| `SETTINGS_ONLY` | Settings UI shows multi-provider options. Can configure but not use yet. |
-| `ENABLED` | Full functionality. Provider selection active. |
+| `SETTINGS_ONLY` | Settings UI shows multi-provider options. Users can configure keys but feature not active. |
+| `ENABLED` | Full functionality. Provider selection active for all LLM operations. |
+
+### Rollout Strategy by Environment
+
+| Epic Phase | Production | Staging |
+|------------|------------|---------|
+| Phase 2 (Router) | `DISABLED` | `DISABLED` |
+| Phase 3 (Keys) | `DISABLED` | `DISABLED` |
+| Phase 4 (Settings UI) | `DISABLED` | `SETTINGS_ONLY` |
+| Phase 5 (Polish) - during | `DISABLED` | `ENABLED` |
+| Phase 5 (Polish) - final | `ENABLED` | `ENABLED` |
+
+**Rationale:**
+- **Production stays `DISABLED`** until Phase 5 final validation - no user impact during development
+- **Staging moves to `SETTINGS_ONLY`** in Phase 4 when UI exists - allows testing the full flow
+- **Staging moves to `ENABLED`** during Phase 5 - validates everything before production rollout
+- **Production moves to `ENABLED`** only as the LAST step of Phase 5 after all validation passes
 
 ### Usage in Code
 
