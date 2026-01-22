@@ -1,0 +1,25 @@
+  # Build outputs                                                                                         dist/                                                                                                 
+  dev-dist/                                                                                             
+
+  # Dependencies
+  node_modules/                     
+  php-api/vendor/
+
+  # Test artifacts
+  test-results/
+  playwright-report/
+  playwright/.cache/
+  coverage/
+  .playwright-mcp/
+  .stryker-tmp/
+
+  # Generated/logs
+  reports/
+  telemetry-logs/
+  package/
+
+  # Other
+  php-api/
+  public/
+  *.md
+  .maestro/

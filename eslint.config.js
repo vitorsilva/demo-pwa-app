@@ -1,9 +1,11 @@
 import js from '@eslint/js';
 import sonarjs from 'eslint-plugin-sonarjs';
+import prettierConfig from 'eslint-config-prettier'; 
 
 export default [
   js.configs.recommended,
   sonarjs.configs.recommended,
+  prettierConfig,
   {
     languageOptions: {
       globals: {

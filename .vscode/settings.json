@@ -7,6 +7,7 @@
         "PKCE",
         "qrcode",
         "Saberloop",
+        "sonarjs",
         "vite"
     ]
 }
