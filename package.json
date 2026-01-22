@@ -40,6 +40,7 @@
     "lint": "eslint src/",
     "lint:dead-code": "knip",
     "lint:dead-code:fix": "knip --fix",
+    "lint:duplicates": "jscpd src/ --ignore \"**/*.test.js\"",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "arch:test": "depcruise src --config .dependency-cruiser.cjs",
