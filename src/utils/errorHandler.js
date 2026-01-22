@@ -1,5 +1,6 @@
 import { logger } from './logger.js';
 import { telemetry } from './telemetry.js';
+import escapeHtml from 'escape-html';
 
 /**
  * Initialize global error handling
@@ -62,7 +63,7 @@ function showErrorNotification(message) {
   notification.innerHTML = `
       <div class="flex items-center gap-2">
         <span class="material-symbols-outlined">error</span>
-        <span>${message}</span>
+        <span>${escapeHtml(message)}</span>
       </div>
       <button onclick="this.parentElement.remove()" class="material-symbols-outlined
   hover:bg-white/20 rounded p-1">close</button>

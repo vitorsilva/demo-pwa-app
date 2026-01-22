@@ -5,6 +5,7 @@
  */
 
 import { t } from '../core/i18n.js';
+import escapeHtml from 'escape-html';
 
 /**
  * @typedef {Object} Participant
@@ -65,7 +66,7 @@ export function createParticipantItem(participant, options = {}) {
   name.className = 'text-text-light dark:text-text-dark text-sm flex-1';
 
   if (participant.isYou) {
-    name.innerHTML = `${participant.name} <span class="text-subtext-light dark:text-subtext-dark">(${t('party.you')})</span>`;
+    name.innerHTML = `${escapeHtml(participant.name)} <span class="text-subtext-light dark:text-subtext-dark">(${t('party.you')})</span>`;
   } else {
     name.textContent = participant.name;
   }

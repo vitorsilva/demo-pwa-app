@@ -6,6 +6,7 @@
 import { logger } from '../utils/logger.js';
 import { t } from '../core/i18n.js';
 import { telemetry } from '../utils/telemetry.js';
+import escapeHtml from 'escape-html';
 import { generateShareImage } from '../utils/share-image.js';
 import {
   canShare,
@@ -142,7 +143,7 @@ export function showShareModal({ topic, score, total, percentage }) {
         previewContainer.innerHTML = `
           <div class="text-center text-white">
             <span class="text-4xl mb-2">🏆</span>
-            <p class="font-bold">${topic} Quiz Master!</p>
+            <p class="font-bold">${escapeHtml(topic)} Quiz Master!</p>
             <p class="text-2xl font-bold text-[#e94560]">${score}/${total}</p>
             <p class="text-gray-400">${percentage}%</p>
           </div>

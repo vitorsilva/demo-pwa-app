@@ -191,6 +191,133 @@ Add to user environment variables:
 
 ---
 
-## Next Steps
+## Phase 7.5: Enhanced Knip Configuration (2026-01-22) ✅
 
-- Phase 7.5: Enhanced Knip Configuration - or stop here
+### What was implemented
+
+- Added `vitest`, `playwright`, `eslint` plugin configs
+- Added `semgrep` to `ignoreBinaries` (installed via pip, not npm)
+- Removed non-existent `public/sw.js` entry (service worker is generated at build)
+
+### Key Learning
+
+Knip's plugin system auto-detects tool-specific entry points and dependencies. Enabling plugins like `vitest: true` helps Knip understand test file patterns without manual configuration.
+
+---
+
+## Phase 7.6: Complexity Analysis (2026-01-22) ⏭️ Skipped
+
+### Why Skipped
+
+- Plato has deprecated dependencies and introduces vulnerabilities
+- ESLint already provides complexity warnings (`complexity`, `max-depth`, `max-lines-per-function`)
+- Complexity hotspots are documented in Phase 7
+
+---
+
+## Phase 7.7: Bundle Size Analysis (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `rollup-plugin-visualizer`
+- Configured in `vite.config.js` to generate `reports/bundle-stats.html`
+- Options: `gzipSize: true`, `brotliSize: true`
+
+### Key Learning
+
+The visualizer shows:
+- Size contribution per module (treemap)
+- Which dependencies are largest
+- Tree-shaking effectiveness
+- Gzip/Brotli compressed sizes (what users actually download)
+
+Bundle health: Good - mostly own code, reasonable dependencies (i18n, IndexedDB, QR codes).
+
+---
+
+## Phase 7.8: Duplicate Code Detection (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `jscpd`
+- Added npm script: `lint:duplicates` (excludes test files)
+
+### Results
+
+- **2.86% duplication** - healthy (under 5% is good)
+- Most duplicates in test files (acceptable - test readability > DRY)
+- Modal components share similar patterns (could abstract, low priority)
+
+### Key Learning
+
+Test file duplication is often acceptable. Keeping tests independent and readable is more valuable than DRY. Focus on production code duplication.
+
+---
+
+## Phase 7.9: Enhanced ESLint Plugins (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `eslint-plugin-import`
+- Added `import/no-duplicates` rule (warns on duplicate imports from same module)
+
+### Key Learning
+
+Kept configuration minimal - only added `no-duplicates` rule since:
+- `import/no-cycle` can be slow and dependency-cruiser already handles circular deps
+- Over-configuring leads to noise
+
+---
+
+## innerHTML XSS Fix (2026-01-22) ✅
+
+### What was implemented
+
+- Installed `escape-html` package (tiny ~200 bytes, used by Express)
+- Applied escapeHtml to 3 files with user-provided data:
+  - `ParticipantList.js:69` - `participant.name`
+  - `errorHandler.js:66` - `message`
+  - `ShareModal.js:147` - `topic`
+
+### Key Learnings
+
+1. **Use established libraries** - escape-html is tiny, well-tested, and used by Express. Better than hand-rolling your own.
+
+2. **Semgrep flags all innerHTML** - Static analyzers can't understand that escapeHtml makes data safe. The 39 findings include many false positives (i18n translations, hardcoded strings). This is a known limitation of pattern-based scanning.
+
+3. **Focus on user-provided data** - The real XSS risk is data that comes from users (names, topics, form inputs). Hardcoded strings and i18n keys are controlled and safe.
+
+### Files Changed
+
+- **Modified:** `ParticipantList.js`, `errorHandler.js`, `ShareModal.js`
+- **Added:** `escape-html` dependency
+
+---
+
+## Phase 7 Complete! 🎉
+
+### Summary of Tools Added
+
+| Tool | Purpose | Command |
+|------|---------|---------|
+| Prettier | Code formatting | `npm run format` |
+| Husky | Git hooks | Auto-runs on commit |
+| lint-staged | Run linters on staged files | Auto-runs via Husky |
+| commitlint | Commit message validation | Auto-runs via Husky |
+| Semgrep | Security static analysis | `npm run security:scan` |
+| Knip | Dead code detection | `npm run lint:dead-code` |
+| rollup-plugin-visualizer | Bundle size analysis | `npm run build` (generates report) |
+| jscpd | Duplicate code detection | `npm run lint:duplicates` |
+| eslint-plugin-import | Import validation | `npm run lint` |
+
+### Workflow Impact
+
+Every commit now:
+1. **Pre-commit hook**: ESLint + Prettier on staged files
+2. **Commit-msg hook**: Validates conventional commit format
+
+On-demand checks:
+- `npm run security:scan` - Security issues
+- `npm run lint:dead-code` - Unused code
+- `npm run lint:duplicates` - Copy-paste code
+- `reports/bundle-stats.html` - Bundle composition (after build)

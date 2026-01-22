@@ -106,6 +106,7 @@
     "workbox-window": "^7.4.0"
   },
   "dependencies": {
+    "escape-html": "^1.0.3",
     "i18next": "^25.7.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "idb": "^8.0.3",
