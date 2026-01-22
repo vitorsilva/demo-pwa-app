@@ -13,19 +13,31 @@ Final polish including comprehensive error handling, edge case management, statu
 
 ---
 
-## ⚠️ Context Management Reminder
-
-**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+## Context Management Protocol
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
 
+### Subtask Completion Checklist
+
+After completing **ANY** subtask (5.1, 5.2, etc.), STOP and complete this checklist:
+
+```
+□ Mark subtask complete in this document (⬚ → ✅)
+□ Update Progress Marker below
+□ Update PHASE5_LEARNING_NOTES.md with difficulties/solutions/learnings
+□ Commit all changes with descriptive message
+□ Force new session (/clear or /compact)
+□ ONLY THEN start next subtask
+```
+
 ### Progress Marker
 
-- **Status:** Not started
+- **Last checkpoint:** Not started
 - **Current task:** —
 - **Completed:** —
-- **Next action:** Begin Task 5.1 (Create LLM Error Handler)
+- **Next action:** Begin Subtask 5.1 (Enhanced Error Handling)
 - **Blockers:** None
+- **Session:** —
 
 ---
 
@@ -73,7 +85,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Tasks
 
-### 5.1 Enhanced Error Handling
+### ⬚ 5.1 Enhanced Error Handling
 
 **File:** `src/services/llm-error-handler.js`
 
@@ -269,9 +281,17 @@ export async function withRetry(fn, options = {}) {
 }
 ```
 
+**Verification:** Run unit tests for llm-error-handler.js, verify error parsing and retry logic.
+
 ---
 
-### 5.2 Provider Status Indicator in Quiz View
+#### 🛑 CHECKPOINT: After completing 5.1
+
+Before starting 5.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 5.2 Provider Status Indicator in Quiz View
 
 Show which provider is being used during quiz.
 
@@ -343,9 +363,17 @@ export async function updateIndicator(container) {
 }
 ```
 
+**Verification:** Verify indicator appears in quiz header with correct provider name.
+
 ---
 
-### 5.3 Integration with Quiz View
+#### 🛑 CHECKPOINT: After completing 5.2
+
+Before starting 5.3, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 5.3 Integration with Quiz View
 
 **File:** `src/views/QuizView.js` (update header section)
 
@@ -375,9 +403,17 @@ function renderQuizHeader() {
 }
 ```
 
+**Verification:** Start a quiz, verify provider indicator displays correctly in header.
+
 ---
 
-### 5.4 Edge Case Handling
+#### 🛑 CHECKPOINT: After completing 5.3
+
+Before starting 5.4, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 5.4 Edge Case Handling
 
 **File:** `src/services/provider-edge-cases.js`
 
@@ -480,9 +516,17 @@ export async function getFallbackProvider(failedProviderId) {
 }
 ```
 
+**Verification:** Test edge cases: no provider configured, invalid key, provider switch.
+
 ---
 
-### 5.5 i18n Strings - Error Messages
+#### 🛑 CHECKPOINT: After completing 5.4
+
+Before starting 5.5, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 5.5 i18n Strings - Error Messages
 
 **File:** `src/i18n/en.json` (add to errors section)
 
@@ -502,9 +546,17 @@ export async function getFallbackProvider(failedProviderId) {
 }
 ```
 
+**Verification:** Switch language, verify all error messages display correctly.
+
 ---
 
-### 5.6 Cost Tracking Integration
+#### 🛑 CHECKPOINT: After completing 5.5
+
+Before starting 5.6, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 5.6 Cost Tracking Integration
 
 **File:** `src/services/cost-tracker.js` (update for multi-provider)
 
@@ -656,6 +708,14 @@ export async function getUsageSummary(options = {}) {
   return summary;
 }
 ```
+
+**Verification:** Generate quiz, verify usage recorded in IndexedDB with correct cost calculation.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 5.6
+
+Phase 5 complete! Complete the [Subtask Completion Checklist](#subtask-completion-checklist), then enable feature flag in production.
 
 ---
 

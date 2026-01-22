@@ -13,19 +13,31 @@ Create the Settings UI for managing LLM providers, including provider selection,
 
 ---
 
-## ⚠️ Context Management Reminder
-
-**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+## Context Management Protocol
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
 
+### Subtask Completion Checklist
+
+After completing **ANY** subtask (4.1, 4.2, etc.), STOP and complete this checklist:
+
+```
+□ Mark subtask complete in this document (⬚ → ✅)
+□ Update Progress Marker below
+□ Update PHASE4_LEARNING_NOTES.md with difficulties/solutions/learnings
+□ Commit all changes with descriptive message
+□ Force new session (/clear or /compact)
+□ ONLY THEN start next subtask
+```
+
 ### Progress Marker
 
-- **Status:** Not started
+- **Last checkpoint:** Not started
 - **Current task:** —
 - **Completed:** —
-- **Next action:** Begin Task 4.1 (Create LLMProvidersSettings Component)
+- **Next action:** Begin Subtask 4.1 (Create LLMProvidersSettings Component)
 - **Blockers:** None
+- **Session:** —
 
 ---
 
@@ -100,7 +112,7 @@ Reference existing components:
 
 ## Tasks
 
-### 4.1 Create LLM Providers Settings Component
+### ⬚ 4.1 Create LLM Providers Settings Component
 
 **File:** `src/components/LLMProvidersSettings.js`
 
@@ -375,9 +387,17 @@ export class LLMProvidersSettings {
 }
 ```
 
+**Verification:** Render component in dev server, verify all providers display with correct status indicators.
+
 ---
 
-### 4.2 Create Add Key Modal
+#### 🛑 CHECKPOINT: After completing 4.1
+
+Before starting 4.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 4.2 Create Add Key Modal
 
 **File:** `src/components/AddKeyModal.js`
 
@@ -506,9 +526,17 @@ export class AddKeyModal {
 }
 ```
 
+**Verification:** Open modal, enter key, verify format validation and successful save.
+
 ---
 
-### 4.3 Create Remove Key Modal
+#### 🛑 CHECKPOINT: After completing 4.2
+
+Before starting 4.3, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 4.3 Create Remove Key Modal
 
 **File:** `src/components/RemoveKeyModal.js`
 
@@ -572,9 +600,17 @@ export class RemoveKeyModal {
 }
 ```
 
+**Verification:** Open remove modal, verify confirmation prompt and successful key removal.
+
 ---
 
-### 4.4 Add i18n Strings
+#### 🛑 CHECKPOINT: After completing 4.3
+
+Before starting 4.4, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 4.4 Add i18n Strings
 
 **File:** `src/i18n/en.json` (additions)
 
@@ -640,9 +676,17 @@ export class RemoveKeyModal {
 }
 ```
 
+**Verification:** Switch language, verify all LLM provider strings display correctly.
+
 ---
 
-### 4.5 Add CSS Styles
+#### 🛑 CHECKPOINT: After completing 4.4
+
+Before starting 4.5, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 4.5 Add CSS Styles
 
 **File:** `src/styles/llm-providers.css`
 
@@ -876,6 +920,14 @@ export class RemoveKeyModal {
   color: var(--text-secondary);
 }
 ```
+
+**Verification:** Verify styles match design system, test dark mode and responsive layout.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 4.5
+
+Phase 4 complete! Complete the [Subtask Completion Checklist](#subtask-completion-checklist), then proceed to Phase 5.
 
 ---
 

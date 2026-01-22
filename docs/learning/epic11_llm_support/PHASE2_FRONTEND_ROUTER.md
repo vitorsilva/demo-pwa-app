@@ -13,19 +13,31 @@ Create the frontend provider router that reads the active provider from settings
 
 ---
 
-## ⚠️ Context Management Reminder
-
-**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+## Context Management Protocol
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
 
+### Subtask Completion Checklist
+
+After completing **ANY** subtask (2.1, 2.2, etc.), STOP and complete this checklist:
+
+```
+□ Mark subtask complete in this document (⬚ → ✅)
+□ Update Progress Marker below
+□ Update PHASE2_LEARNING_NOTES.md with difficulties/solutions/learnings
+□ Commit all changes with descriptive message
+□ Force new session (/clear or /compact)
+□ ONLY THEN start next subtask
+```
+
 ### Progress Marker
 
-- **Status:** Not started
+- **Last checkpoint:** Not started
 - **Current task:** —
 - **Completed:** —
-- **Next action:** Begin Task 2.1 (Add Feature Flag)
+- **Next action:** Begin Subtask 2.1 (Create Provider Configuration)
 - **Blockers:** None
+- **Session:** —
 
 ---
 
@@ -146,7 +158,7 @@ Create `docs/learning/epic10_hygiene/FLAG_MULTI_PROVIDER_LLM.md` for future clea
 
 ## Tasks
 
-### 2.1 Create Provider Configuration
+### ⬚ 2.1 Create Provider Configuration
 
 **File:** `src/api/providers-config.js`
 
@@ -294,9 +306,17 @@ export function estimateCost(providerId, modelId, inputTokens, outputTokens) {
 }
 ```
 
+**Verification:** Run unit tests for providers-config.js, verify all provider data is accurate.
+
 ---
 
-### 2.2 Create Provider Router
+#### 🛑 CHECKPOINT: After completing 2.1
+
+Before starting 2.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 2.2 Create Provider Router
 
 **File:** `src/api/provider-router.js`
 
@@ -395,9 +415,17 @@ async function callViaProxy(providerId, apiKey, messages, modelId, options) {
 }
 ```
 
+**Verification:** Run unit tests for provider-router.js, verify OpenRouter direct call and proxy routing.
+
 ---
 
-### 2.3 Create Provider Settings Service
+#### 🛑 CHECKPOINT: After completing 2.2
+
+Before starting 2.3, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 2.3 Create Provider Settings Service
 
 **File:** `src/services/provider-settings-service.js`
 
@@ -502,9 +530,17 @@ export async function getConfiguredProviders() {
 }
 ```
 
+**Verification:** Run unit tests for provider-settings-service.js, verify settings persistence.
+
 ---
 
-### 2.4 Update api.real.js to Use Router
+#### 🛑 CHECKPOINT: After completing 2.3
+
+Before starting 2.4, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 2.4 Update api.real.js to Use Router
 
 **File:** `src/api/api.real.js` (modifications)
 
@@ -560,6 +596,14 @@ export async function generateExplanation(question, userAnswer, correctAnswer, g
   };
 }
 ```
+
+**Verification:** Run all unit tests, verify quiz generation uses provider router.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 2.4
+
+Phase 2 complete! Complete the [Subtask Completion Checklist](#subtask-completion-checklist), then proceed to Phase 3.
 
 ---
 

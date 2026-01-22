@@ -13,19 +13,31 @@ Create the PHP backend proxy that routes LLM requests to different providers, an
 
 ---
 
-## ⚠️ Context Management Reminder
+## ⚠️ Context Management Protocol
 
-**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+**MANDATORY: After completing EACH subtask, checkpoint before starting the next.**
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
 
+### Subtask Completion Checklist
+
+After completing any subtask (1.1, 1.2, etc.):
+```
+□ Mark subtask complete (⬚ → ✅) in this document
+□ Update Progress Marker below
+□ Update PHASE1_LEARNING_NOTES.md with difficulties/solutions
+□ Commit all changes
+□ Force new session (/clear)
+□ ONLY THEN start next subtask
+```
+
 ### Progress Marker
 
-- **Status:** Not started
-- **Current task:** —
-- **Completed:** —
-- **Next action:** Begin Task 1.1 (Create Deployment Script)
+- **Last checkpoint:** Not started
+- **Next action:** Begin Subtask 1.1 (Create Deployment Script)
+- **Completed subtasks:** None
 - **Blockers:** None
+- **Session:** —
 
 ---
 
@@ -96,7 +108,7 @@ The feature flag `MULTI_PROVIDER_LLM` will be added in **Phase 2** when frontend
 
 ## Tasks
 
-### 1.1 Create Deployment Script
+### ⬚ 1.1 Create Deployment Script
 
 Create a deployment script following the same pattern as `deploy-party.cjs` and `deploy-telemetry.cjs`.
 
@@ -165,9 +177,17 @@ deploy();
 }
 ```
 
+**Verification:** Run `npm run deploy:llm --dry-run` (if supported) or verify script syntax.
+
 ---
 
-### 1.2 Create Directory Structure
+#### 🛑 CHECKPOINT: After completing 1.1
+
+Before starting 1.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.2 Create Directory Structure
 
 ```
 php-api/
@@ -190,9 +210,17 @@ php-api/
 └── telemetry/                    # Existing
 ```
 
+**Verification:** Directories created manually or will be created when files are added.
+
 ---
 
-### 1.3 Create Health Check Endpoint
+#### 🛑 CHECKPOINT: After completing 1.2
+
+Before starting 1.3, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.3 Create Health Check Endpoint
 
 **File:** `php-api/llm/health.php`
 
@@ -210,9 +238,17 @@ echo json_encode([
 ]);
 ```
 
+**Verification:** `curl http://localhost:8080/llm/health.php` returns JSON with status "healthy".
+
 ---
 
-### 1.4 Create .htaccess for CORS
+#### 🛑 CHECKPOINT: After completing 1.3
+
+Before starting 1.4, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.4 Create .htaccess for CORS
 
 **File:** `php-api/llm/.htaccess`
 
@@ -228,9 +264,17 @@ RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 ```
 
+**Verification:** OPTIONS request to endpoint returns 200.
+
 ---
 
-### 1.5 Create Response Sanitizer
+#### 🛑 CHECKPOINT: After completing 1.4
+
+Before starting 1.5, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.5 Create Response Sanitizer
 
 This is similar to the `json-extractor.js` pattern used for OpenRouter responses. It handles common LLM quirks like markdown code blocks, smart quotes, BOM characters, and reasoning model prefixes.
 
@@ -391,9 +435,17 @@ class ResponseSanitizer {
 }
 ```
 
+**Verification:** Unit tests for ResponseSanitizer pass.
+
 ---
 
-### 1.6 Create Telemetry Utility
+#### 🛑 CHECKPOINT: After completing 1.5
+
+Before starting 1.6, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.6 Create Telemetry Utility
 
 **File:** `php-api/llm/src/utils/Telemetry.php`
 
@@ -492,9 +544,17 @@ class Telemetry {
 }
 ```
 
+**Verification:** Telemetry class syntax is valid (no PHP errors).
+
 ---
 
-### 1.7 Create Main Completion Endpoint
+#### 🛑 CHECKPOINT: After completing 1.6
+
+Before starting 1.7, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.7 Create Main Completion Endpoint
 
 **File:** `php-api/llm/completion.php`
 
@@ -593,9 +653,17 @@ return [
 ];
 ```
 
+**Verification:** Endpoint rejects GET requests and invalid JSON.
+
 ---
 
-### 1.8 Create LLM Completion Handler
+#### 🛑 CHECKPOINT: After completing 1.7
+
+Before starting 1.8, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.8 Create LLM Completion Handler
 
 **File:** `php-api/llm/src/handlers/LLMCompletion.php`
 
@@ -666,9 +734,17 @@ class LLMCompletion {
 }
 ```
 
+**Verification:** Unit tests for LLMCompletion validation pass.
+
 ---
 
-### 1.9 Create Provider Classes
+#### 🛑 CHECKPOINT: After completing 1.8
+
+Before starting 1.9, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 1.9 Create Provider Classes
 
 Each provider class now uses `ResponseSanitizer` for consistent response handling.
 
@@ -1088,6 +1164,14 @@ class XAIProvider {
     }
 }
 ```
+
+**Verification:** All 4 provider classes have consistent structure and use ResponseSanitizer.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 1.9
+
+Before starting Testing section, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
 
 ---
 

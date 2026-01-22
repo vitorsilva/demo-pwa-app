@@ -13,19 +13,31 @@ Implement API key storage, validation, and management. Include hybrid validation
 
 ---
 
-## ⚠️ Context Management Reminder
-
-**At ~75% context: STOP, update Progress Marker below, commit, then /clear**
+## Context Management Protocol
 
 See [LLM Context Management Protocol](./EPIC11_LLM_SUPPORT_PLAN.md#llm-context-management-protocol) for full details.
 
+### Subtask Completion Checklist
+
+After completing **ANY** subtask (3.1, 3.2, etc.), STOP and complete this checklist:
+
+```
+□ Mark subtask complete in this document (⬚ → ✅)
+□ Update Progress Marker below
+□ Update PHASE3_LEARNING_NOTES.md with difficulties/solutions/learnings
+□ Commit all changes with descriptive message
+□ Force new session (/clear or /compact)
+□ ONLY THEN start next subtask
+```
+
 ### Progress Marker
 
-- **Status:** Not started
+- **Last checkpoint:** Not started
 - **Current task:** —
 - **Completed:** —
-- **Next action:** Begin Task 3.1 (Create API Keys Service)
+- **Next action:** Begin Subtask 3.1 (Create API Keys Service)
 - **Blockers:** None
+- **Session:** —
 
 ---
 
@@ -71,7 +83,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Tasks
 
-### 3.1 Create API Keys Service
+### ⬚ 3.1 Create API Keys Service
 
 **File:** `src/services/api-keys-service.js`
 
@@ -287,9 +299,17 @@ export async function getAllProviderStatuses() {
 export { KEY_STATUS };
 ```
 
+**Verification:** Run unit tests for api-keys-service.js, verify key storage, masking, and validation logic.
+
 ---
 
-### 3.2 Migrate OpenRouter Key
+#### 🛑 CHECKPOINT: After completing 3.1
+
+Before starting 3.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 3.2 Migrate OpenRouter Key
 
 Handle migration of existing OpenRouter key to new storage format.
 
@@ -365,9 +385,17 @@ async function getOldOpenRouterKey() {
 }
 ```
 
+**Verification:** Run migration manually with existing OpenRouter key, verify it migrates correctly.
+
 ---
 
-### 3.3 Update Main Entry Point
+#### 🛑 CHECKPOINT: After completing 3.2
+
+Before starting 3.3, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 3.3 Update Main Entry Point
 
 Add migration call to app initialization.
 
@@ -386,6 +414,14 @@ async function initializeApp() {
   // ... rest of initialization ...
 }
 ```
+
+**Verification:** Run app initialization, verify migration runs without errors and only once.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 3.3
+
+Phase 3 complete! Complete the [Subtask Completion Checklist](#subtask-completion-checklist), then proceed to Phase 4.
 
 ---
 

@@ -131,56 +131,83 @@ saberloop.com/
 When executing long implementation sessions, LLM quality degrades significantly when:
 1. **Auto-compact triggers** (~80% context) - summarization loses important details
 2. **Session ends** - new session starts without prior context
+3. **Learning notes deferred** - context about difficulties/solutions lost
 
-### Solution: Checkpoint Before Compact
+### Solution: Two-Level Checkpointing
 
-**Rule:** At ~75% context usage, STOP execution, mark progress in this plan, and start fresh session.
+#### Level 1: Checkpoint After Each Subtask (MANDATORY)
+
+**Rule:** After completing ANY subtask (e.g., 1.1, 1.2, etc.), STOP and checkpoint before starting the next.
+
+**Subtask Completion Checklist:**
+```
+□ Update Progress Marker in phase document
+□ Update LEARNING_NOTES.md with difficulties/solutions/learnings
+□ Commit all changes with descriptive message
+□ Force new session (/clear or /compact)
+□ ONLY THEN start next subtask
+```
 
 **Why this works:**
-- This plan document IS the context - it contains everything needed
-- Each task is self-contained with full context inline
-- Fresh session reads plan → continues from marked progress
-- Zero quality degradation (never reaches auto-compact)
+- Learning notes captured while context is fresh
+- Git history has logical, atomic commits
+- Each subtask starts with clean context
+- No risk of losing implementation details
+
+#### Level 2: Emergency Checkpoint at 75% Context
+
+**Rule:** If you reach ~75% context DURING a subtask, checkpoint immediately.
+
+**Emergency Checkpoint:**
+- Mark partial progress in Progress Marker
+- Note exactly where you stopped
+- Commit work-in-progress
+- Start fresh session to continue same subtask
 
 ### Execution Cycle
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  1. READ this plan → find next pending task (marked ⬚)      │
-│  2. EXECUTE task (all context is already in the task)       │
-│  3. MARK complete (⬚ → ✅) and commit                        │
-│  4. CHECK context usage                                      │
-│     └─ If < 75%: continue to next task                      │
-│     └─ If ≥ 75%: mark progress below, then /clear           │
-│  5. NEW SESSION reads plan → continues from step 1          │
+│  1. READ phase doc → find next pending subtask (marked ⬚)   │
+│  2. EXECUTE subtask (all context is in the subtask section) │
+│  3. COMPLETE subtask:                                       │
+│     a. MARK subtask complete (⬚ → ✅)                        │
+│     b. UPDATE Progress Marker                               │
+│     c. UPDATE LEARNING_NOTES.md                             │
+│     d. COMMIT all changes                                   │
+│     e. START NEW SESSION (/clear)                           │
+│  4. NEW SESSION reads phase doc → continues from step 1     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Progress Marker
 
-Update this section when pausing at 75% context:
+Update this section after EVERY subtask completion:
 
 ```
-**Last checkpoint:** [Phase X, Task Y.Z] - [Brief description of state]
-**Next action:** [Exactly what to do next]
+**Last checkpoint:** [Phase X, Subtask Y.Z] - [What was completed]
+**Next action:** [Exact next subtask to start]
 **Blockers:** [Any issues discovered]
+**Session:** [Date/time of checkpoint]
 ```
 
 **Current Progress:**
 - **Last checkpoint:** Not started
-- **Next action:** Begin Phase 1, Task 1.1 (Create Deployment Script)
+- **Next action:** Begin Phase 1, Subtask 1.1 (Create Deployment Script)
 - **Blockers:** None
+- **Session:** —
 
-### Self-Contained Task Requirements
+### Self-Contained Subtask Requirements
 
-Each task in this plan MUST include:
+Each subtask in the phase documents MUST include:
 - ✅ **What to do** - Clear, actionable steps
 - ✅ **Full code** - Complete code blocks, not snippets
 - ✅ **File paths** - Exact locations for all files
-- ✅ **Dependencies** - What must exist before this task
-- ✅ **Verification** - How to confirm task is complete
+- ✅ **Dependencies** - What must exist before this subtask
+- ✅ **Verification** - How to confirm subtask is complete
+- ✅ **Checkpoint marker** - Clear boundary showing where to stop
 
-A fresh LLM session should be able to execute ANY task by reading only that task's section.
+A fresh LLM session should be able to execute ANY subtask by reading only that subtask's section.
 
 ---
 
