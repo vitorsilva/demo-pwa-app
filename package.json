@@ -60,13 +60,15 @@
     "screenshots:process:no-frame": "node scripts/process-screenshots.cjs --no-frame",
     "prepare": "husky"
   },
-  "lint-staged": {                                                                                      
-    "src/**/*.js": [                             
-      "eslint --fix",               
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix",
       "prettier --write"
     ]
-  },  
+  },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@eslint/js": "^9.39.2",
     "@playwright/test": "^1.56.1",
     "@stryker-mutator/core": "^9.4.0",
