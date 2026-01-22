@@ -1,6 +1,7 @@
-// api.real.js - Uses OpenRouter for LLM calls (client-side)
+// api.real.js - Uses provider router for LLM calls (client-side)
+// Supports multiple LLM providers via provider-router when feature is enabled
 
-import { callOpenRouter } from './openrouter-client.js';
+import { completion } from './provider-router.js';
 import { logger } from '../utils/logger.js';
 import { getSelectedModel } from '../services/model-service.js';
 import { extractJSON } from '../utils/json-extractor.js';
@@ -211,8 +212,8 @@ ${exclusionSection}
 
 CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown. Start your response with { and end with }`;
 
-      // Call OpenRouter
-      const result = await callOpenRouter(apiKey, currentPrompt, {
+      // Call LLM via provider router (handles provider selection and routing)
+      const result = await completion(currentPrompt, {
         maxTokens: 2048,
         temperature: 0.7,
       });
@@ -341,7 +342,8 @@ Requirements:
 
 CRITICAL: Respond with ONLY valid JSON. No explanation, no thinking, no markdown. Start your response with { and end with }`;
 
-      const result = await callOpenRouter(apiKey, currentPrompt, {
+      // Call LLM via provider router
+      const result = await completion(currentPrompt, {
         maxTokens: 500,
         temperature: 0.7,
       });
@@ -430,8 +432,9 @@ Be helpful and encouraging. Write in ${languageName} (${language}).
 Provide only the explanation, no other text.`;
 
   try {
+    // Call LLM via provider router
     // Use higher maxTokens for reasoning models that need tokens for chain-of-thought
-    const result = await callOpenRouter(apiKey, prompt, {
+    const result = await completion(prompt, {
       maxTokens: 500,
       temperature: 0.7,
     });

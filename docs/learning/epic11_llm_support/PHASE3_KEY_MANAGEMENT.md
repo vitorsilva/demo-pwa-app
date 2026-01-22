@@ -9,7 +9,9 @@
 
 ## Goal
 
-Implement API key storage, validation, and management. Include hybrid validation approach (format check on save, async validation in background).
+Extend the existing `provider-settings-service.js` (from Phase 2) with key status tracking and async validation. Include hybrid validation approach (format check on save, async validation in background).
+
+**Important:** Phase 2 already created key storage functions in `provider-settings-service.js`. This phase EXTENDS that service rather than creating a new one to avoid duplication.
 
 ---
 
@@ -55,65 +57,71 @@ feature/epic11-phase3-key-management
 main (with Phase 2 merged)
   │
   └── feature/epic11-phase3-key-management
-        ├── commit: feat(llm): add api-keys-service with storage and format validation
+        ├── commit: feat(llm): add key status tracking to provider-settings-service
         ├── commit: feat(llm): add async key validation
         ├── commit: feat(llm): add OpenRouter key migration
-        ├── commit: test(llm): add unit tests for api-keys-service
-        ├── commit: test(llm): add E2E tests for key management
-        ├── commit: test(llm): add Maestro tests for key management
+        ├── commit: test(llm): add unit tests for key status and validation
         └── PR → merge to main
 ```
+
+**Note:** E2E and Maestro tests for key management UI will be added in Phase 4 when the Settings UI is implemented. This phase runs all existing tests for regression testing.
 
 ### Commit Message Format
 
 ```
-feat(llm): add api-keys-service with storage and format validation
+feat(llm): add key status tracking to provider-settings-service
 
-- Implement saveProviderKey with format check
 - Add KEY_STATUS enum (NOT_SET, VALIDATING, VALID, INVALID)
-- Store keys in IndexedDB with llm_key_ prefix
-- Add masked key display utility
+- Add key status tracking with llm_key_status_ prefix
+- Add getMaskedKey() utility for display
+- Add getAllProviderStatuses() for UI consumption
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 ---
 
 ## Tasks
 
-### ⬚ 3.1 Create API Keys Service
+### ⬚ 3.1 Add Key Status and Validation to provider-settings-service.js
 
-**File:** `src/services/api-keys-service.js`
+**File:** `src/services/provider-settings-service.js` (EXTEND existing file from Phase 2)
+
+Phase 2 already created this service with:
+- `getProviderKey(providerId)` - Get API key
+- `setProviderKey(providerId, key)` - Save API key
+- `removeProviderKey(providerId)` - Remove API key
+- `hasProviderKey(providerId)` - Check if key exists
+- `getConfiguredProviders()` - List providers with keys
+
+**Add these new exports to the existing file:**
 
 ```javascript
-/**
- * API Keys Service
- * Handles key storage, validation, and status tracking
- */
-
-import { db } from '../core/db.js';
-import { getProvider, validateKeyFormat } from '../api/providers-config.js';
+// Add imports at top of file
+import { getProvider, validateKeyFormat, getAllProviders } from '../api/providers-config.js';
 import { logger } from '../utils/logger.js';
 
-const KEY_STATUS = {
+// Add KEY_STATUS enum
+export const KEY_STATUS = {
   NOT_SET: 'not_set',
   VALIDATING: 'validating',
   VALID: 'valid',
   INVALID: 'invalid'
 };
 
+// Add to SETTINGS_KEYS
 const SETTINGS_KEYS = {
-  KEY_PREFIX: 'llm_key_',
-  STATUS_PREFIX: 'llm_key_status_'
+  ACTIVE_PROVIDER: 'llm_active_provider',
+  ACTIVE_MODEL: 'llm_active_model',
+  PROVIDER_KEY_PREFIX: 'llm_key_',
+  KEY_STATUS_PREFIX: 'llm_key_status_'  // NEW
 };
 
 /**
- * Save API key for a provider
- * Validates format, saves key, triggers async validation
+ * Save API key with format validation and async validation trigger
+ * Enhanced version of setProviderKey with validation
  */
-export async function saveProviderKey(providerId, apiKey) {
+export async function saveProviderKeyWithValidation(providerId, apiKey) {
   const provider = getProvider(providerId);
   if (!provider) {
     throw new Error(`Unknown provider: ${providerId}`);
@@ -124,53 +132,40 @@ export async function saveProviderKey(providerId, apiKey) {
     throw new Error(`Invalid key format. ${provider.name} keys should start with '${provider.keyPrefix}'`);
   }
 
-  // Save key
-  await db.settings.put({
-    key: SETTINGS_KEYS.KEY_PREFIX + providerId,
-    value: apiKey
-  });
+  // Save key using existing function
+  await setProviderKey(providerId, apiKey);
 
   // Set status to validating
   await setKeyStatus(providerId, KEY_STATUS.VALIDATING);
 
-  // Trigger async validation
+  // Trigger async validation (fire and forget)
   validateKeyAsync(providerId, apiKey);
 
   return { status: KEY_STATUS.VALIDATING };
 }
 
 /**
- * Get API key for a provider
- */
-export async function getProviderKey(providerId) {
-  const setting = await db.settings.get(SETTINGS_KEYS.KEY_PREFIX + providerId);
-  return setting?.value || null;
-}
-
-/**
- * Remove API key for a provider
- */
-export async function removeProviderKey(providerId) {
-  await db.settings.delete(SETTINGS_KEYS.KEY_PREFIX + providerId);
-  await db.settings.delete(SETTINGS_KEYS.STATUS_PREFIX + providerId);
-}
-
-/**
- * Get key status
+ * Get key status for a provider
  */
 export async function getKeyStatus(providerId) {
-  const setting = await db.settings.get(SETTINGS_KEYS.STATUS_PREFIX + providerId);
-  return setting?.value || KEY_STATUS.NOT_SET;
+  const status = await getSetting(SETTINGS_KEYS.KEY_STATUS_PREFIX + providerId);
+  return status || KEY_STATUS.NOT_SET;
 }
 
 /**
- * Set key status
+ * Set key status (internal helper)
  */
 async function setKeyStatus(providerId, status) {
-  await db.settings.put({
-    key: SETTINGS_KEYS.STATUS_PREFIX + providerId,
-    value: status
-  });
+  await saveSetting(SETTINGS_KEYS.KEY_STATUS_PREFIX + providerId, status);
+}
+
+/**
+ * Clear key status when removing a key
+ * Update existing removeProviderKey to also clear status
+ */
+export async function removeProviderKeyWithStatus(providerId) {
+  await removeProviderKey(providerId);
+  await saveSetting(SETTINGS_KEYS.KEY_STATUS_PREFIX + providerId, null);
 }
 
 /**
@@ -184,13 +179,70 @@ export function getMaskedKey(apiKey) {
 }
 
 /**
+ * Get all provider statuses for UI display
+ */
+export async function getAllProviderStatuses() {
+  const providers = getAllProviders();
+  const statuses = {};
+
+  for (const provider of providers) {
+    const key = await getProviderKey(provider.id);
+    const status = await getKeyStatus(provider.id);
+
+    statuses[provider.id] = {
+      hasKey: !!key,
+      maskedKey: key ? getMaskedKey(key) : null,
+      status: key ? status : KEY_STATUS.NOT_SET
+    };
+  }
+
+  return statuses;
+}
+
+/**
+ * Re-validate a key (manual trigger from UI)
+ */
+export async function revalidateKey(providerId) {
+  const apiKey = await getProviderKey(providerId);
+  if (!apiKey) {
+    throw new Error('No key configured');
+  }
+
+  await setKeyStatus(providerId, KEY_STATUS.VALIDATING);
+  validateKeyAsync(providerId, apiKey);
+}
+```
+
+**Verification:**
+- Run new unit tests for key status and validation
+- Run ALL existing unit tests (1262+) for regression
+- Verify key status tracking works
+
+---
+
+#### 🛑 CHECKPOINT: After completing 3.1
+
+Before starting 3.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 3.2 Add Async Key Validation Functions
+
+**File:** `src/services/provider-settings-service.js` (continue extending)
+
+Add async validation functions that test keys against providers:
+
+```javascript
+import { supportsCors } from '../api/providers-config.js';
+
+/**
  * Async validation - makes test call to provider
+ * Called after key is saved, updates status when complete
  */
 async function validateKeyAsync(providerId, apiKey) {
   try {
     logger.debug(`Validating ${providerId} key...`);
 
-    // Small test request
     const isValid = await testProviderKey(providerId, apiKey);
 
     if (isValid) {
@@ -210,19 +262,17 @@ async function validateKeyAsync(providerId, apiKey) {
  * Test provider key with minimal request
  */
 async function testProviderKey(providerId, apiKey) {
-  const provider = getProvider(providerId);
-
-  if (provider.cors) {
-    // OpenRouter - direct test
+  if (supportsCors(providerId)) {
+    // OpenRouter - direct test via auth endpoint
     return await testOpenRouterKey(apiKey);
   } else {
-    // Other providers - test via proxy
+    // Other providers - test via proxy with minimal request
     return await testViaProxy(providerId, apiKey);
   }
 }
 
 /**
- * Test OpenRouter key directly
+ * Test OpenRouter key directly (CORS supported)
  */
 async function testOpenRouterKey(apiKey) {
   try {
@@ -232,7 +282,6 @@ async function testOpenRouterKey(apiKey) {
         'Authorization': `Bearer ${apiKey}`
       }
     });
-
     return response.ok;
   } catch (error) {
     return false;
@@ -240,152 +289,33 @@ async function testOpenRouterKey(apiKey) {
 }
 
 /**
- * Test other provider keys via proxy
+ * Test other provider keys via backend proxy
  */
 async function testViaProxy(providerId, apiKey) {
   try {
+    const provider = getProvider(providerId);
     const response = await fetch('https://saberloop.com/llm/completion.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         provider: providerId,
         api_key: apiKey,
-        model: getProvider(providerId).defaultModel,
+        model: provider.defaultModel,
         messages: [{ role: 'user', content: 'Hi' }],
         options: { max_tokens: 5 }
       })
     });
-
     return response.ok;
   } catch (error) {
     return false;
   }
 }
-
-/**
- * Re-validate a key (manual trigger)
- */
-export async function revalidateKey(providerId) {
-  const apiKey = await getProviderKey(providerId);
-  if (!apiKey) {
-    throw new Error('No key configured');
-  }
-
-  await setKeyStatus(providerId, KEY_STATUS.VALIDATING);
-  validateKeyAsync(providerId, apiKey);
-}
-
-/**
- * Get all provider statuses
- */
-export async function getAllProviderStatuses() {
-  const providers = ['openrouter', 'openai', 'anthropic', 'google', 'xai'];
-  const statuses = {};
-
-  for (const providerId of providers) {
-    const key = await getProviderKey(providerId);
-    const status = await getKeyStatus(providerId);
-
-    statuses[providerId] = {
-      hasKey: !!key,
-      maskedKey: key ? getMaskedKey(key) : null,
-      status: key ? status : KEY_STATUS.NOT_SET
-    };
-  }
-
-  return statuses;
-}
-
-export { KEY_STATUS };
 ```
 
-**Verification:** Run unit tests for api-keys-service.js, verify key storage, masking, and validation logic.
-
----
-
-#### 🛑 CHECKPOINT: After completing 3.1
-
-Before starting 3.2, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
-
----
-
-### ⬚ 3.2 Migrate OpenRouter Key
-
-Handle migration of existing OpenRouter key to new storage format.
-
-**File:** `src/services/api-keys-migration.js`
-
-```javascript
-/**
- * API Keys Migration
- * Migrates existing OpenRouter key to new format
- */
-
-import { db } from '../core/db.js';
-import { saveProviderKey, getProviderKey } from './api-keys-service.js';
-import { logger } from '../utils/logger.js';
-
-const MIGRATION_FLAG = 'llm_keys_migrated_v1';
-
-/**
- * Run migration if needed
- */
-export async function migrateApiKeys() {
-  const migrated = await db.settings.get(MIGRATION_FLAG);
-  if (migrated) {
-    return; // Already migrated
-  }
-
-  logger.info('Migrating API keys...');
-
-  try {
-    // Check for existing OpenRouter key in old location
-    const oldKey = await getOldOpenRouterKey();
-
-    if (oldKey) {
-      // Check if already in new location
-      const newKey = await getProviderKey('openrouter');
-
-      if (!newKey) {
-        await saveProviderKey('openrouter', oldKey);
-        logger.info('OpenRouter key migrated to new storage');
-      }
-    }
-
-    // Mark migration complete
-    await db.settings.put({
-      key: MIGRATION_FLAG,
-      value: true
-    });
-
-    logger.info('API key migration complete');
-  } catch (error) {
-    logger.error('API key migration failed:', error);
-    // Don't fail - user can re-add key manually
-  }
-}
-
-/**
- * Get OpenRouter key from old storage location
- */
-async function getOldOpenRouterKey() {
-  // Check IndexedDB settings
-  const setting = await db.settings.get('openrouter_api_key');
-  if (setting?.value) {
-    return setting.value;
-  }
-
-  // Check localStorage (legacy)
-  const localStorageKey = localStorage.getItem('openrouter_api_key');
-  if (localStorageKey) {
-    return localStorageKey;
-  }
-
-  return null;
-}
-```
-
-**Verification:** Run migration manually with existing OpenRouter key, verify it migrates correctly.
+**Verification:**
+- Run new unit tests for async validation
+- Run ALL existing unit tests for regression
+- Test validation with a real key (manual verification)
 
 ---
 
@@ -395,7 +325,91 @@ Before starting 3.3, complete the [Subtask Completion Checklist](#subtask-comple
 
 ---
 
-### ⬚ 3.3 Update Main Entry Point
+### ⬚ 3.3 Migrate OpenRouter Key
+
+Handle migration of existing OpenRouter key to trigger validation status.
+
+**Important Context:** Phase 2's `provider-settings-service.js` already uses the existing `getOpenRouterKey()` and `storeOpenRouterKey()` from `db.js` for backward compatibility. The "migration" here is mainly to:
+1. Set initial key status for existing OpenRouter keys
+2. Handle any legacy localStorage keys
+
+**File:** `src/services/api-keys-migration.js`
+
+```javascript
+/**
+ * API Keys Migration
+ * Sets up initial key status for existing OpenRouter keys
+ */
+
+import { getSetting, saveSetting } from '../core/db.js';
+import { getOpenRouterKey } from '../core/db.js';
+import { getKeyStatus, KEY_STATUS } from './provider-settings-service.js';
+import { logger } from '../utils/logger.js';
+
+const MIGRATION_FLAG = 'llm_keys_migrated_v1';
+
+/**
+ * Run migration if needed
+ */
+export async function migrateApiKeys() {
+  const migrated = await getSetting(MIGRATION_FLAG);
+  if (migrated) {
+    return; // Already migrated
+  }
+
+  logger.info('Migrating API keys...');
+
+  try {
+    // Check for existing OpenRouter key (uses existing db.js mechanism)
+    const existingKey = await getOpenRouterKey();
+
+    if (existingKey) {
+      // Check if status already set
+      const status = await getKeyStatus('openrouter');
+
+      if (status === KEY_STATUS.NOT_SET) {
+        // Set initial status - mark as valid since it was working
+        // (User can revalidate if needed)
+        await saveSetting('llm_key_status_openrouter', KEY_STATUS.VALID);
+        logger.info('OpenRouter key status initialized');
+      }
+    }
+
+    // Check localStorage for legacy keys (from very old versions)
+    const legacyKey = localStorage.getItem('openrouter_api_key');
+    if (legacyKey && !existingKey) {
+      // Import legacy key to IndexedDB
+      const { storeOpenRouterKey } = await import('../core/db.js');
+      await storeOpenRouterKey(legacyKey);
+      await saveSetting('llm_key_status_openrouter', KEY_STATUS.VALID);
+      localStorage.removeItem('openrouter_api_key');
+      logger.info('Legacy OpenRouter key migrated from localStorage');
+    }
+
+    // Mark migration complete
+    await saveSetting(MIGRATION_FLAG, true);
+
+    logger.info('API key migration complete');
+  } catch (error) {
+    logger.error('API key migration failed:', error);
+    // Don't fail app startup - user can re-add key manually
+  }
+}
+```
+
+**Verification:**
+- Run migration with existing OpenRouter key, verify status is set
+- Run ALL existing tests for regression
+
+---
+
+#### 🛑 CHECKPOINT: After completing 3.3
+
+Before starting 3.4, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
+
+### ⬚ 3.4 Update Main Entry Point
 
 Add migration call to app initialization.
 
@@ -415,11 +429,14 @@ async function initializeApp() {
 }
 ```
 
-**Verification:** Run app initialization, verify migration runs without errors and only once.
+**Verification:**
+- Run app initialization, verify migration runs without errors and only once
+- Run ALL existing unit tests (1262+) for regression
+- Run ALL existing E2E tests (178) for regression
 
 ---
 
-#### 🛑 CHECKPOINT: After completing 3.3
+#### 🛑 CHECKPOINT: After completing 3.4
 
 Phase 3 complete! Complete the [Subtask Completion Checklist](#subtask-completion-checklist), then proceed to Phase 4.
 
@@ -427,55 +444,46 @@ Phase 3 complete! Complete the [Subtask Completion Checklist](#subtask-completio
 
 ## Testing
 
-### Unit Tests
+### Unit Tests (New)
 
-**File:** `tests/unit/api-keys-service.test.js`
+**File:** `src/services/provider-settings-service.test.js` (extend existing test file)
+
+Add tests for the new key status and validation functionality:
 
 ```javascript
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Add to existing provider-settings-service.test.js
+
 import {
-  saveProviderKey,
-  getProviderKey,
-  removeProviderKey,
+  // ... existing imports ...
   getKeyStatus,
   getMaskedKey,
-  KEY_STATUS
-} from '../../src/services/api-keys-service.js';
-import { db } from '../../src/core/db.js';
+  getAllProviderStatuses,
+  saveProviderKeyWithValidation,
+  removeProviderKeyWithStatus,
+  revalidateKey,
+  KEY_STATUS,
+} from './provider-settings-service.js';
 
-// Mock db
-vi.mock('../../src/core/db.js', () => ({
-  db: {
-    settings: {
-      put: vi.fn(),
-      get: vi.fn(),
-      delete: vi.fn()
-    }
-  }
-}));
-
-// Mock fetch for validation
+// Mock fetch for validation tests
 global.fetch = vi.fn();
 
-describe('API Keys Service', () => {
+describe('Key Status and Validation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch.mockReset();
   });
 
-  describe('saveProviderKey', () => {
-    it('should reject invalid key format', async () => {
-      await expect(saveProviderKey('openai', 'invalid-key'))
-        .rejects.toThrow('Invalid key format');
+  describe('getKeyStatus', () => {
+    it('should return NOT_SET when no status stored', async () => {
+      getSetting.mockResolvedValue(null);
+      const status = await getKeyStatus('openai');
+      expect(status).toBe(KEY_STATUS.NOT_SET);
     });
 
-    it('should save valid key and trigger validation', async () => {
-      db.settings.put.mockResolvedValue();
-      global.fetch.mockResolvedValue({ ok: true });
-
-      const result = await saveProviderKey('openai', 'sk-validkey123');
-
-      expect(db.settings.put).toHaveBeenCalled();
-      expect(result.status).toBe(KEY_STATUS.VALIDATING);
+    it('should return stored status', async () => {
+      getSetting.mockResolvedValue(KEY_STATUS.VALID);
+      const status = await getKeyStatus('openai');
+      expect(status).toBe(KEY_STATUS.VALID);
     });
   });
 
@@ -494,131 +502,80 @@ describe('API Keys Service', () => {
     });
   });
 
-  describe('removeProviderKey', () => {
-    it('should remove key and status', async () => {
-      db.settings.delete.mockResolvedValue();
+  describe('saveProviderKeyWithValidation', () => {
+    it('should reject invalid key format', async () => {
+      await expect(saveProviderKeyWithValidation('openai', 'invalid-key'))
+        .rejects.toThrow('Invalid key format');
+    });
 
-      await removeProviderKey('openai');
+    it('should save valid key and return validating status', async () => {
+      getSetting.mockResolvedValue(null);
+      saveSetting.mockResolvedValue();
+      global.fetch.mockResolvedValue({ ok: true });
 
-      expect(db.settings.delete).toHaveBeenCalledTimes(2);
+      const result = await saveProviderKeyWithValidation('openai', 'sk-validkey123456789');
+
+      expect(saveSetting).toHaveBeenCalled();
+      expect(result.status).toBe(KEY_STATUS.VALIDATING);
+    });
+  });
+
+  describe('removeProviderKeyWithStatus', () => {
+    it('should remove key and clear status', async () => {
+      saveSetting.mockResolvedValue();
+
+      await removeProviderKeyWithStatus('openai');
+
+      // Should call saveSetting to clear status
+      expect(saveSetting).toHaveBeenCalledWith('llm_key_status_openai', null);
+    });
+  });
+
+  describe('getAllProviderStatuses', () => {
+    it('should return status for all providers', async () => {
+      getSetting.mockResolvedValue(null);
+      getOpenRouterKey.mockResolvedValue(null);
+
+      const statuses = await getAllProviderStatuses();
+
+      expect(statuses).toHaveProperty('openrouter');
+      expect(statuses).toHaveProperty('openai');
+      expect(statuses).toHaveProperty('anthropic');
+      expect(statuses).toHaveProperty('google');
+      expect(statuses).toHaveProperty('xai');
     });
   });
 });
 ```
 
-### E2E Tests
+### Regression Testing (Existing Tests)
 
-**File:** `tests/e2e/api-keys.spec.js`
+After completing Phase 3, run ALL existing tests to ensure no regressions:
 
-```javascript
-import { test, expect } from '@playwright/test';
+```bash
+# Run all unit tests (should be 1262+ tests)
+npm test -- --run
 
-test.describe('API Key Management', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/app/');
-  });
-
-  test('should store and retrieve API key', async ({ page }) => {
-    // Navigate to settings
-    await page.click('[data-testid="settings-button"]');
-
-    // Add OpenAI key
-    await page.click('[data-testid="add-key-openai"]');
-    await page.fill('[data-testid="api-key-input"]', 'sk-test123456789');
-    await page.click('[data-testid="save-key-button"]');
-
-    // Verify key is masked
-    await expect(page.locator('[data-testid="openai-masked-key"]'))
-      .toContainText('sk-te...6789');
-
-    // Verify status shows validating or valid
-    await expect(page.locator('[data-testid="openai-status"]'))
-      .toHaveText(/Validating|Valid|Invalid/);
-  });
-
-  test('should reject invalid key format', async ({ page }) => {
-    await page.click('[data-testid="settings-button"]');
-    await page.click('[data-testid="add-key-openai"]');
-    await page.fill('[data-testid="api-key-input"]', 'invalid-format');
-    await page.click('[data-testid="save-key-button"]');
-
-    // Should show format error
-    await expect(page.locator('[data-testid="key-error"]'))
-      .toContainText('Invalid key format');
-  });
-
-  test('should remove API key', async ({ page }) => {
-    // First add a key
-    await page.click('[data-testid="settings-button"]');
-    await page.click('[data-testid="add-key-openai"]');
-    await page.fill('[data-testid="api-key-input"]', 'sk-test123456789');
-    await page.click('[data-testid="save-key-button"]');
-
-    // Now remove it
-    await page.click('[data-testid="remove-key-openai"]');
-    await page.click('[data-testid="confirm-remove"]');
-
-    // Verify key is removed
-    await expect(page.locator('[data-testid="openai-status"]'))
-      .toContainText('Not configured');
-  });
-});
+# Run all E2E tests (should be 178 tests)
+npm run test:e2e
 ```
 
-### Maestro Tests
-
-**File:** `tests/maestro/api_key_management.yaml`
-
-```yaml
-appId: com.saberloop.app
----
-- launchApp
-
-# Navigate to settings
-- tapOn:
-    id: "settings-button"
-
-# Scroll to LLM Providers section
-- scrollUntilVisible:
-    element: "LLM Providers"
-    direction: DOWN
-
-# Add OpenAI key
-- tapOn:
-    id: "add-key-openai"
-
-# Enter API key
-- inputText:
-    id: "api-key-input"
-    text: "sk-test123456789"
-
-# Save
-- tapOn:
-    id: "save-key-button"
-
-# Verify key appears masked
-- assertVisible:
-    text: "sk-te...6789"
-
-# Verify status indicator
-- assertVisible:
-    text: "Validating|Valid|Invalid"
-    regex: true
-```
+**Note:** E2E and Maestro tests for the key management **UI** will be added in Phase 4 when the Settings UI is implemented. The tests above verify the service layer only.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] Keys stored securely in IndexedDB
+- [ ] Key status tracking works (NOT_SET, VALIDATING, VALID, INVALID)
 - [ ] Format validation rejects invalid keys
-- [ ] Async validation updates status
-- [ ] Masked key display works correctly
-- [ ] Key removal works
-- [ ] Migration runs for existing OpenRouter keys
-- [ ] All unit tests pass
-- [ ] E2E tests pass
-- [ ] Maestro tests pass
+- [ ] Async validation updates status correctly
+- [ ] Masked key display works correctly (`getMaskedKey()`)
+- [ ] Key removal clears status (`removeProviderKeyWithStatus()`)
+- [ ] `getAllProviderStatuses()` returns correct data for UI
+- [ ] Migration sets initial status for existing OpenRouter keys
+- [ ] All NEW unit tests pass
+- [ ] All EXISTING unit tests pass (1262+ - regression)
+- [ ] All EXISTING E2E tests pass (178 - regression)
 
 ---
 
@@ -636,11 +593,11 @@ appId: com.saberloop.app
 ### 1. Run Unit Tests
 
 ```bash
-# Run all unit tests
-npm test
+# Run all unit tests (including new ones)
+npm test -- --run
 
-# Run specific key management tests
-npm test -- api-keys-service
+# Run specific provider settings tests
+npm test -- provider-settings-service
 ```
 
 ### 2. Test with Dev Server
@@ -649,24 +606,35 @@ npm test -- api-keys-service
 # Start development server
 npm run dev
 
-# Enable feature flag in browser console
-localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
-location.reload();
+# Test key status operations via browser console:
+import {
+  saveProviderKeyWithValidation,
+  getKeyStatus,
+  getMaskedKey,
+  getAllProviderStatuses,
+  KEY_STATUS
+} from './src/services/provider-settings-service.js';
 
-# Test key operations via browser console:
-# - Import and call saveProviderKey()
-# - Verify key is stored in IndexedDB
-# - Check status changes (validating → valid/invalid)
+# Test saving a key with validation
+await saveProviderKeyWithValidation('openai', 'sk-test123456789012345');
+
+# Check status (should be VALIDATING initially)
+await getKeyStatus('openai');
+
+# Test masking
+getMaskedKey('sk-test123456789012345'); // 'sk-te...2345'
+
+# Get all statuses for UI
+await getAllProviderStatuses();
 ```
 
 ### 3. Test Migration
 
 ```bash
-# If you have an existing OpenRouter OAuth token, test migration:
-# 1. Clear IndexedDB
-# 2. Add OpenRouter token to localStorage (as done currently)
-# 3. Run migration
-# 4. Verify key appears in IndexedDB with status
+# If you have an existing OpenRouter OAuth token:
+# 1. Refresh the app
+# 2. Migration should run automatically
+# 3. Check that llm_key_status_openrouter is set to 'valid'
 ```
 
 ---
@@ -676,52 +644,31 @@ location.reload();
 ### Step 1: Local Testing (Required)
 
 Complete all local testing steps above. Verify:
-- [ ] Unit tests pass
-- [ ] Key storage works in IndexedDB
-- [ ] Format validation rejects invalid keys
-- [ ] Async validation updates status
-- [ ] Migration works for existing OpenRouter keys
+- [ ] All new unit tests pass
+- [ ] All existing unit tests pass (1262+ - regression)
+- [ ] All existing E2E tests pass (178 - regression)
+- [ ] Key status tracking works correctly
+- [ ] Migration runs successfully for existing OpenRouter keys
 
-### Step 2: Deploy to Staging
-
-```bash
-npm run build:staging && npm run deploy:staging
-```
-
-### Step 3: Test Staging with Feature Flag ENABLED
+### Step 2: Merge to Main
 
 ```bash
-# Visit https://saberloop.com/app-staging/
-# Enable feature flag in console:
-localStorage.setItem('__test_feature_MULTI_PROVIDER_LLM', 'ENABLED');
-location.reload();
+# Create PR from feature/epic11-phase3-key-management
+gh pr create --title "feat(llm): Phase 3 - Key status tracking and validation" --body "..."
+
+# After review, merge to main
 ```
 
-**Staging Verification Checklist:**
-- [ ] Key storage works correctly
-- [ ] Validation updates status
-- [ ] Migration works if OpenRouter token exists
-- [ ] No errors in console
-
-### Step 4: Run E2E and Maestro Tests on Staging
-
-```bash
-# E2E tests
-PLAYWRIGHT_BASE_URL=https://saberloop.com/app-staging/ npm run test:e2e
-
-# Maestro tests (on device/emulator)
-maestro test tests/maestro/key_management.yaml
-```
-
-### Step 5: Deploy to Production (keep SETTINGS_ONLY)
+### Step 3: Deploy to Production
 
 ```bash
 npm run build && npm run deploy
 ```
 
 **Production Verification:**
-- [ ] Feature flag remains `SETTINGS_ONLY`
-- [ ] No user-visible changes yet
+- [ ] Feature flag remains `DISABLED` or `SETTINGS_ONLY`
+- [ ] No user-visible changes (no UI yet)
+- [ ] Migration runs silently for existing users
 - [ ] Background services ready for Phase 4 UI
 
 ---
