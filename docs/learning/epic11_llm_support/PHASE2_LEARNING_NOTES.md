@@ -150,7 +150,7 @@ None significant.
 
 ### What could be improved
 - Phase document could have noted the 2.2/2.3 dependency upfront
-- Could add more E2E tests for the routing paths
+- E2E tests for new provider routing paths should be added in Phase 4 (Settings UI) when the UI is available to exercise them
 
 ### Recommendations for next phase
 - Phase 3 (Key Management) can build on the provider-settings-service
