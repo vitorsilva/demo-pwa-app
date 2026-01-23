@@ -324,6 +324,196 @@ If you only have occasional Mac access:
    - Phase 2 + Phase 3: Second Mac session (~2-3 hours)
    - Phase 5 (if needed): Third Mac session (~2 hours)
 
+### 0.11 Start/Stop Scripts (Keep Mac Fast for Other Users)
+
+Since this Mac is shared, use these scripts to cleanly start and stop your dev environment.
+
+**Create the scripts directory:**
+```bash
+mkdir -p ~/Developer/scripts
+```
+
+**Create START script** (`~/Developer/scripts/ios-dev-start.sh`):
+```bash
+#!/bin/bash
+# ios-dev-start.sh - Start iOS development environment
+
+echo "🚀 Starting iOS Development Environment..."
+
+# Navigate to project
+cd ~/Developer/saberloop
+
+# Pull latest changes
+echo "📥 Pulling latest code..."
+git pull
+
+# Install any new dependencies
+echo "📦 Checking dependencies..."
+npm install
+
+# Open Xcode (if iOS project exists)
+if [ -d "ios" ]; then
+    echo "📱 Opening Xcode project..."
+    open ios/App/App.xcworkspace 2>/dev/null || open ios/App/App.xcodeproj 2>/dev/null
+fi
+
+# Start dev server in background (optional)
+# echo "🌐 Starting dev server..."
+# npm run dev &
+
+echo ""
+echo "✅ Development environment ready!"
+echo ""
+echo "When finished, run: ~/Developer/scripts/ios-dev-stop.sh"
+```
+
+**Create STOP script** (`~/Developer/scripts/ios-dev-stop.sh`):
+```bash
+#!/bin/bash
+# ios-dev-stop.sh - Stop iOS development environment and cleanup
+
+echo "🛑 Stopping iOS Development Environment..."
+
+# Kill any running node processes (dev servers)
+echo "Stopping Node.js processes..."
+pkill -f "node" 2>/dev/null
+
+# Quit Xcode gracefully
+echo "Closing Xcode..."
+osascript -e 'quit app "Xcode"' 2>/dev/null
+
+# Stop iOS Simulator
+echo "Stopping iOS Simulator..."
+osascript -e 'quit app "Simulator"' 2>/dev/null
+
+# Kill any Xcode background processes
+echo "Cleaning up Xcode processes..."
+pkill -f "com.apple.dt" 2>/dev/null
+
+# Clear Xcode derived data cache (optional - saves disk space)
+# Uncomment if you want to free up space each time
+# echo "Clearing Xcode cache..."
+# rm -rf ~/Library/Developer/Xcode/DerivedData/*
+
+# Stop any running simulators
+xcrun simctl shutdown all 2>/dev/null
+
+echo ""
+echo "✅ All development processes stopped!"
+echo ""
+echo "Verifying nothing is running..."
+echo "Node processes: $(pgrep -f node | wc -l | tr -d ' ')"
+echo "Xcode processes: $(pgrep -f Xcode | wc -l | tr -d ' ')"
+echo "Simulator processes: $(pgrep -f Simulator | wc -l | tr -d ' ')"
+```
+
+**Make scripts executable:**
+```bash
+chmod +x ~/Developer/scripts/ios-dev-start.sh
+chmod +x ~/Developer/scripts/ios-dev-stop.sh
+```
+
+**Usage:**
+```bash
+# When starting your work session:
+~/Developer/scripts/ios-dev-start.sh
+
+# When finished (ALWAYS run this before leaving):
+~/Developer/scripts/ios-dev-stop.sh
+```
+
+**Create aliases for convenience (optional):**
+```bash
+echo 'alias ios-start="~/Developer/scripts/ios-dev-start.sh"' >> ~/.zshrc
+echo 'alias ios-stop="~/Developer/scripts/ios-dev-stop.sh"' >> ~/.zshrc
+source ~/.zshrc
+
+# Then you can just type:
+ios-start
+ios-stop
+```
+
+### 0.12 What Runs in Background (and What Doesn't)
+
+**Things that DON'T run after you close them:**
+| Tool | Behavior |
+|------|----------|
+| Xcode | Closes completely when quit ✅ |
+| VS Code | Closes completely when quit ✅ |
+| Terminal | Closes completely when quit ✅ |
+| Homebrew | No background services ✅ |
+
+**Things that MIGHT keep running:**
+| Tool | Issue | Solution |
+|------|-------|----------|
+| iOS Simulator | May stay open | `ios-stop` script closes it |
+| Node.js dev server | Runs until stopped | `ios-stop` script kills it |
+| Xcode indexing | May run briefly after closing | Usually stops on its own |
+
+**Things installed that use disk space (but don't slow down):**
+| Tool | Size | Notes |
+|------|------|-------|
+| Xcode | ~12GB | Required, doesn't run unless opened |
+| iOS Simulators | ~2-5GB each | Can delete unused ones |
+| Homebrew | ~500MB | Doesn't run in background |
+| Node.js | ~100MB | Doesn't run unless you start it |
+| Derived Data | Grows over time | `ios-stop` can clear this |
+
+### 0.13 Manual Cleanup Commands
+
+If you want to verify everything is stopped manually:
+
+**Check what's running:**
+```bash
+# See all processes with "node" in name
+pgrep -fl node
+
+# See all processes with "Xcode" in name
+pgrep -fl Xcode
+
+# See all processes with "Simulator" in name
+pgrep -fl Simulator
+```
+
+**Force stop everything:**
+```bash
+# Nuclear option - kills all dev-related processes
+pkill -f node
+pkill -f Xcode
+pkill -f Simulator
+xcrun simctl shutdown all
+```
+
+**Free up disk space:**
+```bash
+# Clear Xcode build cache (can recover 5-20GB!)
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+
+# Clear iOS Simulator caches
+xcrun simctl erase all
+
+# See how much space Xcode stuff is using
+du -sh ~/Library/Developer/Xcode/
+du -sh ~/Library/Developer/CoreSimulator/
+```
+
+### 0.14 Checklist: Leaving the Mac Clean
+
+Before ending your session, verify:
+
+- [ ] Ran `ios-stop` script (or manually quit everything)
+- [ ] Xcode is closed (check Dock - no dot under icon)
+- [ ] Simulator is closed
+- [ ] Terminal windows are closed
+- [ ] No spinning fans or high CPU (Activity Monitor should be calm)
+- [ ] Optionally: cleared Derived Data to free space
+
+**Quick verification command:**
+```bash
+# Should all show "0" if everything is stopped
+echo "Node: $(pgrep -f node | wc -l) | Xcode: $(pgrep -f Xcode | wc -l) | Sim: $(pgrep -f Simulator | wc -l)"
+```
+
 ---
 
 ## Phase 1: Prerequisites
