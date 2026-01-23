@@ -64,11 +64,20 @@ Saberloop Distribution:
 ├── ✅ Android: Google Play Store (PWABuilder TWA)
 └── ❌ iOS: Not available (only Safari "Add to Home Screen")
 
+Current App Features:
+├── ✅ Multi-provider AI (OpenAI, Anthropic, Google AI, xAI, OpenRouter)
+├── ✅ Party Mode - real-time multiplayer quiz battles
+├── ✅ 9 languages (EN, PT, ES, FR, DE, IT, NL, NO, RU)
+├── ✅ Quiz sharing via URL
+├── ✅ Configurable quiz length (5, 10, 15 questions)
+├── ✅ Offline support with service worker
+└── ✅ Privacy-first (no tracking, local data)
+
 iOS Users Today:
 ├── Can visit https://saberloop.com/app/ in Safari
 ├── Can "Add to Home Screen" (creates web clip)
 ├── Limited integration (no App Store presence)
-└── No push notifications, limited offline
+└── No push notifications
 ```
 
 ### Target State (iOS App Store)
@@ -78,7 +87,7 @@ Saberloop Distribution:
 ├── ✅ Android: Google Play Store
 └── ✅ iOS: Apple App Store
 
-iOS App Features:
+iOS App Features (all current features plus):
 ├── ✅ Native app icon and launch experience
 ├── ✅ App Store discoverability
 ├── ✅ TestFlight beta distribution
@@ -401,28 +410,54 @@ Better for sharing with others - see section 3.2
 | Support URL | Your website/contact |
 | Privacy Policy URL | https://saberloop.com/privacy.html |
 
-**Tip:** You can reuse much of your Google Play content!
+**Tip:** Reuse content from your Google Play listing (`docs/product-info/playstore-listing-update.md`)!
 
-**Description (adapt from Play Store):**
+**Description:**
 ```
-Saberloop - Learn Any Topic with AI-Powered Quizzes
+Saberloop - Master Any Topic with AI-Powered Quizzes
 
-Generate personalized quizzes on any subject using AI. Perfect for students, lifelong learners, and anyone who wants to test their knowledge.
+🌍 LEARN IN YOUR LANGUAGE
+Generate quizzes in English, Portuguese, Spanish, French, German, Italian, Dutch, Norwegian, or Russian. Questions and interface adapt to your preferred language.
 
-FEATURES:
-• AI-powered question generation on any topic
-• Multiple difficulty levels
-• Instant explanations for wrong answers
-• Works offline - study anywhere
-• Track your progress over time
-• No ads, no tracking
+📚 LEARN ANY TOPIC
+From history and science to coding and languages — just type what you want to learn and get instant AI-generated questions tailored to your level.
 
-HOW IT WORKS:
-1. Enter any topic you want to learn
-2. Get 5 quiz questions instantly
-3. Learn from detailed explanations
+🎉 PARTY MODE
+Challenge friends in real-time quiz battles! Create a room, share the code, and compete with live scores. No accounts needed - just share and play.
 
-Built with privacy in mind - your data stays on your device.
+🤖 CHOOSE YOUR AI
+Use your preferred AI provider — OpenAI, Anthropic (Claude), Google AI (Gemini), xAI (Grok), or OpenRouter. Bring your own API key for lower costs and full control.
+
+📈 ADAPTIVE LEARNING
+Don't just take one quiz — continue on the same topic with increasing difficulty. Build true mastery through progressive challenges.
+
+💡 LEARN FROM MISTAKES
+Get detailed AI explanations for every wrong answer. Understand WHY the correct answer is right, not just what it is.
+
+📱 WORKS OFFLINE
+Review past quizzes and replay topics even without internet. Your learning never stops.
+
+🔒 PRIVACY FIRST
+All data stays on your device. No accounts required, no tracking, no ads. Your learning journey is yours alone.
+
+✨ KEY FEATURES
+• Multi-provider AI: OpenAI, Anthropic, Google AI, xAI, OpenRouter
+• Party Mode - real-time multiplayer quiz battles
+• 9 languages supported
+• Adaptive difficulty with "Continue on Topic"
+• Detailed explanations for wrong answers
+• Share results and quiz links
+• Customizable quiz length (5, 10, or 15 questions)
+• Progress tracking and full quiz history
+• Works completely offline
+• No ads, no tracking, no accounts
+
+Built with privacy in mind. Powered by AI. Free forever.
+```
+
+**Keywords (100 char max):**
+```
+quiz,AI,learning,trivia,education,study,flashcards,multiplayer,party,knowledge,test,brain
 ```
 
 ### 3.5 Submit for Review
@@ -1079,5 +1114,6 @@ Once both Android and iOS are published:
 
 ---
 
-**Last Updated:** 2025-12-18
+**Last Updated:** 2026-01-23
 **Status:** Optional Phase - Implement when ready for iOS expansion
+**Note:** App Store listing content updated to reflect current features (Party Mode, multi-provider AI, 9 languages)
