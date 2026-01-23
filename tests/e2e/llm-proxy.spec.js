@@ -42,7 +42,7 @@ test.describe('LLM Proxy Backend', () => {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    expect(response.status()).toBe(500); // Handler throws exception
+    expect(response.status()).toBe(400); // Missing required fields = bad request
     const data = await response.json();
     expect(data.error).toBeDefined();
   });
