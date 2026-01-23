@@ -12,12 +12,19 @@ Before installing Saberloop, ensure you have:
 
 ### Getting an API Key (Optional)
 
-To use real AI-generated questions, connect your OpenRouter account:
+To use real AI-generated questions, connect one of the supported AI providers:
 
-- **OpenRouter** - Sign up at [openrouter.ai](https://openrouter.ai/)
-- Provides access to multiple AI models (Claude, GPT-4, Gemini, etc.)
-- Free tier models available (default: DeepSeek R1T2 Chimera)
-- Connect via Settings page in the app (OAuth flow)
+| Provider | Sign Up | Free Tier |
+|----------|---------|-----------|
+| **OpenRouter** (recommended) | [openrouter.ai](https://openrouter.ai/) | ✅ 50 req/day |
+| OpenAI | [platform.openai.com](https://platform.openai.com/) | ❌ Pay-per-use |
+| Anthropic | [console.anthropic.com](https://console.anthropic.com/) | ❌ Pay-per-use |
+| Google AI | [aistudio.google.com](https://aistudio.google.com/) | ✅ Limited |
+| xAI | [x.ai](https://x.ai/) | ❌ Pay-per-use |
+
+**OpenRouter** is recommended for beginners - it provides access to multiple AI models through a single account and has a free tier.
+
+Connect via the Settings page in the app.
 
 **Note:** The app works without an API key using mock responses for development.
 

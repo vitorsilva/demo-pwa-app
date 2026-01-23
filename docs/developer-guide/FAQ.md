@@ -8,9 +8,16 @@ Saberloop is an AI-powered quiz application that generates questions on any topi
 
 ### Is it free to use?
 
-The app itself is free. AI-generated questions use OpenRouter:
-- **Free tier models:** DeepSeek R1T2 Chimera (default) - no cost
-- **Premium models:** Claude, GPT-4, etc. - uses your OpenRouter credits
+The app itself is free. AI-generated questions use your own API key:
+
+| Provider | Cost |
+|----------|------|
+| OpenRouter (default) | Free tier: 50 req/day, then pay-per-use |
+| OpenAI | Pay-per-use (no free tier) |
+| Anthropic | Pay-per-use (no free tier) |
+| Google AI | Limited free tier |
+| xAI | Pay-per-use (no free tier) |
+
 - **Mock mode:** Development works without any API key
 
 ### Does it work offline?
@@ -39,8 +46,9 @@ See [Installation Guide](./INSTALLATION.md) for details.
 
 1. Set `VITE_USE_REAL_API=true` in `.env`
 2. Run `npm run dev`
-3. Go to Settings in the app and connect to OpenRouter
-4. Your OpenRouter account provides the API access
+3. Go to Settings in the app
+4. Connect to your preferred AI provider (OpenRouter, OpenAI, Anthropic, Google AI, or xAI)
+5. Your provider account provides the API access
 
 ### How do I add a new feature?
 
@@ -65,13 +73,16 @@ This project started as a learning exercise for PWA fundamentals. Vanilla JS:
 
 ### Why client-side API calls (not a traditional backend)?
 
-Client-side OpenRouter benefits:
-- User provides their own API key via OAuth
+Multi-provider architecture benefits:
+- User provides their own API key (OAuth for OpenRouter, manual entry for others)
 - No server-side API key management needed
-- Simpler deployment (static files + FTP)
 - User controls their own usage/costs
+- Choice of AI provider
 
-**Note:** Party Mode does use a PHP backend for WebRTC signaling coordination, but quiz generation remains fully client-side.
+**Note:**
+- **OpenRouter** calls go directly from browser (CORS supported)
+- **OpenAI, Anthropic, Google AI, xAI** calls go through LLM Proxy for CORS bypass
+- **Party Mode** uses a PHP backend for WebRTC signaling coordination
 
 ### Why IndexedDB (not localStorage)?
 
@@ -136,8 +147,15 @@ Check DevTools → Application → Manifest for issues.
 
 ### Which AI models are used?
 
-- **Default:** DeepSeek R1T2 Chimera (free tier via OpenRouter)
-- **OpenRouter:** Various models available (Claude, GPT-4, Gemini, DeepSeek, etc.)
+Saberloop supports multiple AI providers:
+
+| Provider | Models |
+|----------|--------|
+| **OpenRouter** (default) | DeepSeek, Claude, GPT-4, Gemini, Llama, and more |
+| **OpenAI** | GPT-4, GPT-4o, o1, GPT-3.5 Turbo |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku |
+| **Google AI** | Gemini 1.5 Pro, Gemini 1.5 Flash |
+| **xAI** | Grok 2, Grok 2 Mini |
 
 ### How accurate are the questions?
 
@@ -148,10 +166,15 @@ AI-generated questions are generally accurate but:
 
 ### Can I use my own API key?
 
-Yes! Connect your OpenRouter account via Settings → Connect to AI Provider. This gives you access to:
-- Free tier models (DeepSeek, etc.)
-- Premium models (Claude, GPT-4, Gemini)
-- Your own usage tracking and billing
+Yes! Go to Settings → LLM Providers to connect your preferred provider:
+
+- **OpenRouter:** OAuth flow (click Connect, authorize, done)
+- **OpenAI, Anthropic, Google AI, xAI:** Enter API key manually
+
+Benefits:
+- Control your own costs
+- Choose your preferred AI model
+- No middleman for direct providers
 
 ### What happens if API fails?
 
@@ -218,8 +241,13 @@ All data is stored locally in your browser (IndexedDB):
 
 ### Is my API key secure?
 
-- **OpenRouter key:** Stored locally in your browser's IndexedDB
-- **Never sent to our servers:** API calls go directly from your browser to OpenRouter
+All API keys are stored locally in your browser's IndexedDB:
+- **OpenRouter:** OAuth token stored locally
+- **OpenAI, Anthropic, Google AI, xAI:** Keys stored locally
+
+API calls:
+- **OpenRouter:** Direct from browser to OpenRouter
+- **Other providers:** Through LLM Proxy (your key is forwarded but not stored server-side)
 
 ---
 

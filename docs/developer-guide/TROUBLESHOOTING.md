@@ -35,45 +35,69 @@ npm run dev -- --port 8889
 
 ### API Issues
 
-#### "Not connected to OpenRouter"
+#### "No AI provider connected"
 
-**Symptom:** API returns error about OpenRouter connection
+**Symptom:** API returns error about no provider connection
 
-**Cause:** User hasn't connected their OpenRouter account
+**Cause:** User hasn't connected any AI provider
 
 **Solution:**
 1. Go to Settings in the app
-2. Click "Connect with OpenRouter"
-3. Complete the OAuth flow
-4. Retry the operation
+2. Scroll to "LLM Providers" section
+3. Click "Connect" for your preferred provider
+4. For OpenRouter: Complete OAuth flow
+5. For others: Enter your API key
+6. Retry the operation
 
 #### "Invalid API key"
 
 **Symptom:** API returns 401
 
-**Solutions:**
-1. Verify API key is correct (OpenRouter keys start with `sk-or-`)
-2. Check key hasn't expired
+**Solutions by provider:**
+
+| Provider | Key Format | Verification |
+|----------|------------|--------------|
+| OpenRouter | `sk-or-...` | [openrouter.ai/account](https://openrouter.ai/account) |
+| OpenAI | `sk-...` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| Anthropic | `sk-ant-...` | [console.anthropic.com](https://console.anthropic.com/) |
+| Google AI | `AIza...` | [aistudio.google.com](https://aistudio.google.com/) |
+| xAI | `xai-...` | [x.ai](https://x.ai/) |
+
+1. Verify key format matches your provider
+2. Check key hasn't expired or been revoked
 3. Verify key has sufficient credits
-4. Reconnect to OpenRouter via Settings if needed
+4. Re-enter or reconnect via Settings
 
 #### CORS Errors
 
 **Symptom:** Browser console shows CORS errors
 
 **Solutions:**
-1. OpenRouter API should handle CORS automatically
-2. Check you're using the correct OpenRouter endpoint
-3. Verify your API key is valid
+- **OpenRouter:** Should work directly (CORS supported). Check API key is valid.
+- **OpenAI, Anthropic, Google AI, xAI:** These use LLM Proxy. If CORS errors persist:
+  1. Check LLM Proxy is deployed at `saberloop.com/llm/`
+  2. Verify health check: `curl https://saberloop.com/llm/health.php`
+  3. Check browser console for specific error messages
+
+#### LLM Proxy Errors
+
+**Symptom:** Non-OpenRouter providers fail with "Proxy error" or timeout
+
+**Solutions:**
+1. Check LLM Proxy health: https://saberloop.com/llm/health.php
+2. Verify your API key is valid for the provider
+3. Check provider's status page for outages
+4. Try switching to OpenRouter as a fallback
 
 #### Rate Limiting
 
 **Symptom:** API returns 429 Too Many Requests
 
 **Solutions:**
-1. Wait and retry
-2. Implement retry logic with backoff
-3. Check Anthropic dashboard for usage limits
+1. Wait and retry (each provider has different limits)
+2. Check your provider's dashboard for usage limits
+3. Consider switching to a provider with higher limits
+4. OpenRouter free tier: 50 requests/day
 
 ---
 
@@ -269,17 +293,23 @@ navigator.serviceWorker.getRegistrations()
 localStorage.getItem('loglevel')
 ```
 
-### OpenRouter API Debugging
+### API Key Debugging
 
 ```javascript
-// Check stored API key in browser console
+// Check stored API keys in browser console
 const dbRequest = indexedDB.open('quizmaster', 1);
 dbRequest.onsuccess = () => {
   const db = dbRequest.result;
   const tx = db.transaction('settings', 'readonly');
-  tx.objectStore('settings').get('openrouter_api_key').onsuccess = (e) => {
-    console.log('Key exists:', !!e.target.result);
-  };
+  const store = tx.objectStore('settings');
+
+  // Check all provider keys
+  const keys = ['openrouter_api_key', 'openai_api_key', 'anthropic_api_key', 'google_api_key', 'xai_api_key', 'active_provider'];
+  keys.forEach(key => {
+    store.get(key).onsuccess = (e) => {
+      console.log(`${key}:`, e.target.result ? 'exists' : 'not set');
+    };
+  });
 };
 ```
 

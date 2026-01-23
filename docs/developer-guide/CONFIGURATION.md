@@ -74,20 +74,44 @@ When `VITE_USE_REAL_API=false`:
 - Instant responses
 - Good for UI development
 
-### Real API (OpenRouter)
+### Real API (Multi-Provider)
 
 When `VITE_USE_REAL_API=true`:
-- Uses OpenRouter for AI calls
-- User authenticates with their own OpenRouter account
-- API key stored client-side via OAuth
+- Uses the active AI provider for quiz generation
+- User provides their own API key
+- Keys stored securely in IndexedDB
 
-### OpenRouter Connection
+### Supported AI Providers
 
-Users can connect their own OpenRouter API key:
+| Provider | Connection | Key Format | Free Tier |
+|----------|------------|------------|-----------|
+| OpenRouter | Direct (OAuth) | OAuth PKCE | ✅ 50 req/day |
+| OpenAI | LLM Proxy | `sk-...` | ❌ |
+| Anthropic | LLM Proxy | `sk-ant-...` | ❌ |
+| Google AI | LLM Proxy | `AIza...` | ✅ Limited |
+| xAI | LLM Proxy | `xai-...` | ❌ |
+
+**OpenRouter** (default) - Direct browser calls via OAuth, free tier available
+**Other providers** - Routed through LLM Proxy (`saberloop.com/llm/`) for CORS bypass
+
+### Connecting to a Provider
+
 1. Go to Settings in the app
-2. Click "Connect to AI Provider"
-3. Authenticate with OpenRouter
-4. Uses user's key directly from browser
+2. Scroll to "LLM Providers" section
+3. Click "Connect" for your preferred provider
+4. For OpenRouter: Complete OAuth flow
+5. For others: Enter your API key manually
+
+### LLM Proxy Configuration
+
+For providers without CORS support (OpenAI, Anthropic, Google AI, xAI), requests are routed through the LLM Proxy at `saberloop.com/llm/`.
+
+In development, the proxy URL is automatically detected. For custom deployments:
+
+```bash
+# .env (optional - only for custom proxy deployments)
+VITE_LLM_PROXY_URL=https://your-server.com/llm
+```
 
 ## Build Configuration
 
