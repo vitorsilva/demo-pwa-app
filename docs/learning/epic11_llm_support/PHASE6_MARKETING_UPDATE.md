@@ -33,7 +33,55 @@ Update the landing page and marketing materials to highlight the new multi-provi
 
 **Location:** Features grid (currently 6 cards)
 
-**New card to add:**
+#### Before (Current - 6 cards, 3x2 grid):
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Why Saberloop?                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │       🧠        │  │       🌍        │  │       🎓        │      │
+│  │  AI-Powered     │  │  Learn in Your  │  │  All Skill      │      │
+│  │  Learning       │  │  Language       │  │  Levels         │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │       📱        │  │       🔒        │  │       🎉        │      │
+│  │  Works Offline  │  │  Your Data,     │  │  Party Mode     │      │
+│  │                 │  │  Your Control   │  │                 │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### After (7 cards, 3-3-1 grid with centered 7th card):
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Why Saberloop?                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │       🧠        │  │       🌍        │  │       🎓        │      │
+│  │  AI-Powered     │  │  Learn in Your  │  │  All Skill      │      │
+│  │  Learning       │  │  Language       │  │  Levels         │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │       📱        │  │       🔒        │  │       🎉        │      │
+│  │  Works Offline  │  │  Your Data,     │  │  Party Mode     │      │
+│  │                 │  │  Your Control   │  │                 │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                      │
+│                    ┌─────────────────┐                               │
+│                    │       🤖        │  ← NEW                        │
+│                    │  Choose Your AI │                               │
+│                    │  OpenAI, Anthropic, Google, xAI                 │
+│                    └─────────────────┘                               │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**New card HTML:**
 ```html
 <div class="feature-card">
     <div class="feature-icon">🤖</div>
@@ -42,50 +90,70 @@ Update the landing page and marketing materials to highlight the new multi-provi
 </div>
 ```
 
-**Grid change:** 6 cards → 7 cards
-
-**CSS adjustment needed:**
-```css
-/* 7 cards: 3-4 layout on desktop, 2-2-2-1 on tablet, 1 column on mobile */
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
-}
-
-/* First row: 3 cards, Second row: 4 cards centered */
-/* Alternative: Keep 3-col grid, 7th card centered below */
-```
-
-**Recommendation:** Add as 7th card. The grid will naturally flow 3-3-1 on desktop with the last card centered, or adjust to 4-3 layout.
+**Grid change:** 6 cards → 7 cards (CSS grid auto-flows, 7th card centers naturally)
 
 **Files to modify:**
-- `landing/index.html` - Add feature card HTML
+- `landing/index.html` - Add feature card HTML after Party Mode card (line ~730)
 
 **Verification:**
-- [ ] Card displays correctly on desktop (1200px+)
-- [ ] Card displays correctly on tablet (768-1024px)
-- [ ] Card displays correctly on mobile (<768px)
+- [ ] Card displays correctly on desktop (1200px+) - centered below 2 rows
+- [ ] Card displays correctly on tablet (768-1024px) - flows in 2-col grid
+- [ ] Card displays correctly on mobile (<768px) - single column
 
 ---
 
 ### Subtask 6.2: Update "Unlimited Learning" CTA Section
 
-**Current text (lines 835-844):**
-```html
-<div class="cta-column">
-    <h3>Unlimited Learning</h3>
-    <ul>
-        <li>Connect your OpenRouter account</li>
-        <li>Choose your AI model</li>
-        <li>Generate unlimited quizzes</li>
-        <li>See token usage costs</li>
-    </ul>
-    ...
-</div>
+**Location:** CTA section at bottom of landing page
+
+#### Before (Current):
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Ready to Start Learning?                         │
+│                        (Orange gradient background)                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌────────────────────────────┐  ┌────────────────────────────┐     │
+│  │        Try Free            │  │    Unlimited Learning      │     │
+│  │                            │  │                            │     │
+│  │  ✓ Sample quizzes          │  │  ✓ Connect your OpenRouter │     │
+│  │    available immediately   │  │    account                 │     │
+│  │  ✓ No account needed       │  │  ✓ Choose your AI model    │     │
+│  │  ✓ Works in your browser   │  │  ✓ Generate unlimited      │     │
+│  │                            │  │    quizzes                 │     │
+│  │  [Try in Browser]          │  │  ✓ See token usage costs   │     │
+│  │                            │  │                            │     │
+│  │                            │  │  [Get on Google Play]      │     │
+│  └────────────────────────────┘  └────────────────────────────┘     │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Updated text:**
+#### After (Updated copy):
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Ready to Start Learning?                         │
+│                        (Orange gradient background)                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌────────────────────────────┐  ┌────────────────────────────┐     │
+│  │        Try Free            │  │    Unlimited Learning      │     │
+│  │                            │  │                            │     │
+│  │  ✓ Sample quizzes          │  │  ✓ Use OpenRouter, OpenAI, │     │
+│  │    available immediately   │  │    Anthropic, Google, xAI  │ ← CHANGED
+│  │  ✓ No account needed       │  │  ✓ Bring your own API key  │ ← CHANGED
+│  │  ✓ Works in your browser   │  │    for lower costs         │     │
+│  │                            │  │  ✓ Choose from multiple    │ ← CHANGED
+│  │  [Try in Browser]          │  │    AI models               │     │
+│  │                            │  │  ✓ See token usage & costs │ ← CHANGED
+│  │                            │  │                            │     │
+│  │                            │  │  [Get on Google Play]      │     │
+│  └────────────────────────────┘  └────────────────────────────┘     │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Updated HTML (lines 835-844):**
 ```html
 <div class="cta-column">
     <h3>Unlimited Learning</h3>
@@ -95,48 +163,111 @@ Update the landing page and marketing materials to highlight the new multi-provi
         <li>Choose from multiple AI models</li>
         <li>See token usage and costs</li>
     </ul>
-    ...
+    <a href="https://play.google.com/store/apps/details?id=com.saberloop.app" class="btn btn-secondary" target="_blank" rel="noopener" data-track="play_store_cta">Get on Google Play</a>
 </div>
 ```
 
 **Files to modify:**
-- `landing/index.html` - Update CTA section text
+- `landing/index.html` - Update CTA section text (lines 835-844)
 
 **Verification:**
-- [ ] Text displays correctly
-- [ ] List items fit within card width on mobile
+- [ ] Text displays correctly on desktop
+- [ ] List items fit within card width on mobile (may need shorter text)
+- [ ] No text overflow or wrapping issues
 
 ---
 
 ### Subtask 6.3: Capture New Settings Screenshot
 
-**Current screenshot:** `landing/images/landing-06-settings-page.png` - Shows basic settings
+**Location:** Screenshots grid in "See It In Action" section
 
-**New screenshot needed:** Settings page showing LLM Providers section with:
-- Provider dropdown visible
-- Multiple providers configured (at least 2)
-- Model selection visible
+#### Before (Current Settings Screenshot):
+```
+┌───────────────────────┐
+│  ← Settings           │
+├───────────────────────┤
+│                       │
+│  Language             │
+│  [English        ▼]   │
+│                       │
+│  Difficulty Level     │
+│  [High School    ▼]   │
+│                       │
+│  Questions per Quiz   │
+│  [5              ▼]   │
+│                       │
+│  Dark Mode            │
+│  [Toggle: ON]         │
+│                       │
+│  ───────────────────  │
+│  OpenRouter           │
+│  ✅ Connected         │
+│  [Disconnect]         │
+│                       │
+└───────────────────────┘
+```
+
+#### After (New Settings Screenshot - Shows Provider Selection):
+```
+┌───────────────────────┐
+│  ← Settings           │
+├───────────────────────┤
+│                       │
+│  LLM Providers        │  ← KEY SECTION TO SHOW
+│  ─────────────────    │
+│                       │
+│  Active Provider      │
+│  [OpenAI         ▼]   │  ← Dropdown visible
+│                       │
+│  Active Model         │
+│  [gpt-4o-mini    ▼]   │
+│                       │
+│  Configured:          │
+│  ┌─────────────────┐  │
+│  │ ● OpenRouter ✅  │  │  ← Multiple providers
+│  │ ● OpenAI     ✅  │  │    configured
+│  │ ○ Anthropic  ○   │  │
+│  │ ○ Google AI  ○   │  │
+│  └─────────────────┘  │
+│                       │
+│  [+ Add Provider]     │
+│                       │
+└───────────────────────┘
+```
 
 **Screenshot capture process:**
-1. Open app in Playwright/browser
+1. Open app at https://saberloop.com/app/ or localhost
 2. Navigate to Settings
 3. Configure at least 2 providers (e.g., OpenRouter + OpenAI)
-4. Capture screenshot at mobile dimensions (360x640 viewport → 304x584 output)
+4. Scroll to show "LLM Providers" section prominently
+5. Capture screenshot at mobile dimensions (360x640 viewport)
+
+**Capture command (Playwright):**
+```javascript
+// In tests/e2e/capture-settings-providers.spec.js
+await page.goto('/app/#settings');
+await page.waitForSelector('[data-testid="provider-section"]');
+await page.screenshot({
+    path: 'landing/images/landing-06-settings-page.png',
+    clip: { x: 0, y: 0, width: 360, height: 640 }
+});
+```
 
 **Processing:**
 ```bash
-# Use Sharp to resize/crop to match other landing page images
-node scripts/process-screenshot.js settings-providers.png landing-06-settings-page.png
+# Resize to match other landing page images (304x584)
+npx sharp-cli landing/images/landing-06-settings-page.png -o landing/images/landing-06-settings-page.png resize 304 584
 ```
 
 **Files to modify:**
 - `landing/images/landing-06-settings-page.png` - Replace with new screenshot
-- Or add new: `landing/images/landing-providers-settings.png`
 
 **Verification:**
-- [ ] Screenshot shows provider selection UI
-- [ ] Image dimensions match other screenshots (304x584)
-- [ ] Image file size is optimized (<50KB)
+- [ ] Screenshot shows LLM Providers section prominently
+- [ ] At least 2 providers visible (one active, one configured)
+- [ ] Provider/model dropdowns visible
+- [ ] Image dimensions: 304x584 pixels
+- [ ] Image file size optimized (<50KB)
 
 ---
 
