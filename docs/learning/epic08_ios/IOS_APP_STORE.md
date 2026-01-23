@@ -35,7 +35,13 @@ This phase covers publishing Saberloop to the Apple App Store. The approach is *
 
 ## Learning Objectives
 
-By the end of this phase, you will:
+By the end of this epic, you will:
+
+**Phase 0 (Mac Setup):**
+- ✅ Configure macOS for iOS development
+- ✅ Install and configure Xcode
+- ✅ Install essential developer tools (Homebrew, Node.js, Git)
+- ✅ Clone and set up project on Mac
 
 **Phase 1-3 (PWABuilder path):**
 - ✅ Understand Apple Developer Program requirements
@@ -113,7 +119,8 @@ Apple has historically been strict about "web wrapper" apps. Rather than spendin
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    START HERE                                │
-│                    Phase 1: Prerequisites                    │
+│                    Phase 0: Mac Setup (install Xcode, etc.)  │
+│                    Phase 1: Prerequisites (Apple Dev Account)│
 │                    Phase 2: PWABuilder iOS                   │
 │                    Phase 3: Test & Submit                    │
 └─────────────────────────────────────────────────────────────┘
@@ -140,10 +147,190 @@ Apple has historically been strict about "web wrapper" apps. Rather than spendin
 
 ---
 
+## Phase 0: Mac Setup & Configuration
+
+**Time:** 1-2 hours (can be done incrementally)
+**Mac Required:** Yes
+**Goal:** Get the Mac ready for iOS development before starting Phase 1
+
+This phase ensures your Mac is properly configured. Do this FIRST when you have Mac access, as some downloads are large and time-consuming.
+
+### 0.1 Mac System Requirements
+
+**Minimum Requirements:**
+- macOS Ventura (13.0) or later recommended
+- At least 50GB free disk space (Xcode is ~12GB + simulators)
+- Apple Silicon (M1/M2/M3) or Intel Mac
+
+**Check your macOS version:**
+```bash
+sw_vers -productVersion
+# Should be 13.0 or higher for latest Xcode
+```
+
+**Check available disk space:**
+```bash
+df -h /
+# Look for "Avail" column - need 50GB+
+```
+
+### 0.2 Install Xcode (REQUIRED - Do This First!)
+
+Xcode is Apple's IDE and is **required** for iOS development. It's a large download (~12GB), so start this first.
+
+**Option A: App Store (Recommended)**
+1. Open **App Store** on Mac
+2. Search for "Xcode"
+3. Click **Get** / **Install**
+4. Wait for download (30-60 minutes on fast internet)
+5. Open Xcode once to accept license agreement
+
+**Option B: Direct Download (if App Store is slow)**
+1. Go to https://developer.apple.com/download/all/
+2. Sign in with Apple ID
+3. Download Xcode `.xip` file
+4. Double-click to extract (takes ~10 minutes)
+5. Drag Xcode to Applications folder
+
+**Verify Xcode installation:**
+```bash
+xcode-select --version
+# Should show: xcode-select version 2397 (or similar)
+
+xcodebuild -version
+# Should show: Xcode 15.x (or later)
+```
+
+**Install Command Line Tools:**
+```bash
+xcode-select --install
+# Click "Install" in the popup dialog
+```
+
+### 0.3 Install Homebrew (RECOMMENDED)
+
+Homebrew is a package manager for macOS - makes installing developer tools easy.
+
+**Install Homebrew:**
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**After installation, follow the instructions to add to PATH:**
+```bash
+# For Apple Silicon Macs (M1/M2/M3):
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# For Intel Macs:
+echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/usr/local/bin/brew shellenv)"
+```
+
+**Verify Homebrew:**
+```bash
+brew --version
+# Should show: Homebrew 4.x.x
+```
+
+### 0.4 Install Node.js (if not already installed)
+
+You'll need Node.js for Capacitor (Plan B).
+
+**Check if already installed:**
+```bash
+node --version
+# Should be v18 or higher
+```
+
+**Install via Homebrew (if needed):**
+```bash
+brew install node@18
+```
+
+### 0.5 Install Git (if not already installed)
+
+**Check if already installed:**
+```bash
+git --version
+# macOS usually has git pre-installed
+```
+
+**Install via Homebrew (if needed):**
+```bash
+brew install git
+```
+
+### 0.6 Configure Git (if not already done)
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+### 0.7 Clone Your Repository
+
+Get your Saberloop code onto the Mac:
+
+```bash
+cd ~/Developer  # or wherever you keep projects
+git clone https://github.com/vitorsilva/saberloop.git
+cd saberloop
+npm install
+```
+
+### 0.8 Optional: Install VS Code
+
+If you prefer VS Code over Xcode for editing web code:
+
+```bash
+brew install --cask visual-studio-code
+```
+
+### 0.9 Optional: Install iOS Simulator Runtimes
+
+Xcode comes with the latest iOS simulator, but you may want older versions for testing:
+
+1. Open Xcode
+2. Go to **Xcode → Settings → Platforms**
+3. Click **+** to download additional iOS versions
+4. Recommended: Download iOS 16 and iOS 17 simulators
+
+### 0.10 Checklist: Mac Ready for iOS Development
+
+Before proceeding to Phase 1, verify:
+
+- [ ] macOS is up to date (13.0+)
+- [ ] Xcode installed and opens without errors
+- [ ] Xcode Command Line Tools installed (`xcode-select --version` works)
+- [ ] Homebrew installed (`brew --version` works)
+- [ ] Node.js 18+ installed (`node --version` works)
+- [ ] Git installed and configured
+- [ ] Saberloop repo cloned and `npm install` completed
+- [ ] At least 20GB free space remaining (for simulators, builds)
+
+### Tips for Limited Mac Access
+
+If you only have occasional Mac access:
+
+1. **Do Phase 0 completely** in your first session - get everything installed
+2. **Prepare on Windows first:**
+   - Have your Apple ID ready
+   - Have your Apple Developer account enrolled ($99 paid)
+   - Have your code pushed to GitHub
+   - Generate iOS assets (icons, screenshots) beforehand
+3. **Batch your Mac work:**
+   - Phase 0 + Phase 1: First Mac session (~2 hours)
+   - Phase 2 + Phase 3: Second Mac session (~2-3 hours)
+   - Phase 5 (if needed): Third Mac session (~2 hours)
+
+---
+
 ## Phase 1: Prerequisites
 
 **Time:** 1 session (~1-2 hours)
-**Mac Required:** Yes (for Xcode installation)
+**Mac Required:** Yes (for Xcode configuration)
+**Prerequisites:** Phase 0 complete (Xcode installed)
 
 ### 1.1 Apple Developer Account
 
@@ -983,9 +1170,18 @@ Since you have limited Mac access, here's how to optimize:
 
 ## Success Criteria
 
+**Phase 0 Complete (Mac Setup):**
+- [ ] macOS 13.0+ verified
+- [ ] Xcode installed and opens without errors
+- [ ] Command Line Tools installed
+- [ ] Homebrew installed
+- [ ] Node.js 18+ installed
+- [ ] Git configured
+- [ ] Saberloop repo cloned and dependencies installed
+
 **Phase 1-3 Complete (PWABuilder path):**
-- [ ] Apple Developer Account active
-- [ ] Xcode installed and configured
+- [ ] Apple Developer Account active ($99 paid)
+- [ ] Xcode signing configured with Apple ID
 - [ ] PWABuilder iOS package generated
 - [ ] App builds successfully in Xcode
 - [ ] App tested on real iPhone
