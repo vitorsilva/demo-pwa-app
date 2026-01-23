@@ -13,7 +13,7 @@ export const FEATURE_FLAGS = {
     description: 'Display Google AdSense ads during quiz and results loading',
   },
   MULTI_PROVIDER_LLM: {
-    phase: 'DISABLED', // Start disabled for safe deployment
+    phase: 'ENABLED', // Enabled for multi-provider LLM support
     description: 'Allow users to configure and use multiple LLM providers',
   },
 };

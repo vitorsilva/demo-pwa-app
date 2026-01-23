@@ -16,7 +16,8 @@ import {
 import { logger } from '../utils/logger.js';
 import { isFeatureEnabled } from '../core/features.js';
 
-const LLM_PROXY_URL = 'https://saberloop.com/llm/completion.php';
+const LLM_PROXY_URL =
+  import.meta.env.VITE_LLM_PROXY_URL || 'https://saberloop.com/llm/completion.php';
 
 /**
  * Make an LLM completion request using the active provider

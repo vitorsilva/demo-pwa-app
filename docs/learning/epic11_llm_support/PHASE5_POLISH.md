@@ -32,12 +32,18 @@ After completing **ANY** subtask (5.1, 5.2, etc.), STOP and complete this checkl
 
 ### Progress Marker
 
-- **Last checkpoint:** Not started
-- **Current task:** —
-- **Completed:** —
-- **Next action:** Begin Subtask 5.1 (Enhanced Error Handling)
-- **Blockers:** None
-- **Session:** —
+- **Last checkpoint:** Task 5.0 Provider Integration Validation partially complete
+- **Current task:** 5.0 - Local testing blocked by CORS/Docker
+- **Completed:**
+  - Issue #161 - Anthropic key validation fix
+  - Issue #162 - Multi-provider routing fix (auth-service.js)
+  - Issue #163 - OpenAI key validation fix (regex for project-based keys)
+  - Feature flag enabled to ENABLED
+  - Provider router made configurable via VITE_LLM_PROXY_URL
+  - All 1303 unit tests pass
+- **Next action:** Test providers in production or with local Docker
+- **Blockers:** Local testing of non-CORS providers requires Docker or production deployment
+- **Session:** January 23, 2026
 
 ---
 
@@ -84,6 +90,103 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ---
 
 ## Tasks
+
+### ⬚ 5.0 Provider Integration Validation
+
+**Goal:** Validate that all LLM providers work end-to-end with real API keys before implementing error handling and polish features.
+
+**Prerequisites:**
+- Issue #161 fixed (Anthropic key regex accepts underscores)
+- Backend proxy deployed with improved error handling
+- Feature flag enabled in staging
+
+**API Keys:** Located in `.env` file (also available in GitHub secrets)
+
+#### Test Plan
+
+For each provider, perform these steps:
+
+| Step | Action | Expected Result |
+|------|--------|-----------------|
+| 1 | Navigate to Settings > LLM Providers | LLM Providers section visible |
+| 2 | Click "Add API Key" for provider | Modal opens |
+| 3 | Enter API key from .env | No format validation error |
+| 4 | Click "Save Key" | Status shows "Validating..." then "✓ Valid" |
+| 5 | Verify provider is set as active | Active Provider dropdown shows provider |
+| 6 | Navigate to Home and create quiz | Quiz generation starts |
+| 7 | Verify quiz generates successfully | 5 questions returned |
+| 8 | Remove provider key | Provider shows "Not configured" |
+
+#### Provider Checklist
+
+| Provider | Key Prefix | Status | Key Valid | Quiz Generated |
+|----------|------------|--------|-----------|----------------|
+| ⚠️ OpenAI | `sk-proj-` | Format passes | Blocked (CORS) | Blocked (needs proxy) |
+| ✅ Anthropic | `sk-ant-` | Done | ✓ | Blocked (needs proxy) |
+| ⬚ Google AI | `AIza` | — | — | — |
+| ⬚ xAI | `xai-` | — | — | — |
+
+**Note:** Non-CORS providers (OpenAI, Anthropic, Google, xAI) require the backend proxy. Local testing requires either:
+1. Running local PHP backend via Docker: `docker-compose -f docker-compose.php.yml up -d php-api`
+2. Testing in production environment
+
+OpenRouter (CORS-enabled) can be tested directly from localhost but the stored key was expired/invalid during testing.
+
+#### Execution Steps
+
+**5.0.1 - Test OpenAI Provider**
+```
+1. Add OpenAI key from .env (OPENAI_API_KEY)
+2. Verify key validation succeeds
+3. Set OpenAI as active provider
+4. Generate quiz on topic "World Geography"
+5. Verify 5 questions are returned
+6. Check console for errors
+7. Remove key after test
+```
+
+**5.0.2 - Test Anthropic Provider**
+```
+1. Add Anthropic key from .env (ANTHROPIC_API_KEY)
+2. Verify key validation succeeds (already tested in #161)
+3. Set Anthropic as active provider
+4. Generate quiz on topic "Space Exploration"
+5. Verify 5 questions are returned
+6. Check console for errors
+7. Remove key after test
+```
+
+**5.0.3 - Test Google AI Provider**
+```
+1. Add Google key from .env (GOOGLE_API_KEY)
+2. Verify key validation succeeds
+3. Set Google AI as active provider
+4. Generate quiz on topic "Ancient History"
+5. Verify 5 questions are returned
+6. Check console for errors
+7. Remove key after test
+```
+
+**5.0.4 - Test xAI Provider**
+```
+1. Add xAI key from .env (XAI_API_KEY)
+2. Verify key validation succeeds
+3. Set xAI as active provider
+4. Generate quiz on topic "Technology"
+5. Verify 5 questions are returned
+6. Check console for errors
+7. Remove key after test
+```
+
+**Verification:** All 4 providers accept keys, validate successfully, and generate quizzes.
+
+---
+
+#### 🛑 CHECKPOINT: After completing 5.0
+
+Before starting 5.1, complete the [Subtask Completion Checklist](#subtask-completion-checklist).
+
+---
 
 ### ⬚ 5.1 Enhanced Error Handling
 
