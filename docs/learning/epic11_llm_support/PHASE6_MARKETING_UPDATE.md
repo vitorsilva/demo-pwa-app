@@ -583,4 +583,29 @@ If issues arise:
 
 ---
 
+## References
+
+### Developer Guides
+- [E2E Testing Guide](../../developer-guide/E2E_TESTING.md) - Playwright setup, capture scripts, `npm run test:e2e:capture`
+- [Deployment Guide](../../architecture/DEPLOYMENT.md) - Landing page deployment via `npm run deploy:landing`
+- [Staging Deployment](../../developer-guide/STAGING_DEPLOYMENT.md) - Test changes on staging first
+
+### Deployment Scripts
+- `scripts/deploy-landing.cjs` - Landing page FTP deployment
+- `scripts/deploy-ftp.cjs` - Main app deployment (with `--staging` flag for staging)
+
+### Existing Capture Scripts (Reference Patterns)
+- `tests/e2e/capture-landing-assets.spec.js` - Landing page screenshots and demo video
+- `tests/e2e/capture-playstore-screenshots.spec.js` - App store screenshots
+- `tests/e2e/capture-party-demo.spec.js` - Party mode demo video
+
+### Previous Landing Page Updates
+- [Epic 6: Landing Page Party Update](../epic06_sharing/LANDING_PAGE_PARTY_UPDATE.md) - Previous landing page changes
+- [Epic 5: Landing Page Improvements](../epic05/PHASE52_LANDING_PAGE.md) - Earlier landing page work
+
+### Architecture
+- [LLM Integration Evolution](../../architecture/LLM_INTEGRATION_EVOLUTION.md) - History of LLM provider support
+
+---
+
 **Created:** 2026-01-23
