@@ -1,6 +1,6 @@
-# QuizMaster Documentation
+# Saberloop Documentation
 
-This directory contains all learning notes and documentation for the QuizMaster project, organized by epic.
+This directory contains all learning notes and documentation for the Saberloop project, organized by epic.
 
 Live version available at [https://saberloop.com/app/](https://saberloop.com/app/)
 
@@ -18,6 +18,13 @@ docs/
 │   ├── epic03_quizmaster_v2/
 │   ├── epic04_saberloop_v1/
 │   ├── epic05/
+│   ├── epic06_sharing/
+│   ├── epic07_monetization/
+│   ├── epic08_ios/
+│   ├── epic09_telemetry_analysis/
+│   ├── epic10_hygiene/
+│   ├── epic11_llm_support/
+│   ├── epic13_misc/
 │   └── parking_lot/
 ├── architecture/
 ├── developer-guide/
@@ -33,27 +40,50 @@ docs/
 **📚 [Epic 01: PWA Infrastructure](./learning/epic01_infrastructure/LEARNING_PLAN.md)**
 - Status: ✅ Complete
 - Focus: PWA fundamentals, build tools, testing, deployment
-- Phases: 1-5 (all complete)
 
 **📚 [Epic 02: QuizMaster V1](./learning/epic02_quizmaster_v1/QUIZMASTER_V1_LEARNING_PLAN.md)**
-- Status: ✅ Complete (Phases 1-9)
+- Status: ✅ Complete
 - Focus: Feature development with mock API
-- Phases: 1-9 complete, 10-11 moved to Epic 03
 
 **📚 [Epic 03: QuizMaster V2](./learning/epic03_quizmaster_v2/EPIC3_QUIZMASTER_V2_PLAN.md)**
 - Status: ✅ Complete
 - Focus: Production readiness with real AI
-- Phases: 1-9 (all complete)
 
 **📚 [Epic 04: Saberloop V1](./learning/epic04_saberloop_v1/EPIC4_SABERLOOP_V1_PLAN.md)**
 - Status: ✅ Complete
-- Focus: Maintenance, enhancements, and new functionality
-- Key Phases: OpenRouter onboarding, i18n, architecture testing, telemetry, Maestro testing
+- Focus: Maintenance, enhancements, i18n, telemetry
 
 **📚 [Epic 05: Growth & Excellence](./learning/epic05/EPIC5_PLAN.md)**
+- Status: ✅ Complete
+- Focus: UX polish, growth marketing, mutation testing
+
+**📚 [Epic 06: Sharing Features](./learning/epic06_sharing/EPIC6_SHARING_PLAN.md)**
+- Status: ✅ Complete
+- Focus: Learning & Party modes with social quiz sharing
+
+**📚 [Epic 07: Monetization](./learning/epic07_monetization/EPIC7_MONETIZATION_PLAN.md)**
 - Status: 📝 Planned
-- Focus: User experience polish, growth marketing, and testing excellence
-- Tracks: UX enhancements, growth & marketing, mutation testing
+- Focus: Revenue streams (AdSense, donations, premium)
+
+**📚 [Epic 08: iOS](./learning/epic08_ios/IOS_APP_STORE.md)**
+- Status: 📝 Planned
+- Focus: iOS App Store publishing
+
+**📚 [Epic 09: Telemetry Analysis](./learning/epic09_telemetry_analysis/EPIC9_TELEMETRY_ANALYSIS_PLAN.md)**
+- Status: 📝 Planned
+- Focus: Analytics, performance insights, reporting
+
+**📚 [Epic 10: Project Hygiene](./learning/epic10_hygiene/EPIC10_HYGIENE_PLAN.md)**
+- Status: ♻️ Ongoing
+- Focus: Maintenance, technical debt cleanup
+
+**📚 [Epic 11: Multi-Provider LLM](./learning/epic11_llm_support/EPIC11_LLM_SUPPORT_PLAN.md)**
+- Status: ✅ Complete
+- Focus: OpenAI, Anthropic, Google AI, xAI direct API support
+
+**📚 [Epic 13: Miscellaneous](./learning/epic13_misc/EPIC13_PLAN.md)**
+- Status: ♻️ Ongoing
+- Focus: Standalone one-off improvements
 
 ### Understanding the Transition
 
@@ -121,17 +151,7 @@ docs/
 
 **Epic Plan:** [EPIC3_QUIZMASTER_V2_PLAN.md](./epic03_quizmaster_v2/EPIC3_QUIZMASTER_V2_PLAN.md)
 
-**Phases:**
-- [Phase 1](./epic03_quizmaster_v2/PHASE1_BACKEND.md) - Backend Integration ✅
-- [Phase 2](./epic03_quizmaster_v2/PHASE2_OFFLINE.md) - Production Offline ✅
-- [Phase 3](./epic03_quizmaster_v2/PHASE3_UI_POLISH.md) - UI Polish ✅
-- [Phase 3.4](./epic03_quizmaster_v2/PHASE3.4_PHP_MIGRATION.md) - PHP VPS Migration ✅
-- [Phase 3.5](./epic03_quizmaster_v2/PHASE3.5_BRANDING.md) - Branding & Identity 📝
-- [Phase 4](./epic03_quizmaster_v2/PHASE4_OBSERVABILITY.md) - Observability 📝
-- [Phase 5](./epic03_quizmaster_v2/PHASE5_PROJECT_STRUCTURE.md) - Project Structure 📝
-- [Phase 6](./epic03_quizmaster_v2/PHASE6_VALIDATION.md) - Validation 📝
-
-**Status:** 🚧 In Progress (Phase 3.4 complete, Phase 3.5 next)
+**Status:** ✅ All phases complete
 
 ### Parking Lot (Ideas to Explore)
 
@@ -139,10 +159,6 @@ docs/
 - Contains experimental and optional phases
 - Not required for core functionality
 - Can be revisited when relevant
-- Recently moved 6 items to Epic 5 (Growth & Excellence)
-- Currently contains: 9 optional ideas including Azure, OAuth, iOS App Store, and more
-
-**Note:** Several high-priority items from the parking lot have been promoted to [Epic 05: Growth & Excellence](./learning/epic05/EPIC5_PLAN.md)
 
 ---
 
@@ -169,23 +185,20 @@ See [EPIC_TRANSITION_SUMMARY.md](./EPIC_TRANSITION_SUMMARY.md) for detailed expl
 
 ## Completion Status
 
-### Overall Progress
-
-| Epic | Phases | Status | Completion |
-|------|--------|--------|------------|
-| Epic 01 | 5 phases | ✅ Complete | 100% |
-| Epic 02 | 9 executed, 2 deferred | ✅ Complete | 100% (of executed) |
-| Epic 03 | 9 phases | ✅ Complete | 100% |
-| Epic 04 | Multiple phases | ✅ Complete | 100% |
-| Epic 05 | 7 phases (3 tracks) | 📝 Planned | 0% |
-
-### Phase Mapping
-
-| Epic 02 Phase | Status | Epic 03 Equivalent |
-|---------------|--------|-------------------|
-| Phase 1-9 | ✅ Complete | N/A (standalone) |
-| Phase 10 | ⚠️ Deferred | Phase 6: Validation |
-| Phase 11 | ⚠️ Deferred | Phase 1: Backend |
+| Epic | Status | Focus |
+|------|--------|-------|
+| Epic 01 | ✅ Complete | PWA Infrastructure |
+| Epic 02 | ✅ Complete | QuizMaster V1 (Mock API) |
+| Epic 03 | ✅ Complete | QuizMaster V2 (Production) |
+| Epic 04 | ✅ Complete | Saberloop V1 (Maintenance) |
+| Epic 05 | ✅ Complete | Growth & Excellence |
+| Epic 06 | ✅ Complete | Sharing Features & Party Mode |
+| Epic 07 | 📝 Planned | Monetization |
+| Epic 08 | 📝 Planned | iOS App Store |
+| Epic 09 | 📝 Planned | Telemetry Analysis |
+| Epic 10 | ♻️ Ongoing | Project Hygiene |
+| Epic 11 | ✅ Complete | Multi-Provider LLM Support |
+| Epic 13 | ♻️ Ongoing | Miscellaneous Improvements |
 
 ---
 
@@ -222,6 +235,7 @@ See [EPIC_TRANSITION_SUMMARY.md](./EPIC_TRANSITION_SUMMARY.md) for detailed expl
 - 📝 Planned - Phase documented but not executed
 - ⚠️ Deferred - Phase planned but moved to different epic
 - 🚧 In Progress - Currently working on this phase
+- ♻️ Ongoing - Continuous epic with no end date (maintenance, improvements)
 
 ### File Naming
 - `LEARNING_PLAN.md` - Epic overview and phase structure
@@ -251,5 +265,5 @@ If adding new learning notes:
 
 ---
 
-**Last Updated:** 2025-12-30
-**Current Status:** Epic 05 planned (Epic 01-04 complete, Epic 05 ready to start)
+**Last Updated:** 2026-01-23
+**Current Status:** Epic 11 complete | Multi-provider LLM support live | Party Mode in production

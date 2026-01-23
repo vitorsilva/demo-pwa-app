@@ -9,7 +9,7 @@
 
 ## Features
 
-- **AI-Generated Questions** - Powered by Claude API via OpenRouter
+- **AI-Generated Questions** - Choose your AI provider: OpenRouter, OpenAI, Anthropic, Google AI, or xAI
 - **Party Mode** - Play quizzes together in real-time with friends
 - **Progressive Web App** - Install on any device, works offline
 - **Local Progress Tracking** - Your data stays on your device
@@ -22,7 +22,12 @@
 ### Prerequisites
 
 - Node.js 18+ ([Download](https://nodejs.org/))
-- API key from [OpenRouter](https://openrouter.ai/) (for AI-generated questions)
+- API key from any supported AI provider:
+  - [OpenRouter](https://openrouter.ai/) - OAuth login, free tier available
+  - [OpenAI](https://platform.openai.com/) - GPT-4, GPT-3.5
+  - [Anthropic](https://console.anthropic.com/) - Claude models
+  - [Google AI](https://aistudio.google.com/) - Gemini models
+  - [xAI](https://console.x.ai/) - Grok models
 
 ### Installation
 
@@ -102,11 +107,16 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ## Acknowledgments
 
 Built with:
-- [Claude](https://www.anthropic.com/claude) by Anthropic - AI powering the questions
 - [Claude Code](https://claude.ai/code) - AI pair programming assistant
-- [OpenRouter](https://openrouter.ai/) - AI API gateway
 - [Vite](https://vitejs.dev/) - Build tool and dev server
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+
+AI providers supported:
+- [OpenRouter](https://openrouter.ai/) - Multi-model AI gateway
+- [OpenAI](https://openai.com/) - GPT models
+- [Anthropic](https://www.anthropic.com/) - Claude models
+- [Google AI](https://ai.google.dev/) - Gemini models
+- [xAI](https://x.ai/) - Grok models
 
 ## About This Project
 
