@@ -43,7 +43,7 @@ export const PROVIDERS = {
     description: 'Direct access to GPT models',
     cors: false, // Requires backend proxy
     keyPrefix: 'sk-',
-    keyPattern: /^sk-[a-zA-Z0-9]+$/,
+    keyPattern: /^sk-[a-zA-Z0-9_-]+$/,
     docsUrl: 'https://platform.openai.com/api-keys',
     models: [
       { id: 'gpt-4o', name: 'GPT-4o', inputPrice: 2.5, outputPrice: 10.0 },

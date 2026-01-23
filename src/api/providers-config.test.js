@@ -121,6 +121,17 @@ describe('Providers Config', () => {
         expect(validateKeyFormat('openai', 'sk-ABC123xyz789')).toBe(true);
       });
 
+      it('should validate OpenAI keys with dashes and underscores', () => {
+        // Modern OpenAI keys use project-based format with dashes and underscores
+        expect(validateKeyFormat('openai', 'sk-proj-abc123')).toBe(true);
+        expect(
+          validateKeyFormat(
+            'openai',
+            'sk-proj-IECUDl2KJ3xt39dcy2-GP1WOKEH8_8w1O9Esr0um0k77JlJsgQqw7xxw0z9npO4h'
+          )
+        ).toBe(true);
+      });
+
       it('should reject invalid OpenAI key format', () => {
         expect(validateKeyFormat('openai', 'invalid')).toBe(false);
         expect(validateKeyFormat('openai', 'abc123')).toBe(false);
