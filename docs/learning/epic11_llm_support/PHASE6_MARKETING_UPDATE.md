@@ -53,6 +53,49 @@ gh pr create --title "feat(landing): Epic 11 Phase 6 - Marketing Update" --body 
 
 ---
 
+## Learning Notes
+
+**File:** [PHASE6_LEARNING_NOTES.md](./PHASE6_LEARNING_NOTES.md)
+
+Create and maintain learning notes throughout implementation to capture:
+
+- **Unexpected errors** - Error messages, stack traces, root causes
+- **Workarounds** - Temporary solutions and why they were needed
+- **Fixes** - Final solutions and why they work
+- **Gotchas** - Things that weren't obvious or caused confusion
+- **Decisions** - Why certain approaches were chosen over alternatives
+
+**When to update:**
+- After completing each subtask (before moving to next)
+- Immediately when encountering and resolving problems
+- At session end to ensure nothing was missed
+
+**Template:**
+```markdown
+# Phase 6: Marketing Update - Learning Notes
+
+## Session: [Date]
+
+### Completed
+- [x] Subtask 6.1: Feature card added
+
+### Difficulties & Solutions
+
+#### Problem: [Brief description]
+- **Error:** `[error message]`
+- **Cause:** [root cause]
+- **Fix:** [solution]
+- **Learning:** [takeaway for future]
+
+### Gotchas
+- [Thing that wasn't obvious]
+
+### Next Steps
+- [ ] Continue with subtask 6.2
+```
+
+---
+
 ## Current Landing Page Analysis
 
 | Section | Current Content | Multi-Provider Impact |
