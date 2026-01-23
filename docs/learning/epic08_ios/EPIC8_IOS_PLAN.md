@@ -36,6 +36,7 @@ This epic covers publishing Saberloop to the Apple App Store. The approach is **
 
 | Phase | Name | Document | Description |
 |-------|------|----------|-------------|
+| 0.5 | BrowserStack Testing | [PHASE0.5_BROWSERSTACK_TESTING.md](./PHASE0.5_BROWSERSTACK_TESTING.md) | Test on iOS Safari from Windows (no Mac needed) |
 | 0 | Mac Setup | [PHASE0_MAC_SETUP.md](./PHASE0_MAC_SETUP.md) | Configure macOS for iOS development |
 | 1 | Prerequisites | [PHASE1_PREREQUISITES.md](./PHASE1_PREREQUISITES.md) | Apple Developer Account, Xcode signing |
 | 2 | PWABuilder | [PHASE2_PWABUILDER.md](./PHASE2_PWABUILDER.md) | Generate iOS package with PWABuilder |
@@ -49,6 +50,12 @@ This epic covers publishing Saberloop to the Apple App Store. The approach is **
 ## Learning Objectives
 
 By the end of this epic, you will:
+
+**Phase 0.5 (BrowserStack - No Mac Required):**
+- Test Saberloop on real iOS devices via cloud
+- Identify iOS Safari-specific issues
+- Validate PWA behavior on iOS
+- Document any issues before Mac setup
 
 **Phase 0 (Mac Setup):**
 - Configure macOS for iOS development
@@ -231,6 +238,13 @@ Since you have limited Mac access, here's how to optimize:
 ---
 
 ## Success Criteria
+
+**Phase 0.5 Complete (BrowserStack):**
+- [ ] BrowserStack account created
+- [ ] Tested on latest iPhone (15 Pro or similar)
+- [ ] Tested on at least one older iPhone
+- [ ] PWA features verified (Add to Home Screen, offline)
+- [ ] Any iOS-specific issues documented
 
 **Phase 0 Complete (Mac Setup):**
 - [ ] macOS 13.0+ verified
