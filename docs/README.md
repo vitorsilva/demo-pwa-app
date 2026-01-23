@@ -65,7 +65,7 @@ docs/
 - Status: 📝 Planned
 - Focus: Revenue streams (AdSense, donations, premium)
 
-**📚 [Epic 08: iOS](./learning/epic08_ios/IOS_APP_STORE.md)**
+**📚 [Epic 08: iOS](./learning/epic08_ios/EPIC8_IOS_PLAN.md)**
 - Status: 📝 Planned
 - Focus: iOS App Store publishing
 
