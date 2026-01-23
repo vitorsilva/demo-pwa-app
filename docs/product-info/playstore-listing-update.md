@@ -1,7 +1,7 @@
 # Play Store Listing Update - Ready to Copy
 
-**Date:** January 20, 2026
-**Phase:** Epic 12 - Task 1 (Party Mode Update)
+**Date:** January 23, 2026
+**Phase:** Epic 12 - Task 3 (Multi-Provider LLM Update)
 
 Use this file to copy-paste content into Google Play Console.
 
@@ -48,9 +48,12 @@ Review past quizzes and replay topics even without internet. Your learning never
 🔒 PRIVACY FIRST
 All data stays on your device. No accounts required, no tracking, no ads. Your learning journey is yours alone.
 
+🤖 CHOOSE YOUR AI
+Use your preferred AI provider — OpenAI, Anthropic (Claude), Google AI (Gemini), xAI (Grok), or OpenRouter. Bring your own API key for lower costs and full control.
+
 ✨ KEY FEATURES
-• AI-powered question generation (multiple AI models available)
-• 🆕 Party Mode - real-time multiplayer quiz battles
+• 🆕 Multi-provider AI: OpenAI, Anthropic, Google AI, xAI, OpenRouter
+• Party Mode - real-time multiplayer quiz battles
 • 5 languages: English, Portuguese, Spanish, French, German
 • Adaptive difficulty with "Continue on Topic" feature
 • Detailed explanations for wrong answers
@@ -73,21 +76,19 @@ Built with privacy in mind. Powered by AI. Free forever.
 Download now and start your learning journey!
 ```
 
-**Character count:** ~1,950 characters (well within 4,000 limit)
+**Character count:** ~2,150 characters (well within 4,000 limit)
 
 ---
 
 ## What's New Text
 
 ```
-🎉 NEW: Party Mode!
-Challenge friends in real-time quiz battles:
-• Create a room and share the code
-• Compete with live scores
-• See final leaderboard
-• No accounts needed!
+🤖 NEW: Choose Your AI Provider!
+• Use OpenAI, Anthropic (Claude), Google AI, or xAI
+• Bring your own API key for lower costs
+• Switch providers anytime in Settings
 
-Also: Bug fixes and performance improvements.
+Plus: Bug fixes and performance improvements.
 ```
 
 ---
@@ -152,15 +153,13 @@ Upload in this order (Party Mode first for visibility):
 
 ## Verification Checklist
 
-- [ ] Short description updated (80 chars max)
-- [ ] Full description updated with Party Mode section
-- [ ] KEY FEATURES section has Party Mode marked as 🆕
-- [ ] PERFECT FOR section has "Friends competing in quiz nights" marked as 🆕
-- [ ] Old screenshots deleted
-- [ ] 8 new screenshots uploaded (Party Mode first)
-- [ ] What's New text updated
+- [ ] Full description updated with "CHOOSE YOUR AI" section
+- [ ] KEY FEATURES section has multi-provider marked as 🆕
+- [ ] What's New text updated with multi-provider announcement
 - [ ] Preview looks correct
 - [ ] Changes saved
+
+**Note:** Screenshots don't need updating - no UI changes for this update.
 
 ---
 
@@ -170,3 +169,4 @@ Upload in this order (Party Mode first for visibility):
 |------|--------|
 | January 4, 2026 | Initial Play Store listing (Phase 53) |
 | January 20, 2026 | Party Mode update (Epic 12 Task 1) |
+| January 23, 2026 | Multi-provider LLM update (Epic 12 Task 3) |
