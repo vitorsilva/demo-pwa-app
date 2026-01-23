@@ -42,6 +42,7 @@ This epic covers publishing Saberloop to the Apple App Store. The approach is **
 | 3 | Test & Submit | [PHASE3_TEST_SUBMIT.md](./PHASE3_TEST_SUBMIT.md) | TestFlight and App Store submission |
 | 4 | Evaluate | [PHASE4_EVALUATE.md](./PHASE4_EVALUATE.md) | Handle approval or rejection |
 | 5 | Native Enhancement | [PHASE5_NATIVE_ENHANCEMENT.md](./PHASE5_NATIVE_ENHANCEMENT.md) | Capacitor migration (if needed) |
+| 6 | Share TO | [PHASE6_SHARE_TO.md](./PHASE6_SHARE_TO.md) | iOS Share Extension for content sharing |
 
 ---
 
@@ -67,9 +68,15 @@ By the end of this epic, you will:
 **Phase 5 (Native Enhancement - if needed):**
 - Understand Capacitor framework
 - Migrate from PWABuilder to Capacitor
-- Implement iOS Share Extension ("Share TO" Saberloop)
 - Add haptic feedback for iOS
+- Add native share functionality
 - Understand native vs hybrid app tradeoffs
+
+**Phase 6 (Share TO - optional enhancement):**
+- Create iOS Share Extension
+- Handle incoming shared content
+- Extract topics from URLs and text
+- Deep link into app with pre-filled topic
 
 ---
 
@@ -248,8 +255,13 @@ Since you have limited Mac access, here's how to optimize:
 - [ ] Capacitor project configured
 - [ ] Haptic feedback working
 - [ ] Share FROM (results) working
-- [ ] Share TO (extension) working
 - [ ] App resubmitted with native features
+
+**Phase 6 Complete (optional):**
+- [ ] Share Extension created in Xcode
+- [ ] URL scheme configured
+- [ ] Share handler implemented
+- [ ] Share TO working from Safari and other apps
 
 **Final Success:**
 - [ ] Saberloop approved and live on App Store

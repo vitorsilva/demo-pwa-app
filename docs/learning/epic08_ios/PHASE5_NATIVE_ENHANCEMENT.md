@@ -220,138 +220,13 @@ shareButton.onclick = () => shareResults(quiz.topic, score, total);
 
 ---
 
-## 5.7 Add Share TO (Share Extension) - The Big Feature
+## 5.7 Share TO (Optional Enhancement)
 
-**This is the feature that transforms Saberloop from "a website" to "an iOS learning tool."**
+The Share TO feature (iOS Share Extension) is covered in detail in **[Phase 6: Share TO](./PHASE6_SHARE_TO.md)**.
 
-**What it does:**
-- User reads article about "Photosynthesis" in Safari/News/etc.
-- User taps Share → Saberloop
-- Saberloop opens with topic pre-filled
-- User generates quiz about what they just read
+This feature allows users to share content FROM other apps (Safari, News, etc.) TO Saberloop to create quizzes. It's a powerful native feature that significantly increases App Store approval chances.
 
-**Why Apple loves this:**
-- Genuine iOS integration
-- Can't be done with a website
-- Provides unique value
-
-**Implementation (requires native Swift code):**
-
-### Step 1: Create Share Extension in Xcode
-
-1. In Xcode, File → New → Target
-2. Select "Share Extension"
-3. Name: "ShareToSaberloop"
-4. Finish
-
-### Step 2: Configure Share Extension
-
-**File:** `ios/App/ShareToSaberloop/ShareViewController.swift`
-
-```swift
-import UIKit
-import Social
-import MobileCoreServices
-
-class ShareViewController: SLComposeServiceViewController {
-
-    override func isContentValid() -> Bool {
-        return true
-    }
-
-    override func didSelectPost() {
-        // Get shared text
-        if let item = extensionContext?.inputItems.first as? NSExtensionItem,
-           let attachments = item.attachments {
-
-            for attachment in attachments {
-                if attachment.hasItemConformingToTypeIdentifier(kUTTypeText as String) {
-                    attachment.loadItem(forTypeIdentifier: kUTTypeText as String, options: nil) { (text, error) in
-                        if let sharedText = text as? String {
-                            self.openApp(with: sharedText)
-                        }
-                    }
-                } else if attachment.hasItemConformingToTypeIdentifier(kUTTypeURL as String) {
-                    attachment.loadItem(forTypeIdentifier: kUTTypeURL as String, options: nil) { (url, error) in
-                        if let sharedURL = url as? URL {
-                            self.openApp(with: sharedURL.absoluteString)
-                        }
-                    }
-                }
-            }
-        }
-
-        extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
-    }
-
-    private func openApp(with content: String) {
-        // Encode content for URL
-        let encoded = content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-
-        // Open main app with shared content
-        let url = URL(string: "saberloop://share?content=\(encoded)")!
-
-        var responder: UIResponder? = self
-        while responder != nil {
-            if let application = responder as? UIApplication {
-                application.open(url, options: [:], completionHandler: nil)
-                break
-            }
-            responder = responder?.next
-        }
-    }
-
-    override func configurationItems() -> [Any]! {
-        return []
-    }
-}
-```
-
-### Step 3: Configure URL Scheme
-
-In Xcode, select main App target → Info tab → URL Types:
-- Add URL Scheme: `saberloop`
-
-### Step 4: Handle incoming share in your web app
-
-```javascript
-// src/features/share-handler.js
-import { App } from '@capacitor/app';
-
-export function setupShareHandler() {
-  App.addListener('appUrlOpen', (event) => {
-    const url = new URL(event.url);
-
-    if (url.protocol === 'saberloop:' && url.host === 'share') {
-      const content = url.searchParams.get('content');
-      if (content) {
-        // Navigate to quiz creation with pre-filled topic
-        handleSharedContent(decodeURIComponent(content));
-      }
-    }
-  });
-}
-
-function handleSharedContent(content) {
-  // Extract topic from shared content
-  // Could be URL (fetch page title) or text (use directly)
-
-  // Simple approach: use first 100 chars as topic
-  const topic = content.substring(0, 100);
-
-  // Navigate to home and pre-fill topic
-  window.location.href = `/app/?topic=${encodeURIComponent(topic)}`;
-}
-```
-
-### Step 5: Initialize in main.js
-
-```javascript
-import { setupShareHandler } from './features/share-handler.js';
-
-// On app start
-setupShareHandler();
-```
+**Complete Phase 5 first**, then proceed to Phase 6 if you want this enhancement.
 
 ---
 
@@ -374,7 +249,7 @@ npx cap open ios
 1. Build and run on iPhone
 2. Test haptic feedback on quiz answers
 3. Test Share button on results
-4. Test Share TO from Safari (share an article)
+4. (Optional) For Share TO testing, see [Phase 6](./PHASE6_SHARE_TO.md)
 
 ---
 
@@ -405,9 +280,6 @@ npx cap open ios
 - [ ] iOS project generated with `npx cap add ios`
 - [ ] Haptic feedback plugin installed and integrated
 - [ ] Share FROM (results) plugin installed and integrated
-- [ ] Share TO (extension) created and working
-- [ ] URL scheme configured (`saberloop://`)
-- [ ] Share handler implemented in web app
 - [ ] All features tested on real device
 - [ ] New build uploaded to App Store Connect
 - [ ] App resubmitted for review with native features highlighted
@@ -426,13 +298,7 @@ npx cap open ios
 
 ### Share Extension Issues
 
-**Extension not appearing in share sheet**
-- Verify extension target is included in build
-- Check that extension and main app have same App Group
-
-**App not opening from extension**
-- Verify URL scheme is registered in Info.plist
-- Check URL encoding of shared content
+See [Phase 6: Share TO](./PHASE6_SHARE_TO.md) for Share Extension troubleshooting.
 
 ---
 
@@ -451,7 +317,10 @@ A: Each rejection gives specific feedback. Address it, add more native features 
 
 ## Next Steps
 
-After Phase 5 approval:
+**Optional enhancement:**
+- **[Phase 6: Share TO](./PHASE6_SHARE_TO.md)** - Add iOS Share Extension for receiving shared content
+
+**After approval:**
 - Update landing page with App Store badge
 - Monitor reviews and ratings
 - Consider additional iOS features (widgets, Siri shortcuts)
