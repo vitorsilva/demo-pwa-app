@@ -27,7 +27,7 @@ This epic consolidates all marketing-related tasks for Saberloop. It serves as a
 | Task | Description | Status | Document |
 |------|-------------|--------|----------|
 | Task 1 | Landing Page & Play Store Party Mode Update | ✅ Complete | [TASK1_LANDING_PLAYSTORE_UPDATE.md](./TASK1_LANDING_PLAYSTORE_UPDATE.md) |
-| Task 3 | Multi-Provider LLM Messaging | ✅ Complete | Landing page updated (Epic 11 Phase 6), Play Store ready |
+| Task 3 | Multi-Provider LLM Messaging | ✅ Complete | Landing page (Epic 11 Phase 6) + Play Store (Jan 23, 2026) |
 
 ### Future Tasks (Backlog)
 
