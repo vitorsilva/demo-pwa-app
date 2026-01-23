@@ -54,14 +54,22 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Saberloop",
-        "operatingSystem": "Android",
+        "operatingSystem": "Android, Web",
         "applicationCategory": "EducationalApplication",
         "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD"
         },
-        "description": "AI-powered quiz app for learning any topic. Generate unlimited quizzes on any subject with AI.",
+        "description": "AI-powered quiz app supporting multiple LLM providers. Generate unlimited quizzes using OpenAI, Anthropic, Google AI, xAI, or OpenRouter.",
+        "featureList": [
+            "AI-powered quiz generation",
+            "Multiple LLM provider support (OpenAI, Anthropic, Google AI, xAI, OpenRouter)",
+            "Multi-language support (English, Portuguese, Spanish, French, German)",
+            "Offline mode",
+            "Party Mode multiplayer",
+            "Adaptive difficulty levels"
+        ],
         "screenshot": "https://saberloop.com/app/icons/screenshot-mobile-1.png",
         "author": {
             "@type": "Person",
@@ -672,16 +680,16 @@
                 <p>AI-powered quizzes on any topic, in 5 languages. Learn solo or challenge friends in real-time Party Mode. Free to try, works offline.</p>
 
                 <div class="hero-buttons">
-                    <a href="https://play.google.com/store/apps/details?id=com.saberloop.app" class="btn btn-primary" target="_blank" rel="noopener" data-track="play_store_hero">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/></svg>
-                        Get on Google Play
+                    <a href="/app/" class="btn btn-primary" data-track="web_app_hero">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Try in Browser
                     </a>
                     <a href="/downloads/saberloop-v1.0.0.apk" class="btn btn-secondary" download data-track="apk_download_hero">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 16l-6-6h4V4h4v6h4l-6 6zm-6 2h12v2H6v-2z"/></svg>
                         Download APK
                     </a>
                 </div>
-                <p class="web-link">Or <a href="/app/" data-track="web_app_hero">try in your browser</a> — no install needed</p>
+                <p class="web-link">Google Play: Coming Soon</p>
 
             </div>
             <div class="hero-image">
@@ -727,6 +735,11 @@
                     <div class="feature-icon">🎉</div>
                     <h3>Party Mode</h3>
                     <p>Challenge friends in real-time quiz battles. Create a room, share the code, compete live!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Choose Your AI</h3>
+                    <p>Use your own API key from OpenAI, Anthropic, Google AI, or xAI. Lower costs, more control.</p>
                 </div>
             </div>
         </div>
@@ -835,12 +848,13 @@
                 <div class="cta-column">
                     <h3>Unlimited Learning</h3>
                     <ul>
-                        <li>Connect your OpenRouter account</li>
-                        <li>Choose your AI model</li>
-                        <li>Generate unlimited quizzes</li>
-                        <li>See token usage costs</li>
+                        <li>Use OpenRouter, OpenAI, Anthropic, Google AI, or xAI</li>
+                        <li>Bring your own API key for lower costs</li>
+                        <li>Choose from multiple AI models</li>
+                        <li>See token usage and costs</li>
                     </ul>
-                    <a href="https://play.google.com/store/apps/details?id=com.saberloop.app" class="btn btn-secondary" target="_blank" rel="noopener" data-track="play_store_cta">Get on Google Play</a>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 16px;">Google Play: Coming Soon</p>
+                    <a href="/app/" class="btn btn-secondary" data-track="web_app_cta_unlimited">Try in Browser</a>
                 </div>
             </div>
             <p class="web-link">Or <a href="/downloads/saberloop-v1.0.0.apk" download data-track="apk_download_cta">download the APK</a> directly</p>
