@@ -147,7 +147,8 @@ Update the landing page and marketing materials to highlight the new multi-provi
 │  │  [Try in Browser]          │  │    AI models               │     │
 │  │                            │  │  ✓ See token usage & costs │ ← CHANGED
 │  │                            │  │                            │     │
-│  │                            │  │  [Get on Google Play]      │     │
+│  │                            │  │  Google Play: Coming Soon  │ ← CHANGED
+│  │                            │  │  [Try in Browser]          │ ← CHANGED
 │  └────────────────────────────┘  └────────────────────────────┘     │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
@@ -163,7 +164,8 @@ Update the landing page and marketing materials to highlight the new multi-provi
         <li>Choose from multiple AI models</li>
         <li>See token usage and costs</li>
     </ul>
-    <a href="https://play.google.com/store/apps/details?id=com.saberloop.app" class="btn btn-secondary" target="_blank" rel="noopener" data-track="play_store_cta">Get on Google Play</a>
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 16px;">Google Play: Coming Soon</p>
+    <a href="/app/" class="btn btn-secondary" data-track="web_app_cta_unlimited">Try in Browser</a>
 </div>
 ```
 
@@ -174,10 +176,136 @@ Update the landing page and marketing materials to highlight the new multi-provi
 - [ ] Text displays correctly on desktop
 - [ ] List items fit within card width on mobile (may need shorter text)
 - [ ] No text overflow or wrapping issues
+- [ ] "Coming Soon" text is visible and styled appropriately
 
 ---
 
-### Subtask 6.3: Capture New Settings Screenshot
+### Subtask 6.2b: Update Hero Section Google Play Button
+
+**Location:** Hero section (lines 675-678)
+
+#### Before:
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Learn Anything, Practice Anything                                   │
+│                                                                      │
+│  AI-powered quizzes on any topic...                                  │
+│                                                                      │
+│  [▶ Get on Google Play]  [↓ Download APK]                           │
+│                                                                      │
+│  Or try in your browser                                              │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### After:
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Learn Anything, Practice Anything                                   │
+│                                                                      │
+│  AI-powered quizzes on any topic...                                  │
+│                                                                      │
+│  [🌐 Try in Browser]  [↓ Download APK]                              │ ← CHANGED
+│                                                                      │
+│  Google Play: Coming Soon                                            │ ← CHANGED
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Updated HTML (lines 674-685):**
+```html
+<div class="hero-buttons">
+    <a href="/app/" class="btn btn-primary" data-track="web_app_hero">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        Try in Browser
+    </a>
+    <a href="/downloads/saberloop-v1.0.0.apk" class="btn btn-secondary" download data-track="apk_download_hero">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 16l-6-6h4V4h4v6h4l-6 6zm-6 2h12v2H6v-2z"/></svg>
+        Download APK
+    </a>
+</div>
+<p class="web-link">Google Play: Coming Soon</p>
+```
+
+**Files to modify:**
+- `landing/index.html` - Update hero buttons section (lines 674-685)
+
+**Verification:**
+- [ ] "Try in Browser" is now primary CTA
+- [ ] "Coming Soon" text displays below buttons
+- [ ] APK download still works
+
+---
+
+### Subtask 6.3: Capture Screenshots
+
+**Purpose:** Capture all screenshots needed for landing page updates.
+
+**Reference:** Existing capture scripts in `tests/e2e/capture-*.spec.js`
+- `capture-landing-assets.spec.js` - Pattern for landing page screenshots
+- `capture-playstore-screenshots.spec.js` - Pattern for app store screenshots
+
+#### Screenshots to Capture:
+
+| Screenshot | Description | Dimensions | Output Path |
+|------------|-------------|------------|-------------|
+| Settings with Providers | Settings page showing LLM Providers section | 375x667 → 304x584 | `landing/images/landing-06-settings-page.png` |
+
+#### Capture Script to Create: `tests/e2e/capture-settings-providers.spec.js`
+
+```javascript
+import { test, expect } from '@playwright/test';
+import { setupAuthenticatedState, clearSessions } from './helpers.js';
+
+const MOBILE_VIEWPORT = { width: 375, height: 667 };
+const SCREENSHOT_DIR = 'landing/images';
+
+test.use({ viewport: MOBILE_VIEWPORT });
+
+test.describe('Capture Settings Provider Screenshots', () => {
+
+  test('Settings page with LLM Providers section', async ({ page }) => {
+    await setupAuthenticatedState(page);
+    await clearSessions(page);
+    await page.reload();
+    await page.waitForSelector('[data-testid="welcome-heading"]', { timeout: 10000 });
+
+    // Navigate to Settings
+    await page.goto('/#/settings');
+    await page.waitForTimeout(500);
+
+    // Scroll to LLM Providers section (ensure it's visible)
+    const providerSection = page.locator('[data-testid="provider-section"]');
+    if (await providerSection.isVisible()) {
+      await providerSection.scrollIntoViewIfNeeded();
+    }
+    await page.waitForTimeout(300);
+
+    // Capture screenshot
+    await page.screenshot({
+      path: `${SCREENSHOT_DIR}/landing-06-settings-page.png`,
+      fullPage: false
+    });
+
+    console.log('✓ Captured: Settings page with LLM Providers');
+  });
+
+});
+```
+
+#### Run Command:
+```bash
+npx playwright test tests/e2e/capture-settings-providers.spec.js --headed
+```
+
+#### Post-Processing (resize to match landing page dimensions):
+```bash
+# Current landing page images are 304x584
+# Use Sharp or ImageMagick to resize
+npx sharp-cli landing/images/landing-06-settings-page.png -o landing/images/landing-06-settings-page.png resize 304 584
+```
+
+---
+
+#### Screenshot 1: Settings with Provider Selection
 
 **Location:** Screenshots grid in "See It In Action" section
 
@@ -378,18 +506,24 @@ npm run deploy:landing
 
 ## Implementation Checklist
 
-### Phase 1: Content Updates (Required)
-- [ ] 6.1: Add "Choose Your AI" feature card
-- [ ] 6.2: Update "Unlimited Learning" CTA text
+### Phase 1: Screenshot Capture (Do First)
+- [ ] 6.3: Capture settings screenshot showing LLM Providers section
+- [ ] Process screenshot to 304x584 dimensions
+- [ ] Verify image quality and file size
+
+### Phase 2: Content Updates (Required)
+- [ ] 6.1: Add "Choose Your AI" feature card to features grid
+- [ ] 6.2: Update "Unlimited Learning" CTA text (multi-provider messaging)
+- [ ] 6.2b: Update Hero section (Google Play → "Coming Soon", Try in Browser as primary)
 - [ ] 6.4: Update structured data with featureList
 
-### Phase 2: Visual Updates (Recommended)
-- [ ] 6.3: Capture and replace settings screenshot showing providers
-
 ### Phase 3: Deploy & Verify
-- [ ] 6.7: Deploy to production
-- [ ] 6.7: Verify all changes live
-- [ ] Test on mobile devices
+- [ ] 6.7: Deploy landing page to production
+- [ ] Verify feature card displays correctly (desktop/tablet/mobile)
+- [ ] Verify CTA section text renders properly
+- [ ] Verify hero buttons work correctly
+- [ ] Verify new screenshot displays in grid
+- [ ] Test on mobile devices (iOS Safari, Android Chrome)
 
 ### Skipped (Not Recommended)
 - [ ] ~~6.5: Update meta description~~ (keep current, focused on benefits)
@@ -401,8 +535,8 @@ npm run deploy:landing
 
 | File | Changes |
 |------|---------|
-| `landing/index.html` | Feature card, CTA text, structured data |
-| `landing/images/landing-06-settings-page.png` | Replace with provider settings screenshot (optional) |
+| `landing/index.html` | Feature card, hero buttons, CTA text, structured data |
+| `landing/images/landing-06-settings-page.png` | Replace with provider settings screenshot |
 
 ---
 
