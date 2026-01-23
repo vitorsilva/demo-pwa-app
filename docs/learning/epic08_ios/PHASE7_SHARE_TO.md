@@ -1,9 +1,9 @@
-# Phase 6: Share TO Functionality
+# Phase 7: Share TO Functionality
 
 **Epic:** 08 - iOS
 **Time:** 1-2 sessions
 **Mac Required:** Yes
-**Prerequisites:** Phase 5 complete (Capacitor installed)
+**Prerequisites:** Phase 6 complete (Capacitor installed)
 
 ---
 
@@ -34,7 +34,7 @@ Receive shared content to create quizzes. This is a key iOS-native feature that 
 
 ---
 
-## 6.1 Create Share Extension in Xcode
+## 7.1 Create Share Extension in Xcode
 
 1. In Xcode, File → New → Target
 2. Select "Share Extension"
@@ -43,7 +43,7 @@ Receive shared content to create quizzes. This is a key iOS-native feature that 
 
 ---
 
-## 6.2 Configure Share Extension
+## 7.2 Configure Share Extension
 
 **File:** `ios/App/ShareToSaberloop/ShareViewController.swift`
 
@@ -108,14 +108,14 @@ class ShareViewController: SLComposeServiceViewController {
 
 ---
 
-## 6.3 Configure URL Scheme
+## 7.3 Configure URL Scheme
 
 In Xcode, select main App target → Info tab → URL Types:
 - Add URL Scheme: `saberloop`
 
 ---
 
-## 6.4 Handle Incoming Share in Web App
+## 7.4 Handle Incoming Share in Web App
 
 **File:** `src/features/share-handler.js`
 
@@ -158,7 +158,7 @@ setupShareHandler();
 
 ---
 
-## 6.5 Topic Extraction Enhancements (Optional)
+## 7.5 Topic Extraction Enhancements (Optional)
 
 For smarter topic extraction:
 
@@ -188,7 +188,7 @@ function extractTopic(content) {
 
 ---
 
-## 6.6 Testing
+## 7.6 Testing
 
 1. Build and run on iPhone
 2. Open Safari and navigate to any article
@@ -202,7 +202,7 @@ function extractTopic(content) {
 
 ---
 
-## 6.7 Checklist: Phase 6 Complete
+## 7.7 Checklist: Phase 6 Complete
 
 - [ ] Share Extension target created in Xcode
 - [ ] ShareViewController.swift implemented
@@ -239,7 +239,7 @@ function extractTopic(content) {
 
 ## Related Documents
 
-- [PHASE5_NATIVE_ENHANCEMENT.md](./PHASE5_NATIVE_ENHANCEMENT.md) - Capacitor setup (prerequisite)
+- [PHASE6_NATIVE_ENHANCEMENT.md](./PHASE6_NATIVE_ENHANCEMENT.md) - Capacitor setup (prerequisite)
 - [Epic 6: Quiz Sharing](../epic06_sharing/PHASE1_QUIZ_SHARING.md) - Share FROM functionality
 
 ---

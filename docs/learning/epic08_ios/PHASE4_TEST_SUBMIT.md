@@ -1,13 +1,13 @@
-# Phase 3: Test & Submit
+# Phase 4: Test & Submit
 
 **Epic:** 08 - iOS
 **Time:** 1-2 sessions
 **Mac Required:** Yes
-**Prerequisites:** Phase 2 complete (app builds successfully)
+**Prerequisites:** Phase 3 complete (app builds successfully)
 
 ---
 
-## 3.1 Test on Your iPhone
+## 4.1 Test on Your iPhone
 
 **Option A: Via USB (requires free Apple ID)**
 
@@ -20,11 +20,11 @@
 
 **Option B: Via TestFlight (requires Developer Account)**
 
-Better for sharing with others - see section 3.2
+Better for sharing with others - see section 4.2
 
 ---
 
-## 3.2 TestFlight Distribution
+## 4.2 TestFlight Distribution
 
 **TestFlight** is Apple's official beta testing platform.
 
@@ -45,7 +45,7 @@ Better for sharing with others - see section 3.2
 
 3. **Configure in App Store Connect**
    - Go to https://appstoreconnect.apple.com
-   - Select your app (create if needed - see 3.3)
+   - Select your app (create if needed - see 4.3)
    - Go to "TestFlight" tab
    - Your build appears (may take 10-30 minutes to process)
    - Add test information if prompted
@@ -62,7 +62,7 @@ Better for sharing with others - see section 3.2
 
 ---
 
-## 3.3 Create App in App Store Connect
+## 4.3 Create App in App Store Connect
 
 **Steps:**
 
@@ -78,7 +78,7 @@ Better for sharing with others - see section 3.2
 
 ---
 
-## 3.4 Prepare App Store Listing
+## 4.4 Prepare App Store Listing
 
 **Required assets:**
 
@@ -147,7 +147,7 @@ quiz,AI,learning,trivia,education,study,flashcards,multiplayer,party,knowledge,t
 
 ---
 
-## 3.5 Submit for Review
+## 4.5 Submit for Review
 
 **Pre-submission checklist:**
 - [ ] App builds without errors
@@ -172,7 +172,7 @@ quiz,AI,learning,trivia,education,study,flashcards,multiplayer,party,knowledge,t
 
 ---
 
-## 3.6 Checklist: Phase 3 Complete
+## 4.6 Checklist: Phase 4 Complete
 
 - [ ] App tested on real iPhone
 - [ ] Archive created in Xcode
@@ -208,7 +208,7 @@ quiz,AI,learning,trivia,education,study,flashcards,multiplayer,party,knowledge,t
 ## Next Phase
 
 After submitting, proceed to:
-- **[Phase 4: Evaluate](./PHASE4_EVALUATE.md)** - Handle the review outcome
+- **[Phase 5: Evaluate](./PHASE5_EVALUATE.md)** - Handle the review outcome
 
 ---
 

@@ -1,13 +1,13 @@
-# Phase 1: Prerequisites
+# Phase 2: Prerequisites
 
 **Epic:** 08 - iOS
 **Time:** 1 session (~1-2 hours)
 **Mac Required:** Yes (for Xcode configuration)
-**Prerequisites:** Phase 0 complete (Xcode installed)
+**Prerequisites:** Phase 1 complete (Xcode installed)
 
 ---
 
-## 1.1 Apple Developer Account
+## 2.1 Apple Developer Account
 
 **Cost:** $99/year (recurring)
 
@@ -29,14 +29,14 @@
 
 ---
 
-## 1.2 Xcode Installation Verification
+## 2.2 Xcode Installation Verification
 
 **Why Xcode?**
 - Required to build iOS apps
 - Required to sign apps for distribution
 - Required to upload to App Store
 
-**Verify installation (should be done in Phase 0):**
+**Verify installation (should be done in Phase 1):**
 ```bash
 xcode-select --version
 # Should show version info
@@ -45,11 +45,11 @@ xcodebuild -version
 # Should show: Xcode 15.x (or later)
 ```
 
-If not installed, see [Phase 0: Mac Setup](./PHASE0_MAC_SETUP.md).
+If not installed, see [Phase 1: Mac Setup](./PHASE1_MAC_SETUP.md).
 
 ---
 
-## 1.3 Apple Developer Account in Xcode
+## 2.3 Apple Developer Account in Xcode
 
 **Steps:**
 1. Open Xcode
@@ -61,7 +61,7 @@ If not installed, see [Phase 0: Mac Setup](./PHASE0_MAC_SETUP.md).
 
 ---
 
-## 1.4 Understand App Store Review Guidelines
+## 2.4 Understand App Store Review Guidelines
 
 **Before building, read these key sections:**
 - https://developer.apple.com/app-store/review/guidelines/
@@ -77,7 +77,7 @@ If not installed, see [Phase 0: Mac Setup](./PHASE0_MAC_SETUP.md).
 
 ---
 
-## 1.5 Checklist: Phase 1 Complete
+## 2.5 Checklist: Phase 2 Complete
 
 - [ ] Apple Developer Account enrolled ($99 paid)
 - [ ] Enrollment approved by Apple
@@ -90,7 +90,7 @@ If not installed, see [Phase 0: Mac Setup](./PHASE0_MAC_SETUP.md).
 ## Next Phase
 
 Once prerequisites are complete, proceed to:
-- **[Phase 2: PWABuilder](./PHASE2_PWABUILDER.md)** - Generate iOS package
+- **[Phase 3: PWABuilder](./PHASE3_PWABUILDER.md)** - Generate iOS package
 
 ---
 

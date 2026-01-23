@@ -1,4 +1,4 @@
-# Phase 0.5: BrowserStack iOS Testing
+# Phase 0: BrowserStack iOS Testing
 
 **Epic:** 08 - iOS
 **Time:** 1-2 hours
@@ -24,7 +24,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.1 Create BrowserStack Account
+## 0.1 Create BrowserStack Account
 
 1. Go to https://www.browserstack.com
 2. Click "Start Free Trial" (no credit card required)
@@ -39,7 +39,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.2 Test Saberloop on iOS Safari
+## 0.2 Test Saberloop on iOS Safari
 
 ### Start a Live Session
 
@@ -62,7 +62,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.3 Testing Checklist
+## 0.3 Testing Checklist
 
 ### Basic Functionality
 
@@ -102,7 +102,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.4 Common iOS Safari Issues to Watch For
+## 0.4 Common iOS Safari Issues to Watch For
 
 | Issue | What to Look For | Solution |
 |-------|------------------|----------|
@@ -114,7 +114,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.5 BrowserStack Features to Explore
+## 0.5 BrowserStack Features to Explore
 
 ### Device Settings
 
@@ -139,7 +139,7 @@ BrowserStack provides access to real iOS devices and simulators through your bro
 
 ---
 
-## 0.5.6 Testing on Multiple iOS Versions
+## 0.6 Testing on Multiple iOS Versions
 
 Test on at least:
 
@@ -153,7 +153,7 @@ Test on at least:
 
 ---
 
-## 0.5.7 Document Any Issues Found
+## 0.7 Document Any Issues Found
 
 Create notes for any iOS-specific issues:
 
@@ -177,7 +177,7 @@ Save these notes - they'll be useful when:
 
 ---
 
-## 0.5.8 Alternative: Sauce Labs (If BrowserStack Doesn't Work)
+## 0.8 Alternative: Sauce Labs (If BrowserStack Doesn't Work)
 
 If you prefer another option:
 
@@ -188,7 +188,7 @@ If you prefer another option:
 
 ---
 
-## 0.5.9 Checklist: Phase 0.5 Complete
+## 0.9 Checklist: Phase 0 Complete
 
 - [ ] BrowserStack account created
 - [ ] Tested on iPhone 15 Pro (or latest)
@@ -214,12 +214,12 @@ After this phase, you should know:
 ## Next Phase
 
 If everything looks good on iOS Safari, proceed to:
-- **[Phase 0: Mac Setup](./PHASE0_MAC_SETUP.md)** - When you have Mac access
+- **[Phase 1: Mac Setup](./PHASE1_MAC_SETUP.md)** - When you have Mac access
 
 If you found issues:
 - Fix them on Windows first
 - Re-test on BrowserStack
-- Then proceed to Phase 0
+- Then proceed to Phase 1
 
 ---
 

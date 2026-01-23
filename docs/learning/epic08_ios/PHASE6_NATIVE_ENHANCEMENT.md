@@ -1,15 +1,15 @@
-# Phase 5: Native Enhancement (Plan B)
+# Phase 6: Native Enhancement (Plan B)
 
 **Epic:** 08 - iOS
 **Time:** 2-3 sessions
 **Mac Required:** Yes
-**Prerequisites:** Phase 4 - Rejection requiring native features
+**Prerequisites:** Phase 5 - Rejection requiring native features
 
 This phase transforms your PWA wrapper into a hybrid app with genuine native features.
 
 ---
 
-## 5.1 Migrate to Capacitor
+## 6.1 Migrate to Capacitor
 
 **Why Capacitor?**
 - PWABuilder iOS is limited to basic WebView
@@ -30,7 +30,7 @@ This phase transforms your PWA wrapper into a hybrid app with genuine native fea
 
 ---
 
-## 5.2 Install Capacitor
+## 6.2 Install Capacitor
 
 **On your main development machine (not Mac):**
 
@@ -60,7 +60,7 @@ saberloop/
 
 ---
 
-## 5.3 Configure Capacitor
+## 6.3 Configure Capacitor
 
 **File:** `capacitor.config.ts`
 
@@ -87,7 +87,7 @@ export default config;
 
 ---
 
-## 5.4 Build and Sync
+## 6.4 Build and Sync
 
 **Workflow:**
 
@@ -109,7 +109,7 @@ npx cap open ios
 
 ---
 
-## 5.5 Add Haptic Feedback
+## 6.5 Add Haptic Feedback
 
 **Native haptic feedback makes the app feel more "iOS native".**
 
@@ -164,7 +164,7 @@ function handleAnswer(selectedAnswer, correctAnswer) {
 
 ---
 
-## 5.6 Add Share FROM (Results Sharing)
+## 6.6 Add Share FROM (Results Sharing)
 
 **Allow users to share their quiz results.**
 
@@ -220,17 +220,17 @@ shareButton.onclick = () => shareResults(quiz.topic, score, total);
 
 ---
 
-## 5.7 Share TO (Optional Enhancement)
+## 6.7 Share TO (Optional Enhancement)
 
-The Share TO feature (iOS Share Extension) is covered in detail in **[Phase 6: Share TO](./PHASE6_SHARE_TO.md)**.
+The Share TO feature (iOS Share Extension) is covered in detail in **[Phase 7: Share TO](./PHASE7_SHARE_TO.md)**.
 
 This feature allows users to share content FROM other apps (Safari, News, etc.) TO Saberloop to create quizzes. It's a powerful native feature that significantly increases App Store approval chances.
 
-**Complete Phase 5 first**, then proceed to Phase 6 if you want this enhancement.
+**Complete Phase 6 first**, then proceed to Phase 7 if you want this enhancement.
 
 ---
 
-## 5.8 Rebuild and Test
+## 6.8 Rebuild and Test
 
 **After adding native features:**
 
@@ -249,11 +249,11 @@ npx cap open ios
 1. Build and run on iPhone
 2. Test haptic feedback on quiz answers
 3. Test Share button on results
-4. (Optional) For Share TO testing, see [Phase 6](./PHASE6_SHARE_TO.md)
+4. (Optional) For Share TO testing, see [Phase 7](./PHASE7_SHARE_TO.md)
 
 ---
 
-## 5.9 Resubmit to App Store
+## 6.9 Resubmit to App Store
 
 **Update your submission:**
 
@@ -274,7 +274,7 @@ npx cap open ios
 
 ---
 
-## 5.10 Checklist: Phase 5 Complete
+## 6.10 Checklist: Phase 5 Complete
 
 - [ ] Capacitor installed and configured
 - [ ] iOS project generated with `npx cap add ios`
@@ -298,7 +298,7 @@ npx cap open ios
 
 ### Share Extension Issues
 
-See [Phase 6: Share TO](./PHASE6_SHARE_TO.md) for Share Extension troubleshooting.
+See [Phase 7: Share TO](./PHASE7_SHARE_TO.md) for Share Extension troubleshooting.
 
 ---
 
@@ -318,7 +318,7 @@ A: Each rejection gives specific feedback. Address it, add more native features 
 ## Next Steps
 
 **Optional enhancement:**
-- **[Phase 6: Share TO](./PHASE6_SHARE_TO.md)** - Add iOS Share Extension for receiving shared content
+- **[Phase 7: Share TO](./PHASE7_SHARE_TO.md)** - Add iOS Share Extension for receiving shared content
 
 **After approval:**
 - Update landing page with App Store badge

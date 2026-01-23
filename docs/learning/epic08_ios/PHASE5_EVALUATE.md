@@ -1,13 +1,13 @@
-# Phase 4: Evaluate Outcome
+# Phase 5: Evaluate Outcome
 
 **Epic:** 08 - iOS
 **Time:** Depends on review result
 **Mac Required:** Only if changes needed
-**Prerequisites:** Phase 3 complete (app submitted)
+**Prerequisites:** Phase 4 complete (app submitted)
 
 ---
 
-## 4.1 If Approved
+## 5.1 If Approved
 
 **Congratulations!** Your app is on the App Store.
 
@@ -18,11 +18,11 @@
 - [ ] Announce on social media
 - [ ] Monitor reviews and ratings
 
-**You're done!** Skip Phase 5 - you don't need native enhancements.
+**You're done!** Skip Phase 6 - you don't need native enhancements.
 
 ---
 
-## 4.2 If Rejected
+## 5.2 If Rejected
 
 **Don't panic!** This is common for PWA wrappers.
 
@@ -34,31 +34,31 @@
 
 | Rejection Reason | Solution |
 |------------------|----------|
-| 4.2 Minimum Functionality | Add native features (Phase 5) |
-| 4.2.3 Web Clipping | Add native features (Phase 5) |
+| 4.2 Minimum Functionality | Add native features (Phase 6) |
+| 4.2.3 Web Clipping | Add native features (Phase 6) |
 | Missing features | May need specific native APIs |
 | Metadata issues | Fix description, screenshots |
 | Bugs/crashes | Fix and resubmit |
 
 ---
 
-## 4.3 Appeal vs Enhance
+## 5.3 Appeal vs Enhance
 
 **When to appeal:**
 - Rejection seems unfair or incorrect
 - You can clearly explain added value
 - Rejection is for metadata (easy to fix)
 
-**When to enhance (Phase 5):**
+**When to enhance (Phase 6):**
 - Rejection cites "minimum functionality"
 - Rejection cites "web clipping"
 - Apple suggests adding native features
 
-**Most PWA wrappers need Phase 5** to pass review.
+**Most PWA wrappers need Phase 6** to pass review.
 
 ---
 
-## 4.4 How to Appeal
+## 5.4 How to Appeal
 
 If you believe the rejection is incorrect:
 
@@ -97,14 +97,14 @@ Please let us know if you need any additional information.
 
 ---
 
-## 4.5 Decision: Appeal or Enhance?
+## 5.5 Decision: Appeal or Enhance?
 
 **Appeal if:**
 - [ ] Rejection reason seems to misunderstand your app
 - [ ] You have clear differentiating features to highlight
 - [ ] You want to try one more time before investing in native features
 
-**Enhance (Phase 5) if:**
+**Enhance (Phase 6) if:**
 - [ ] Rejection specifically mentions "minimum functionality" or "web clipping"
 - [ ] Apple suggests adding native features
 - [ ] You're willing to invest time in native development
@@ -112,7 +112,7 @@ Please let us know if you need any additional information.
 
 ---
 
-## 4.6 Checklist: Phase 4 Complete
+## 5.6 Checklist: Phase 4 Complete
 
 **If Approved:**
 - [ ] App live on App Store
@@ -123,7 +123,7 @@ Please let us know if you need any additional information.
 - [ ] Rejection reason understood
 - [ ] Decision made: Appeal or Enhance
 - [ ] If appealing: Response submitted
-- [ ] If enhancing: Proceed to Phase 5
+- [ ] If enhancing: Proceed to Phase 6
 
 ---
 
@@ -136,7 +136,7 @@ Based on your outcome:
 **Rejected + Appealing:** Wait for Apple's response (typically 1-3 days)
 
 **Rejected + Enhancing:** Proceed to:
-- **[Phase 5: Native Enhancement](./PHASE5_NATIVE_ENHANCEMENT.md)** - Add Capacitor and native features
+- **[Phase 6: Native Enhancement](./PHASE6_NATIVE_ENHANCEMENT.md)** - Add Capacitor and native features
 
 ---
 

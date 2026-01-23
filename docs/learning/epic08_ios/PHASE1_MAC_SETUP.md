@@ -1,15 +1,15 @@
-# Phase 0: Mac Setup & Configuration
+# Phase 1: Mac Setup & Configuration
 
 **Epic:** 08 - iOS
 **Time:** 1-2 hours (can be done incrementally)
 **Mac Required:** Yes
-**Goal:** Get the Mac ready for iOS development before starting Phase 1
+**Goal:** Get the Mac ready for iOS development before starting Phase 2
 
 This phase ensures your Mac is properly configured. Do this FIRST when you have Mac access, as some downloads are large and time-consuming.
 
 ---
 
-## 0.1 Mac System Requirements
+## 1.1 Mac System Requirements
 
 **Minimum Requirements:**
 - macOS Ventura (13.0) or later recommended
@@ -30,7 +30,7 @@ df -h /
 
 ---
 
-## 0.2 Install Xcode (REQUIRED - Do This First!)
+## 1.2 Install Xcode (REQUIRED - Do This First!)
 
 Xcode is Apple's IDE and is **required** for iOS development. It's a large download (~12GB), so start this first.
 
@@ -65,7 +65,7 @@ xcode-select --install
 
 ---
 
-## 0.3 Install Homebrew (RECOMMENDED)
+## 1.3 Install Homebrew (RECOMMENDED)
 
 Homebrew is a package manager for macOS - makes installing developer tools easy.
 
@@ -93,7 +93,7 @@ brew --version
 
 ---
 
-## 0.4 Install Node.js (if not already installed)
+## 1.4 Install Node.js (if not already installed)
 
 You'll need Node.js for Capacitor (Plan B).
 
@@ -110,7 +110,7 @@ brew install node@18
 
 ---
 
-## 0.5 Install Git (if not already installed)
+## 1.5 Install Git (if not already installed)
 
 **Check if already installed:**
 ```bash
@@ -125,7 +125,7 @@ brew install git
 
 ---
 
-## 0.6 Configure Git (if not already done)
+## 1.6 Configure Git (if not already done)
 
 ```bash
 git config --global user.name "Your Name"
@@ -134,7 +134,7 @@ git config --global user.email "your.email@example.com"
 
 ---
 
-## 0.7 Clone Your Repository
+## 1.7 Clone Your Repository
 
 Get your Saberloop code onto the Mac:
 
@@ -147,7 +147,7 @@ npm install
 
 ---
 
-## 0.8 Optional: Install VS Code
+## 1.8 Optional: Install VS Code
 
 If you prefer VS Code over Xcode for editing web code:
 
@@ -157,7 +157,7 @@ brew install --cask visual-studio-code
 
 ---
 
-## 0.9 Optional: Install iOS Simulator Runtimes
+## 1.9 Optional: Install iOS Simulator Runtimes
 
 Xcode comes with the latest iOS simulator, but you may want older versions for testing:
 
@@ -168,9 +168,9 @@ Xcode comes with the latest iOS simulator, but you may want older versions for t
 
 ---
 
-## 0.10 Checklist: Mac Ready for iOS Development
+## 1.10 Checklist: Mac Ready for iOS Development
 
-Before proceeding to Phase 1, verify:
+Before proceeding to Phase 2, verify:
 
 - [ ] macOS is up to date (13.0+)
 - [ ] Xcode installed and opens without errors
@@ -187,20 +187,20 @@ Before proceeding to Phase 1, verify:
 
 If you only have occasional Mac access:
 
-1. **Do Phase 0 completely** in your first session - get everything installed
+1. **Do Phase 1 completely** in your first session - get everything installed
 2. **Prepare on Windows first:**
    - Have your Apple ID ready
    - Have your Apple Developer account enrolled ($99 paid)
    - Have your code pushed to GitHub
    - Generate iOS assets (icons, screenshots) beforehand
 3. **Batch your Mac work:**
-   - Phase 0 + Phase 1: First Mac session (~2 hours)
-   - Phase 2 + Phase 3: Second Mac session (~2-3 hours)
-   - Phase 5 (if needed): Third Mac session (~2 hours)
+   - Phase 1 + Phase 2: First Mac session (~2 hours)
+   - Phase 3 + Phase 4: Second Mac session (~2-3 hours)
+   - Phase 6 (if needed): Third Mac session (~2 hours)
 
 ---
 
-## 0.11 Start/Stop Scripts (Keep Mac Fast for Other Users)
+## 1.11 Start/Stop Scripts (Keep Mac Fast for Other Users)
 
 Since this Mac is shared, use these scripts to cleanly start and stop your dev environment.
 
@@ -311,7 +311,7 @@ ios-stop
 
 ---
 
-## 0.12 What Runs in Background (and What Doesn't)
+## 1.12 What Runs in Background (and What Doesn't)
 
 **Things that DON'T run after you close them:**
 | Tool | Behavior |
@@ -339,7 +339,7 @@ ios-stop
 
 ---
 
-## 0.13 Manual Cleanup Commands
+## 1.13 Manual Cleanup Commands
 
 If you want to verify everything is stopped manually:
 
@@ -379,7 +379,7 @@ du -sh ~/Library/Developer/CoreSimulator/
 
 ---
 
-## 0.14 Checklist: Leaving the Mac Clean
+## 1.14 Checklist: Leaving the Mac Clean
 
 Before ending your session, verify:
 
@@ -401,7 +401,7 @@ echo "Node: $(pgrep -f node | wc -l) | Xcode: $(pgrep -f Xcode | wc -l) | Sim: $
 ## Next Phase
 
 Once your Mac is configured, proceed to:
-- **[Phase 1: Prerequisites](./PHASE1_PREREQUISITES.md)** - Apple Developer Account setup
+- **[Phase 2: Prerequisites](./PHASE2_PREREQUISITES.md)** - Apple Developer Account setup
 
 ---
 

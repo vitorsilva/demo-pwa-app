@@ -1,13 +1,13 @@
-# Phase 2: PWABuilder iOS Package
+# Phase 3: PWABuilder iOS Package
 
 **Epic:** 08 - iOS
 **Time:** 1 session (~1-2 hours)
 **Mac Required:** Yes (for Xcode build)
-**Prerequisites:** Phase 1 complete (Apple Developer Account)
+**Prerequisites:** Phase 2 complete (Apple Developer Account)
 
 ---
 
-## 2.1 Generate iOS Package with PWABuilder
+## 3.1 Generate iOS Package with PWABuilder
 
 **Steps:**
 
@@ -42,7 +42,7 @@ Splash Screen:     Use manifest colors
 
 ---
 
-## 2.2 Understand the Package Contents
+## 3.2 Understand the Package Contents
 
 **PWABuilder generates:**
 ```
@@ -60,7 +60,7 @@ iOS-Package/
 
 ---
 
-## 2.3 Open in Xcode
+## 3.3 Open in Xcode
 
 **Steps:**
 
@@ -84,7 +84,7 @@ iOS-Package/
 
 ---
 
-## 2.4 Configure App Icons
+## 3.4 Configure App Icons
 
 **PWABuilder should import icons from your manifest, but verify:**
 
@@ -100,7 +100,7 @@ iOS-Package/
 
 ---
 
-## 2.5 Build for Testing
+## 3.5 Build for Testing
 
 **Steps:**
 
@@ -123,7 +123,7 @@ iOS-Package/
 
 ---
 
-## 2.6 Checklist: Phase 2 Complete
+## 3.6 Checklist: Phase 3 Complete
 
 - [ ] PWABuilder iOS package downloaded
 - [ ] Package extracted and opened in Xcode
@@ -160,7 +160,7 @@ iOS-Package/
 ## Next Phase
 
 Once the app builds successfully, proceed to:
-- **[Phase 3: Test & Submit](./PHASE3_TEST_SUBMIT.md)** - TestFlight and App Store submission
+- **[Phase 4: Test & Submit](./PHASE4_TEST_SUBMIT.md)** - TestFlight and App Store submission
 
 ---
 
