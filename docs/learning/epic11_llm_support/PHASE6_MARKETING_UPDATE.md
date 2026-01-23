@@ -13,6 +13,8 @@ Update the landing page and marketing materials to highlight the new multi-provi
 
 **Key Value Proposition:** "Choose your AI - Use OpenAI, Anthropic, Google, or xAI with your own API key"
 
+> **Skill Available:** Use `/landing-page-marketing` to access the complete workflow, templates, and guidelines for this phase. The skill provides feature card templates, CSS reference, image specifications, and deployment commands.
+
 ---
 
 ## Current Landing Page Analysis
@@ -584,6 +586,14 @@ If issues arise:
 ---
 
 ## References
+
+### Skills
+- **`/landing-page-marketing`** - Complete workflow for landing page updates including:
+  - Screenshot capture with Playwright
+  - Image processing specifications (304x584 for mobile)
+  - Feature card HTML templates
+  - CSS reference and color variables
+  - Deployment commands and troubleshooting
 
 ### Developer Guides
 - [E2E Testing Guide](../../developer-guide/E2E_TESTING.md) - Playwright setup, capture scripts, `npm run test:e2e:capture`
