@@ -133,6 +133,17 @@ describe('Providers Config', () => {
         expect(validateKeyFormat('anthropic', 'sk-ant-ABC-123-xyz')).toBe(true);
       });
 
+      it('should validate Anthropic keys with underscores', () => {
+        // Real Anthropic keys often contain underscores
+        expect(validateKeyFormat('anthropic', 'sk-ant-api03-abc_def-123')).toBe(true);
+        expect(
+          validateKeyFormat(
+            'anthropic',
+            'sk-ant-api03-meDm-eUBehBLfyR54fY2zcDMeS-a5iAEsz6SHap2JJDl3wK7fa_Mo0Ui9xv7'
+          )
+        ).toBe(true);
+      });
+
       it('should reject invalid Anthropic key format', () => {
         expect(validateKeyFormat('anthropic', 'invalid')).toBe(false);
         expect(validateKeyFormat('anthropic', 'sk-abc123')).toBe(false);

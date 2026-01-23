@@ -72,6 +72,28 @@ try {
     // Log full error server-side only
     error_log('LLM Proxy Error: ' . $e->getMessage());
 
-    http_response_code(500);
-    echo json_encode(['error' => 'Internal server error']);
+    // Determine appropriate HTTP status code based on error message
+    $errorMessage = $e->getMessage();
+    $httpCode = 500;
+    $userMessage = 'Internal server error';
+
+    if (stripos($errorMessage, 'Invalid') !== false && stripos($errorMessage, 'API key') !== false) {
+        $httpCode = 401;
+        $userMessage = 'Invalid API key';
+    } elseif (stripos($errorMessage, 'rate limit') !== false) {
+        $httpCode = 429;
+        $userMessage = 'Rate limit exceeded. Please try again later';
+    } elseif (stripos($errorMessage, 'Missing required field') !== false) {
+        $httpCode = 400;
+        $userMessage = $errorMessage;
+    } elseif (stripos($errorMessage, 'Invalid request') !== false) {
+        $httpCode = 400;
+        $userMessage = 'Invalid request';
+    } elseif (stripos($errorMessage, 'Network error') !== false) {
+        $httpCode = 502;
+        $userMessage = 'Unable to connect to provider';
+    }
+
+    http_response_code($httpCode);
+    echo json_encode(['error' => $userMessage]);
 }

@@ -60,7 +60,7 @@ export const PROVIDERS = {
     description: 'Direct access to Claude models',
     cors: false,
     keyPrefix: 'sk-ant-',
-    keyPattern: /^sk-ant-[a-zA-Z0-9-]+$/,
+    keyPattern: /^sk-ant-[a-zA-Z0-9_-]+$/,
     docsUrl: 'https://console.anthropic.com/settings/keys',
     models: [
       {
