@@ -6,16 +6,17 @@ This document traces the evolution of LLM (Large Language Model) integration in 
 
 ## Executive Summary
 
-SaberLoop's LLM integration evolved through **four distinct iterations**:
+SaberLoop's LLM integration evolved through **five distinct iterations**:
 
 | Iteration | Approach | Status | Key Insight |
 |-----------|----------|--------|-------------|
 | 0. Mock API | Simulated responses | Development only | Enabled frontend development without API costs |
 | 1. Direct Anthropic | Browser → Anthropic API | ❌ Blocked by CORS | Anthropic does not support browser requests |
 | 2. Backend Proxy | Browser → Server → Anthropic | ✅ Worked but costly | Developer pays for all usage |
-| 3. OpenRouter | Browser → OpenRouter (OAuth) | ✅ **Current** | Zero cost for developer, CORS supported |
+| 3. OpenRouter | Browser → OpenRouter (OAuth) | ✅ Default option | Zero cost for developer, CORS supported |
+| 4. Multi-Provider | Browser → LLM Proxy → Any Provider | ✅ **Current** | User choice: OpenAI, Anthropic, Google AI, xAI |
 
-**Current Architecture:** Client-side OpenRouter with OAuth PKCE authentication.
+**Current Architecture:** Multi-provider support with OpenRouter as default, plus LLM Proxy for direct provider access.
 
 ---
 
@@ -430,19 +431,165 @@ User (power user): $10 one-time for 1000 requests/day
 
 ---
 
+## Iteration 4: Multi-Provider Support (Current Production)
+
+**Epic:** 11 - Multi-Provider LLM Support
+**Completed:** January 2026
+**Status:** ✅ **Live in Production**
+
+### Key Insight
+
+> **Users want choice.** While OpenRouter works well, power users prefer direct API access to their provider of choice for cost control, privacy, or model-specific features.
+
+### Architecture
+
+```
+Browser (Frontend)
+    │
+    ├── Provider Router (src/api/provider-router.js)
+    │   ├── Determines active provider from settings
+    │   └── Routes request to appropriate client
+    │
+    ├── OpenRouter (Direct - CORS ✓)
+    │   └── HTTPS POST https://openrouter.ai/api/v1/chat/completions
+    │
+    └── LLM Proxy (saberloop.com/llm/)
+        ├── HTTPS POST /llm/completion.php
+        │   ├── Validates request
+        │   ├── Routes to target provider
+        │   └── Returns response
+        │
+        └── Supported Providers:
+            ├── OpenAI (api.openai.com)
+            ├── Anthropic (api.anthropic.com)
+            ├── Google AI (generativelanguage.googleapis.com)
+            └── xAI (api.x.ai)
+```
+
+### Implementation Files
+
+#### A. Provider Router
+
+**File:** `src/api/provider-router.js`
+
+```javascript
+// Routes requests to the active provider
+export async function routeToProvider(prompt, options = {}) {
+  const activeProvider = await getActiveProvider();
+
+  switch (activeProvider) {
+    case 'openrouter':
+      return callOpenRouter(apiKey, prompt, options);
+    case 'openai':
+    case 'anthropic':
+    case 'google':
+    case 'xai':
+      return callViaProxy(activeProvider, apiKey, prompt, options);
+    default:
+      throw new Error(`Unknown provider: ${activeProvider}`);
+  }
+}
+```
+
+#### B. LLM Proxy (PHP Backend)
+
+**File:** `php-api/llm/completion.php`
+
+```php
+// Route completion requests to provider APIs
+$provider = $_POST['provider'];
+$apiKey = $_POST['api_key'];
+$messages = $_POST['messages'];
+
+switch ($provider) {
+    case 'openai':
+        $url = 'https://api.openai.com/v1/chat/completions';
+        break;
+    case 'anthropic':
+        $url = 'https://api.anthropic.com/v1/messages';
+        break;
+    case 'google':
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent';
+        break;
+    case 'xai':
+        $url = 'https://api.x.ai/v1/chat/completions';
+        break;
+}
+// Forward request with user's API key
+```
+
+#### C. Provider Key Storage
+
+**File:** `src/core/db.js`
+
+```javascript
+// IndexedDB settings store keys:
+// - openrouter_api_key  (OAuth)
+// - openai_api_key      (manual entry)
+// - anthropic_api_key   (manual entry)
+// - google_api_key      (manual entry)
+// - xai_api_key         (manual entry)
+// - active_provider     (which provider to use)
+// - active_model        (model ID for current provider)
+```
+
+### Supported Providers
+
+| Provider | Connection | Key Format | CORS | Notes |
+|----------|------------|------------|------|-------|
+| OpenRouter | Direct | OAuth PKCE | ✅ | Default, free tier available |
+| OpenAI | LLM Proxy | `sk-...` | ❌ | GPT-4, GPT-4o, o1 models |
+| Anthropic | LLM Proxy | `sk-ant-...` | ❌ | Claude 3.5/4 models |
+| Google AI | LLM Proxy | `AIza...` | ❌ | Gemini models |
+| xAI | LLM Proxy | `xai-...` | ❌ | Grok models |
+
+### Why LLM Proxy?
+
+| Problem | Solution |
+|---------|----------|
+| CORS Blocking | PHP proxy bypasses browser CORS restrictions |
+| Provider Differences | Normalize request/response formats |
+| Key Validation | Validate key format before attempting API call |
+| Error Handling | Consistent error format across providers |
+
+### Cost Model
+
+```
+OpenRouter (default):
+- User pays OpenRouter (or uses free tier)
+- Developer cost: $0
+
+Direct Providers (via LLM Proxy):
+- User pays provider directly
+- Developer cost: $0 (only VPS hosting)
+- User benefits: Better pricing, no middleman markup
+```
+
+### Documentation
+
+- **Epic 11 Plan:** `docs/learning/epic11_llm_support/EPIC11_LLM_SUPPORT_PLAN.md`
+- **Phase 1 (Provider Router):** `docs/learning/epic11_llm_support/PHASE1_PROVIDER_ROUTER.md`
+- **Phase 2 (LLM Proxy):** `docs/learning/epic11_llm_support/PHASE2_LLM_PROXY.md`
+- **Phase 3 (Key Management):** `docs/learning/epic11_llm_support/PHASE3_KEY_MANAGEMENT.md`
+- **Phase 4 (Settings UI):** `docs/learning/epic11_llm_support/PHASE4_SETTINGS_UI.md`
+- **Phase 5 (Polish):** `docs/learning/epic11_llm_support/PHASE5_POLISH.md`
+
+---
+
 ## Comparison Matrix
 
-| Aspect | Direct Anthropic | Backend Proxy | OpenRouter |
-|--------|------------------|---------------|------------|
-| **CORS** | ❌ Blocked | ✅ Proxy bypasses | ✅ Native support |
-| **API Key Location** | Browser (exposed) | Server (secure) | Browser (user's own key) |
-| **Auth Flow** | Manual key entry | Env variable | OAuth PKCE |
-| **Developer Cost** | Per usage | Per usage | ❌ None |
-| **User Cost** | Hidden in app | Hidden in app | ✅ Transparent |
-| **Free Tier** | ❌ None | ❌ None | ✅ 50 req/day |
-| **Multi-Model** | ❌ No | ❌ No | ✅ Yes |
-| **Server Required** | No (but blocked) | ✅ Yes | ❌ No |
-| **Implementation** | ~50 lines | ~300 lines + server | ~350 lines |
+| Aspect | Direct Anthropic | Backend Proxy | OpenRouter | Multi-Provider |
+|--------|------------------|---------------|------------|----------------|
+| **CORS** | ❌ Blocked | ✅ Proxy bypasses | ✅ Native support | ✅ LLM Proxy |
+| **API Key Location** | Browser (exposed) | Server (secure) | Browser (user's own) | Browser (user's own) |
+| **Auth Flow** | Manual key entry | Env variable | OAuth PKCE | Manual entry |
+| **Developer Cost** | Per usage | Per usage | ❌ None | ❌ None |
+| **User Cost** | Hidden in app | Hidden in app | ✅ Transparent | ✅ Transparent |
+| **Free Tier** | ❌ None | ❌ None | ✅ 50 req/day | Depends on provider |
+| **Multi-Model** | ❌ No | ❌ No | ✅ Yes | ✅ Yes |
+| **Server Required** | No (but blocked) | ✅ Yes | ❌ No | ✅ LLM Proxy |
+| **Provider Choice** | ❌ Single | ❌ Single | ✅ Many via OR | ✅ Direct to any |
+| **Implementation** | ~50 lines | ~300 lines + server | ~350 lines | ~500 lines + proxy |
 
 ---
 
@@ -488,20 +635,35 @@ Each iteration built on learnings from the previous:
 src/api/
 ├── index.js              # Smart loader (mock vs real based on env)
 ├── api.mock.js           # Mock API for development/testing
-├── api.real.js           # Real API using OpenRouter (~267 lines)
+├── api.real.js           # Real API using provider router (~267 lines)
 ├── openrouter-auth.js    # OAuth PKCE flow (~140 lines)
 ├── openrouter-client.js  # OpenRouter API wrapper (~208 lines)
+├── provider-router.js    # Multi-provider routing logic
+├── llm-proxy-client.js   # Client for LLM proxy calls
 └── prompts.js            # Prompt templates
 
-php-api/src/
-├── AnthropicClient.php   # Legacy PHP wrapper (unused for LLM calls)
-├── handlers/
-│   ├── GenerateQuestions.php
-│   └── GenerateExplanation.php
-└── Config.php
+src/services/
+├── provider-service.js   # Provider management (active provider, keys)
+└── model-service.js      # Model selection per provider
+
+php-api/llm/
+├── completion.php        # Main completion endpoint (routes to providers)
+├── health.php            # Health check endpoint
+├── providers/            # Provider-specific implementations
+│   ├── openai.php
+│   ├── anthropic.php
+│   ├── google.php
+│   └── xai.php
+└── config.local.php      # Local configuration (gitignored)
+
+php-api/party/            # Party Mode signaling (WebRTC coordination)
+php-api/telemetry/        # Event ingestion
 ```
 
-**Note:** The PHP backend is now only used for Party Mode signaling (WebRTC coordination) and telemetry endpoints, not for LLM calls.
+**Note:** The PHP backend now handles:
+- **LLM Proxy** (`/llm/`) - CORS bypass for OpenAI, Anthropic, Google AI, xAI
+- **Party Mode** (`/party/`) - WebRTC signaling for multiplayer
+- **Telemetry** (`/telemetry/`) - Event ingestion
 
 ---
 

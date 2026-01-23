@@ -11,11 +11,12 @@ Saberloop uses GitHub Actions for CI testing and FTP deployment to a VPS (LAMP s
 └─────────────┘     └─────────────┘     │                                     │
                           │             │  /           Landing Page (static)  │
                     ┌─────▼─────┐       │  /app        Frontend PWA (static)  │
-                    │  Tests    │       │  /party      Party Backend (PHP)    │
-                    │  - Unit   │       │  /telemetry  Telemetry (PHP)        │
-                    │  - E2E    │       │                                     │
-                    │  - Build  │       │  MySQL: Party session data          │
-                    └───────────┘       │                                     │
+                    │  Tests    │       │  /llm        LLM Proxy (PHP)        │
+                    │  - Unit   │       │  /party      Party Backend (PHP)    │
+                    │  - E2E    │       │  /telemetry  Telemetry (PHP)        │
+                    │  - Build  │       │                                     │
+                    └───────────┘       │  MySQL: Party session data          │
+                                        │                                     │
                                         └─────────────────────────────────────┘
 ```
 
@@ -26,6 +27,7 @@ Saberloop uses GitHub Actions for CI testing and FTP deployment to a VPS (LAMP s
 | Landing Page | `./landing` | `/` | saberloop.com/ | `npm run deploy:landing` |
 | Frontend App | `./dist` | `/app` | saberloop.com/app/ | `npm run deploy` |
 | Frontend (Staging) | `./dist` | `/app-staging` | saberloop.com/app-staging/ | `npm run deploy:staging` |
+| LLM Proxy | `./php-api/llm` | `/llm` | saberloop.com/llm/ | `npm run deploy:llm` |
 | Party Backend | `./php-api/party` | `/party` | saberloop.com/party/ | `npm run deploy:party` |
 | Telemetry | `./php-api/telemetry` | `/telemetry` | saberloop.com/telemetry/ | `npm run deploy:telemetry` |
 
@@ -161,6 +163,19 @@ npm run deploy:party     # FTP upload ./php-api/party to /party
 3. Run migrations: Access `/party/migrate.php` once
 4. Create MySQL database via cPanel (see Database Setup below)
 5. Configure cron job for cleanup (see Cron Jobs below)
+
+### LLM Proxy (PHP)
+
+```bash
+npm run deploy:llm        # FTP upload ./php-api/llm to /llm
+```
+
+**First-time setup on server:**
+1. Create `config.local.php` from `config.local.example.php`
+2. No additional configuration required (keys passed from client)
+3. Verify health check: `curl https://saberloop.com/llm/health.php`
+
+**Supported providers:** OpenAI, Anthropic, Google AI, xAI (CORS bypass for browser requests)
 
 ### Telemetry Backend (PHP)
 

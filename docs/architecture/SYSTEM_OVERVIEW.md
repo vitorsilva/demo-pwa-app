@@ -2,7 +2,11 @@
 
 ## High-Level Architecture
 
-Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) is made directly from the browser using OpenRouter (user-provided API keys). Party Mode uses a PHP signaling server for WebRTC coordination.
+Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) can be made:
+- **Directly to OpenRouter** (user-provided OAuth API key) - CORS supported
+- **Via LLM Proxy** to OpenAI, Anthropic, Google AI, or xAI (user-provided API keys) - CORS bypass
+
+Party Mode uses a PHP signaling server for WebRTC coordination.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -23,21 +27,23 @@ Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) is made d
 │           │                                                │                  │
 │  ┌────────▼─────────────────────────────────┐             │                  │
 │  │           API Client Layer               │             │                  │
-│  │  OpenRouter │ Party API │ Telemetry API  │◄────────────┘                  │
+│  │  Provider Router │ Party API │ Telemetry │◄────────────┘                  │
 │  └──────┬─────────────┬─────────────┬───────┘                                │
 │         │             │             │                                        │
 └─────────┼─────────────┼─────────────┼────────────────────────────────────────┘
           │             │             │
           │ HTTPS       │ HTTPS       │ HTTPS
           │             │             │
-          ▼             │             │
-┌─────────────────────┐ │             │
-│   OpenRouter API    │ │             │
-│  (AI Quiz Gen)      │ │             │
-├─────────────────────┤ │             │
-│ Claude, GPT-4,      │ │             │
-│ Gemini, Llama, etc. │ │             │
-└─────────────────────┘ │             │
+    ┌─────┴─────┐       │             │
+    │           │       │             │
+    ▼           ▼       │             │
+┌─────────┐ ┌─────────────────────┐   │
+│OpenRouter│ │   LLM Proxy (VPS)   │   │
+│  (direct)│ │ saberloop.com/llm/  │   │
+├─────────┤ ├─────────────────────┤   │
+│ CORS ✓  │ │ OpenAI, Anthropic,  │   │
+│         │ │ Google AI, xAI      │   │
+└─────────┘ └─────────────────────┘   │
                         │             │
                         ▼             ▼
           ┌─────────────────────────────────────────────────┐
@@ -93,13 +99,24 @@ Saberloop is a **client-side PWA**. Core quiz functionality (AI calls) is made d
 | Features | `src/features/` | Feature modules (onboarding, sample-loader) |
 | Data | `src/data/` | Static data files (sample quizzes) |
 
-### AI Integration (Client-Side)
+### AI Integration (Multi-Provider)
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| API Gateway | OpenRouter | Multi-model AI access |
-| Key Storage | IndexedDB | Secure local storage |
+| Provider Router | `src/api/provider-router.js` | Routes to active provider |
+| OpenRouter | Direct browser calls | CORS-enabled, OAuth keys |
+| LLM Proxy | `saberloop.com/llm/` | CORS bypass for OpenAI, Anthropic, Google AI, xAI |
+| Key Storage | IndexedDB | Secure local storage for all provider keys |
 | Default Model | DeepSeek R1T2 Chimera (free) | User-selectable, free tier default |
+
+**Supported Providers:**
+| Provider | Connection Method | Key Format |
+|----------|-------------------|------------|
+| OpenRouter | Direct (CORS ✓) | OAuth PKCE |
+| OpenAI | Via LLM Proxy | `sk-...` |
+| Anthropic | Via LLM Proxy | `sk-ant-...` |
+| Google AI | Via LLM Proxy | `AIza...` |
+| xAI | Via LLM Proxy | `xai-...` |
 
 **Services Layer:**
 - `quiz-service.js` - Quiz operations (history, sessions, generation)
@@ -179,10 +196,18 @@ Self-hosted observability via `src/utils/telemetry.js`:
 
 Server-side services deployed to VPS:
 
-| Component | Path | Purpose |
-|-----------|------|---------|
-| Party Signaling | `php-api/party/` | WebRTC coordination for Party Mode |
-| Telemetry | `php-api/telemetry/` | Event ingestion endpoint |
+| Component | Path | URL | Purpose |
+|-----------|------|-----|---------|
+| LLM Proxy | `php-api/llm/` | `/llm/` | CORS bypass for OpenAI, Anthropic, Google AI, xAI |
+| Party Signaling | `php-api/party/` | `/party/` | WebRTC coordination for Party Mode |
+| Telemetry | `php-api/telemetry/` | `/telemetry/` | Event ingestion endpoint |
+
+**LLM Proxy API Endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/llm/health.php` | Health check |
+| POST | `/llm/completion.php` | Route completion request to provider |
 
 **Party Mode API Endpoints:**
 

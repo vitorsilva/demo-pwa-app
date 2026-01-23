@@ -2,15 +2,31 @@
 
 ## Overview
 
-Saberloop uses OpenRouter for AI-powered question generation. Users authenticate with their own OpenRouter account via OAuth, and API calls are made directly from the browser to OpenRouter.
+Saberloop uses a **multi-provider LLM architecture** for AI-powered question generation. Users can choose their preferred AI provider:
+
+- **OpenRouter** (default) - Direct browser calls via OAuth, free tier available
+- **OpenAI, Anthropic, Google AI, xAI** - Via LLM Proxy for CORS bypass
+
+All providers use the user's own API key, stored securely in IndexedDB.
 
 ## Architecture
 
 | Component | Description |
 |-----------|-------------|
-| OpenRouter OAuth | User authenticates and stores API key in browser |
-| Client-side API | Direct calls from browser to OpenRouter |
-| IndexedDB | Stores API key securely in user's browser |
+| Provider Router | Routes requests to active provider |
+| OpenRouter (Direct) | OAuth authentication, CORS-enabled |
+| LLM Proxy | PHP backend for providers without CORS support |
+| IndexedDB | Stores API keys securely in user's browser |
+
+### Provider Support
+
+| Provider | Connection Method | Key Format | CORS |
+|----------|-------------------|------------|------|
+| OpenRouter | Direct (browser) | OAuth PKCE | ✅ |
+| OpenAI | LLM Proxy | `sk-...` | ❌ |
+| Anthropic | LLM Proxy | `sk-ant-...` | ❌ |
+| Google AI | LLM Proxy | `AIza...` | ❌ |
+| xAI | LLM Proxy | `xai-...` | ❌ |
 
 ## OpenRouter Integration
 
@@ -40,6 +56,96 @@ const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
   })
 });
 ```
+
+---
+
+## LLM Proxy (Multi-Provider)
+
+For providers that don't support CORS (OpenAI, Anthropic, Google AI, xAI), requests are routed through the LLM Proxy.
+
+### Base URL
+
+```
+https://saberloop.com/llm/
+```
+
+### Endpoints
+
+#### Health Check
+
+```
+GET /llm/health.php
+```
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-01-23T12:00:00Z"
+}
+```
+
+#### Completion Request
+
+```
+POST /llm/completion.php
+```
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `provider` | string | Yes | Provider ID: `openai`, `anthropic`, `google`, `xai` |
+| `api_key` | string | Yes | User's API key for the provider |
+| `model` | string | Yes | Model ID (e.g., `gpt-4`, `claude-3-5-sonnet-20241022`) |
+| `messages` | array | Yes | Chat messages array |
+| `max_tokens` | number | No | Maximum response tokens (default: 2048) |
+| `temperature` | number | No | Sampling temperature (default: 0.7) |
+
+**Request Example:**
+```javascript
+const response = await fetch('https://saberloop.com/llm/completion.php', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    provider: 'openai',
+    api_key: 'sk-...',
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: 'Generate a quiz about space' }],
+    max_tokens: 2048
+  })
+});
+```
+
+**Response:**
+```json
+{
+  "text": "Here are quiz questions about space...",
+  "model": "gpt-4o",
+  "usage": {
+    "prompt_tokens": 50,
+    "completion_tokens": 500,
+    "total_tokens": 550
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Invalid API key",
+  "provider": "openai"
+}
+```
+
+### Provider-Specific Notes
+
+| Provider | Model Examples | Notes |
+|----------|---------------|-------|
+| OpenAI | `gpt-4o`, `gpt-4-turbo`, `o1-preview` | Uses OpenAI chat completions API |
+| Anthropic | `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229` | Converts to Anthropic messages API format |
+| Google AI | `gemini-1.5-pro`, `gemini-1.5-flash` | Uses Gemini generateContent API |
+| xAI | `grok-2`, `grok-2-mini` | Uses xAI chat completions API |
 
 ---
 
@@ -214,3 +320,4 @@ saveSelectedModel('anthropic/claude-3-haiku');
 - [System Overview](./SYSTEM_OVERVIEW.md)
 - [Database Schema](./DATABASE_SCHEMA.md)
 - [Deployment](./DEPLOYMENT.md)
+- [LLM Integration Evolution](./LLM_INTEGRATION_EVOLUTION.md)

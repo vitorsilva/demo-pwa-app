@@ -103,7 +103,13 @@ interface Setting {
 
 | Key | Value Type | Description |
 |-----|------------|-------------|
-| `openrouter_api_key` | `{ key: string, storedAt: string }` | OpenRouter API key (secure) |
+| `openrouter_api_key` | `{ key: string, storedAt: string }` | OpenRouter API key (OAuth) |
+| `openai_api_key` | `{ key: string, storedAt: string }` | OpenAI API key |
+| `anthropic_api_key` | `{ key: string, storedAt: string }` | Anthropic API key |
+| `google_api_key` | `{ key: string, storedAt: string }` | Google AI API key |
+| `xai_api_key` | `{ key: string, storedAt: string }` | xAI API key |
+| `active_provider` | `string` | Active LLM provider (openrouter, openai, anthropic, google, xai) |
+| `active_model` | `string` | Active model ID for current provider |
 | `welcome_seen` | `boolean` | Whether welcome screen was shown |
 | `samples_loaded` | `{ version: string }` | Sample data version tracking |
 
