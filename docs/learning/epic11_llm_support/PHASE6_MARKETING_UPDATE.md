@@ -17,6 +17,42 @@ Update the landing page and marketing materials to highlight the new multi-provi
 
 ---
 
+## Branching Strategy
+
+**Branch name:** `feature/epic11-phase6-marketing`
+
+```bash
+# Create feature branch from main
+git checkout main
+git pull origin main
+git checkout -b feature/epic11-phase6-marketing
+```
+
+**Commit Strategy:** Small, logical commits after each subtask:
+
+| Subtask | Commit Message |
+|---------|----------------|
+| 6.1 | `feat(landing): add multi-provider feature card` |
+| 6.2 | `feat(landing): update CTA section for multi-provider` |
+| 6.2b | `feat(landing): update hero section with Coming Soon` |
+| 6.3 | `feat(landing): add settings provider screenshot` |
+| 6.4 | `feat(landing): update structured data with providers` |
+| 6.7 | `chore(landing): deploy and verify changes` |
+
+**Merge Process:**
+```bash
+# After all subtasks complete and verified
+git checkout main
+git pull origin main
+git merge feature/epic11-phase6-marketing
+git push origin main
+
+# Or create PR for review
+gh pr create --title "feat(landing): Epic 11 Phase 6 - Marketing Update" --body "..."
+```
+
+---
+
 ## Current Landing Page Analysis
 
 | Section | Current Content | Multi-Provider Impact |
